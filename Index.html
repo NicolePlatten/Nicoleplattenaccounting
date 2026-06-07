@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nicole Platten Accounting | Chartered Accountant</title>
+    <meta name="description" content="Nicole Platten Accounting - ACCA Chartered Accountant based in the West Midlands, serving clients across the whole UK remotely. Expert accounting and tax support for sole traders, landlords and limited companies.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #5A4A3C;
+            --secondary: #A68972;
+            --light-beige: #F5F0EB;
+            --pale-beige: #F9F6F3;
+            --white: #FFFFFF;
+            --text: #3A342E;
+            --light-text: #7A7269;
+            --border: #E8E0D8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            line-height: 1.65;
+            background-color: var(--white);
+            font-size: 1.05rem;
+        }
+
+        h1, h2, h3, h4 {
+            font-weight: 600;
+            line-height: 1.25;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        h1 { font-size: 2.7rem; letter-spacing: -0.5px; }
+        h2 { font-size: 1.9rem; }
+        h3 { font-size: 1.35rem; }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--light-text);
+            font-size: 1.05rem;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- CLEAN HEADER / NAVIGATION --- */
+        nav {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 999;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.3px;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .header-social {
+            display: flex;
+            gap: 0.7rem;
+            margin-right: 1rem;
+        }
+
+        .header-social a {
+            width: 34px;
+            height: 34px;
+            border-radius: 4px;
+            background-color: var(--light-beige);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+
+        .header-social a:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.8rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: color 0.25s ease;
+            padding: 0.4rem 0;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--secondary);
+        }
+
+        /* --- HERO SECTION - FIXED IMAGE POSITION --- */
+        .hero {
+            min-height: 90vh;
+            background-color: var(--light-beige);
+            display: flex;
+            align-items: center;
+            text-align: center;
+            padding-top: 120px;
+            padding-bottom: 3rem;
+        }
+
+        .hero-profile-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 6px solid var(--white);
+            box-shadow: 0 4px 15px rgba(90, 74, 60, 0.1);
+            margin-bottom: 1.8rem;
+            object-position: top center;
+        }
+
+        .hero-subheading {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            font-weight: 500;
+            margin-bottom: 1.2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.9rem 2.2rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            margin-left: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        section {
+            padding: 4rem 0;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-heading h2 {
+            padding-bottom: 0.7rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-heading h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background-color: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin: 2rem auto 0;
+            max-width: 600px;
+        }
+
+        .badge {
+            background-color: var(--white);
+            border: 1px solid var(--border);
+            padding: 0.6rem 1.1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge i {
+            color: var(--secondary);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .about-image-container {
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(90, 74, 60, 0.06);
+            background-color: var(--light-beige);
+            height: 460px;
+        }
+
+        .profile-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top center;
+        }
+
+        .credentials {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .credential-item {
+            background-color: var(--pale-beige);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .service-card {
+            background-color: var(--white);
+            padding: 2rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            transition: all 0.25s ease;
+        }
+
+        .service-card:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 8px 20px rgba(90, 74, 60, 0.05);
+        }
+
+        .service-icon {
+            width: 55px;
+            height: 55px;
+            background-color: var(--pale-beige);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            color: var(--secondary);
+        }
+
+        .service-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+
+        .service-list li {
+            padding: 0.35rem 0;
+            color: var(--light-text);
+            display: flex;
+            align-items: flex-start;
+            line-height: 1.5;
+        }
+
+        .service-list li::before {
+            content: "✓";
+            color: var(--secondary);
+            font-weight: bold;
+            margin-right: 0.7rem;
+            flex-shrink: 0;
+        }
+
+        /* --- TESTIMONIALS --- */
+        .testimonial-card {
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            background-color: var(--pale-beige);
+            padding: 2.2rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .testimonial-stars {
+            color: #f5a623;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-text {
+            font-size: .08rem;
+            line-height: 1.7;
+            color: var(--text);
+            font-style: italic;
+            margin-bottom: 1.2rem;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .testimonial-company {
+            font-size: 0.9rem;
+            color: var(--light-text);
+            margin-top: 0.2rem;
+        }
+
+        .calculator-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .calculator-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--text);
+            background-color: var(--white);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 2px rgba(166, 137, 114, 0.07);
+        }
+
+        .result-box {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 1.5rem;
+            border-radius: 4px;
+            text-align: center;
+            display: none;
+            margin-top: 1.5rem;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin: 0.8rem 0;
+        }
+
+        /* --- FAQ WORKING DROPDOWNS --- */
+        .faq-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background-color: var(--white);
+            border-radius: 4px;
+            margin-bottom: 0.7rem;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            width: 100%;
+            text-align: left;
+            padding: 1.1rem 1.4rem;
+            background-color: transparent;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .faq-question:hover {
+            background-color: var(--pale-beige);
+        }
+
+        .faq-question i {
+            transition: transform 0.3s ease;
+            color: var(--secondary);
+        }
+
+        .faq-question.active i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.4rem 1.4rem 1.4rem;
+            display: none;
+            color: var(--light-text);
+            line-height: 1.7;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .blog-card {
+            background-color: var(--white);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.25s ease;
+        }
+
+        .blog-card:hover {
+            border-color: var(--secondary);
+        }
+
+        .blog-image {
+            height: 170px;
+            background-color: var(--light-beige);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--secondary);
+        }
+
+        .blog-content {
+            padding: 1.5rem;
+        }
+
+        .blog-content h3 {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .blog-content p {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .read-more {
+            color: var(--secondary);
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+        }
+
+        .read-more:hover {
+            text-decoration: underline;
+        }
+
+        .contact-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .contact-info h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-details {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-details li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: var(--light-text);
+            font-size: 1.05rem;
+        }
+
+        .contact-details li i {
+            color: var(--secondary);
+            font-size: 1.1rem;
+            width: 25px;
+        }
+
+        .contact-details li a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-details li a:hover {
+            text-decoration: underline;
+        }
+
+        .calendar-note {
+            background-color: var(--pale-beige);
+            padding: 1rem 1.2rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 3px solid var(--secondary);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        footer {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 2.5rem 0 1rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-logo span {
+            color: var(--secondary);
+        }
+
+        .footer-col h4 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-col ul li a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: color 0.25s ease;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--secondary);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 0.7rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            background-color: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            text-decoration: none;
+            transition: background-color 0.25s ease;
+        }
+
+        .social-links a:hover {
+            background-color: var(--secondary);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+        }
+
+        /* --- MOBILE RESPONSIVE --- */
+        @media(max-width: 768px) {
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--white);
+                flex-direction: column;
+                padding: 1rem 1.5rem;
+                gap: 0.8rem;
+                border-bottom: 1px solid var(--border);
+                display: none;
+            }
+            .nav-links.active { display: flex; }
+            .menu-toggle { display: block; }
+            h1 { font-size: 2.1rem; }
+            .about-content, .calculator-form, .contact-wrapper {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .btn-secondary { margin-left: 0; margin-top: 0.8rem; display: inline-block; }
+            .hero-profile-photo { width: 130px; height: 130px; }
+            .testimonial-card { padding: 1.8rem 1.4rem; }
+            .hero { padding-top: 110px; }
+            .trust-badges { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <div class="container nav-wrapper">
+            <a href="#" class="logo">Nicole Platten <span>Accounting</span></a>
+            
+            <div style="display:flex; align-items:center;">
+                <div class="header-social">
+                    <a href="https://www.linkedin.com/in/nicoleplatten" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="#" aria-label="Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                </div>
+                <div class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+            
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#about">About Me</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#testimonials">Testimonials</a></li>
+                <li><a href="#calculator">Tax Savings</a></li>
+                <li><a href="#tips">Tax Tips</a></li>
+                <li><a href="#faq">FAQs</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="container hero-content">
+            <img src="Nicolephoto.PNG" alt="Nicole Platten - ACCA Chartered Accountant" class="hero-profile-photo">
+            
+            <p class="hero-subheading">West Midlands based — serving clients across the entire UK remotely</p>
+            <h1>Expert Accounting & Tax You Can Rely On</h1>
+            <p>Professional, clear and proactive support for sole traders, property landlords and limited companies. I save you time, stress and money — keeping you fully compliant and helping you keep more of what you earn.</p>
+            <div>
+                <a href="#contact" class="btn btn-primary">Book Your Free Consultation</a>
+                <a href="#services" class="btn btn-secondary">View Services</a>
+            </div>
+
+            <div class="trust-badges">
+                <div class="badge"><i class="fas fa-check-circle"></i> ACCA Chartered</div>
+                <div class="badge"><i class="fas fa-clock"></i> 11+ Years’ Experience</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <div class="section-heading">
+                <h2>About Me</h2>
+            </div>
+            <div class="about-content">
+                <div class="about-image-container">
+                    <img src="Nicolephoto.PNG" alt="Nicole Platten - Chartered Accountant" class="profile-photo">
+                </div>
+                <div class="about-text">
+                    <h3>Your Dedicated Accountant</h3>
+                    <p>As an <strong>ACCA Chartered Accountant</strong> with over <strong>11 years’ experience in practice</strong>, I deliver reliable, high-quality accounting and tax services.</p>
+                    <p><strong>Based in the West Midlands — working remotely with clients throughout the whole of the UK.</strong></p>
+                    <p>I combine technical expertise with a straightforward, jargon-free approach. I explain exactly what you need to know, plan ahead to minimise your tax liability legally, and handle everything efficiently so you can focus on running your business.</p>
+                    <p>Whether you are starting out, growing or looking for a better standard of service, I am here to support you with honesty, clarity and commitment.</p>
+                    <p><strong>Free initial consultation — no obligation, just clear, helpful advice.</strong></p>
+                    
+                    <div class="credentials">
+                        <span class="credential-item">ACCA Qualified</span>
+                        <span class="credential-item">11+ Years’ Experience</span>
+                        <span class="credential-item">UK-Wide Service</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" style="background-color: var(--pale-beige);">
+        <div class="container">
+            <div class="section-heading">
+                <h2>My Services</h2>
+                <p>Tailored support designed around your needs</p>
+            </div>
+
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-user-tie"></i></div>
+                    <h3>Sole Traders</h3>
+                    <p>Complete support for self-employed individuals, from startup guidance to annual filing.</p>
+                    <ul class="service-list">
+                        <li>Self Assessment tax returns</li>
+                        <li>Annual accounts preparation</li>
+                        <li>Expense optimisation — claim everything you are entitled to</li>
+                        <li>Registration and compliance support</li>
+                        <li>Advice on structure and growth</li>
+                        <li>Bookkeeping and record-keeping help</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-home"></i></div>
+                    <h3>Property Landlords</h3>
+                    <p>Specialist knowledge of rental property tax rules for individual and portfolio landlords.</p>
+                    <ul class="service-list">
+                        <li>Property income tax returns</li>
+                        <li>Allowable expense calculation</li>
+                        <li>Finance cost relief explained</li>
+                        <li>Ownership structure advice</li>
+                        <li>Capital Gains Tax planning and returns</li>
+                        <li>Portfolio reviews for maximum efficiency</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-building"></i></div>
+                    <h3>Limited Companies</h3>
+                    <p>Full service for small and medium businesses — from incorporation to annual compliance.</p>
+                    <ul class="service-list">
+                        <li>Statutory annual accounts</li>
+                        <li>Corporation Tax returns and planning</li>
+                        <li>Companies House filing</li>
+                        <li>VAT returns and scheme advice</li>
+                        <li>Payroll and dividend administration</li>
+                        <li>Management accounts and business advice</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-file-invoice-pound"></i></div>
+                    <h3>Tax Planning</h3>
+                    <p>Proactive planning to ensure you never pay more tax than necessary.</p>
+                    <ul class="service-list">
+                        <li>Personal tax efficiency reviews</li>
+                        <li>Business tax planning</li>
+                        <li>Capital Gains Tax advice</li>
+                        <li>Reliefs and allowances maximised</li>
+                        <li>HMRC correspondence handled</li>
+                        <li>Tax-efficient extraction of profits</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-calculator"></i></div>
+                    <h3>Bookkeeping & VAT</h3>
+                    <p>Accurate, organised records kept up to date throughout the year.</p>
+                    <ul class="service-list">
+                        <li>Regular bookkeeping services</li>
+                        <li>Bank reconciliation</li>
+                        <li>VAT return preparation and submission</li>
+                        <li>Scheme selection advice</li>
+                        <li>Software setup and training</li>
+                        <li>Systems review to save you time</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-rocket"></i></div>
+                    <h3>Business Startup</h3>
+                    <p>Everything you need to start correctly and avoid costly mistakes.</p>
+                    <ul class="service-list">
+                        <li>Choosing the right structure</li>
+                        <li>Registration with HMRC and Companies House</li>
+                        <li>Compliance guidance</li>
+                        <li>First-year tax planning</li>
+                        <li>Payroll and employment setup</li>
+                        <li>Ongoing support as you grow</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonials" class="testimonials-section">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Client Testimonials</h2>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <blockquote class="testimonial-text">
+                    "Nicole prepared our financial statements and corporation tax return for our property company, handling the entire process from start to finish — including all submissions directly to HMRC. She is extremely friendly to deal with, and her fees are very fair compared to other accountants we have spoken to. We would highly recommend Nicole without hesitation, and we will definitely be using her for all our ongoing accountancy work."
+                </blockquote>
+                <div class="testimonial-author">Goldie’s Properties LTD</div>
+                <div class="testimonial-company">Property Investment Company</div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <blockquote class="testimonial-text">
+                    "I have been using Nicole for my self-assessment returns for three years now. She is incredibly efficient, explains everything clearly and has saved me hundreds of pounds in tax by pointing out expenses I didn't realise I could claim. She always replies quickly and makes what I find stressful very simple. I wouldn't go anywhere else."
+                </blockquote>
+                <div class="testimonial-author">Client in Birmingham</div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <blockquote class="testimonial-text">
+                    "We moved our limited company accounts to Nicole last year after being let down by our previous accountant. The difference has been night and day — she is proactive, organised and genuinely cares about helping our business grow. She spotted tax planning opportunities no one else mentioned. Professional, approachable and excellent value."
+                </blockquote>
+                <div class="testimonial-author">Limited Company Client</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="calculator" class="calculator-section">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Potential Annual Tax Savings</h2>
+                <p>See how much professional planning could save you each year</p>
+            </div>
+            <div class="calculator-container">
+                <div class="calculator-form">
+                    <div>
+                        <div class="form-group">
+                            <label for="incomeType">Business / Income Type</label>
+                            <select id="incomeType" required>
+                                <option value="">Select type</option>
+                                <option value="soletrader">Sole Trader</option>
+                                <option value="landlord">Property Landlord</option>
+                                <option value="limitedcompany">Limited Company</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="annualIncome">Annual Income / Turnover (£)</label>
+                            <input type="number" id="annualIncome" min="0" step="1000" placeholder="e.g. 50000">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label for="industry">Sector / Industry</label>
+                            <select id="industry" required>
+                                <option value="">Select sector</option>
+                                <option value="general">General Services</option>
+                                <option value="retail">Retail / Wholesale</option>
+                                <option value="construction">Construction / Trades</option>
+                                <option value="professional">Professional Services</option>
+                                <option value="property">Property / Lettings</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="currentAdvice">Current Arrangement</label>
+                            <select id="currentAdvice" required>
+                                <option value="">Select option</option>
+                                <option value="none">Self-managed / No accountant</option>
+                                <option value="change">Looking to change accountant</option>
+                                <option value="existing">Already have professional advice</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align:center;">
+                    <button id="calculateBtn" class="btn btn-primary">Calculate Potential Savings</button>
+                </div>
+                <div id="resultBox" class="result-box">
+                    <h3>Estimated Annual Tax Saving</h3>
+                    <div class="result-value" id="savingValue">£0 – £0</div>
+                    <p>These savings come from claiming all allowable expenses, using available reliefs and planning the most efficient structure for you.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tips" style="background-color: var(--pale-beige);">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Tax Tips & Guidance</h2>
+                <p>Useful advice to help you save money and stay compliant</p>
+            </div>
+
+            <div class="blog-grid">
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <div class="blog-content">
+                        <h3>5 Expenses Sole Traders Often Miss</h3>
+                        <p>Are you claiming everything you are entitled to? Many self-employed people miss legitimate costs that could reduce their bill significantly.</p>
+                        <a href="#" class="read-more" id="readMore1">Read More <i class="fas fa-arrow-right"></i></a>
+                        <div class="extra-content" id="extra1" style="display:none; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+                            <p><strong>1. Home office costs:</strong> If you work from home, you can claim a proportion of your rent, mortgage interest, council tax, electricity and heating based on the space you use exclusively for business.</p>
+                            <p><strong>2. Travel and subsistence:</strong> Costs for business journeys, including public transport, mileage allowances for your own vehicle, and reasonable food and drink costs when away overnight or for extended periods.</p>
+                            <p><strong>3. Professional fees:</strong> Payments to accountants, tax advisors, or legal professionals directly related to your business activity are fully allowable.</p>
+                            <p><strong>4. Insurance premiums:</strong> Professional indemnity, public liability and other business insurance costs are deductible expenses.</p>
+                            <p><strong>5. Training and development:</strong> Courses, seminars and materials that maintain or improve the skills you need for your current trade or profession can be claimed.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <div class="blog-content">
+                        <h3>When Should You Become a Limited Company?</h3>
+                        <p>Changing structure can save tax, but it is not right for everyone. Here is how to decide the best time to make the switch.</p>
+                        <a href="#" class="read-more" id="readMore2">Read More <i class="fas fa-arrow-right"></i></a>
+                        <div class="extra-content" id="extra2" style="display:none; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+                            <p>There is no fixed rule, but many people consider moving from sole trader to limited company once profits reach a level where the tax savings outweigh the extra administrative responsibilities.</p>
+                            <p>Limited companies pay Corporation Tax on profits at lower rates than higher rates of Income Tax, and you also have more flexibility in how and when you extract money from the business, which can improve tax efficiency.</p>
+                            <p>Other factors include personal liability — operating as a limited company creates a separate legal identity, meaning your personal assets are generally better protected — and how you plan to grow or sell the business in the future.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="blog-content">
+                        <h3>Key Tips for Property Landlords</h3>
+                        <p>Understand finance cost relief, allowable repairs and how to structure your portfolio tax-efficiently.</p>
+                        <a href="#" class="read-more" id="readMore3">Read More <i class="fas fa-arrow-right"></i></a>
+                        <div class="extra-content" id="extra3" style="display:none; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+                            <p><strong>Finance cost relief:</strong> Mortgage interest and other finance costs are no longer fully deducted from rental income. Instead, you receive a basic rate tax reduction. This can significantly affect the tax payable by higher and additional rate taxpayers.</p>
+                            <p><strong>Repairs vs improvements:</strong> You can claim the cost of repairs and maintenance, but not improvements that enhance the property beyond its original condition. Understanding the difference is important to ensure you claim correctly and avoid enquiries.</p>
+                            <p><strong>Portfolio ownership:</strong> Depending on your circumstances, holding properties personally or through a company structure can produce very different tax outcomes. This is an area where careful planning delivers real long-term benefit.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Frequently Asked Questions</h2>
+            </div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Do I really need an accountant?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>While you are legally entitled to manage your own accounts and tax returns, working with a qualified accountant brings significant benefits. You save valuable time, reduce the risk of errors或 missed deadlines, and ensure you pay no more tax than necessary. Professional advice often identifies savings that far outweigh the cost of the service. It also means you have expert support available should HMRC ever make contact or carry out a review.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How do you structure your fees?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>My approach is clear and transparent. Fees are agreed upfront before any work begins, based entirely on the complexity of your affairs and the level of support you require. Whether arranged as a fixed price or an hourly rate, you will always know exactly what is involved, with no hidden extras or unexpected charges appearing later on.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Can you help me reduce my tax bill legally?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes absolutely — this is a central part of what I do. I use all available reliefs, allowances and exemptions within current UK tax legislation to structure your affairs as efficiently as possible. This is completely legal and ethical, and is what qualified accountants are trained to deliver. Every situation is different, and I will tailor planning specifically to your circumstances to ensure you keep as much of what you earn as possible.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What records do I need to keep?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>You are required by law to keep accurate and complete records of all income and expenditure relating to your business or property. This includes invoices issued and received, receipts, bank statements and details of any personal use of business assets. I will provide you with a simple checklist tailored to your situation, and can advise on straightforward systems or software to make record keeping easy and organised throughout the year.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How do we work together?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Everything is handled remotely, making the process simple and accessible wherever you are located in the UK. We communicate via email, telephone or video call — whichever suits you best. Documents are shared securely, and I am always available when you have a question or need advice. You receive the same high-quality service and personal attention you would expect from a local firm, without the need to travel.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How quickly will you reply?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>I aim to respond to all routine enquiries within 24 hours on normal working days. If your matter is urgent, please let me know clearly and I will prioritise your request accordingly. I understand that things can be time-sensitive, and I always endeavour to keep communication prompt and reliable.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Can you help me change accountant?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes — changing accountant is much simpler than many people realise, and I manage the entire process on your behalf. This includes writing to your previous professional advisers to request all necessary records and information, handling any formal clearance procedures, and ensuring a smooth transition so your compliance deadlines are never at risk. You simply sign the necessary authority forms, and I take care of the rest.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" style="background-color: var(--pale-beige);">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Get In Touch</h2>
+                <p>Book your free consultation or send me a message — I am here to help</p>
+            </div>
+            <div class="contact-wrapper">
+                <div class="contact-info">
+                    <h3>Let’s Have a Chat</h3>
+                    <p>Whether you are starting out, growing your business or looking for better support, I’d be happy to have a no-obligation conversation to discuss exactly how I can help you.</p>
+                    
+                    <ul class="contact-details">
+                        <li><i class="fas fa-map-marker-alt"></i> West Midlands based — serving clients across the whole UK remotely</li>
+                        <li><i class="fas fa-envelope"></i> <a href="mailto:nicoleplatten@outlook.com">nicoleplatten@outlook.com</a></li>
+                        <li><i class="fas fa-phone"></i> <a href="tel:07492990955">07492 990955</a></li>
+                    </ul>
+
+                    <div class="social-links">
+                        <a href="https://www.linkedin.com/in/nicoleplatten" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+
+                <div class="contact-form">
+                    <div class="calendar-note">
+                        <p><strong><i class="fas fa-calendar-check"></i> Book your free consultation below:</strong><br>Send your details and message, and I will be in touch very soon to arrange a convenient time to speak.</p>
+                    </div>
+
+                    <form action="https://formspree.io/f/xbdegwjj" method="POST">
+                        <input type="hidden" name="_to" value="nicoleplatten@outlook.com">
+                        <input type="hidden" name="_subject" value="New Booking / Enquiry from Website">
+                        <input type="hidden" name="_reply
