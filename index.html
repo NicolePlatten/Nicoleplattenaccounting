@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nicole Platten Accounting | Chartered Accountants UK</title>
+    <meta name="description" content="Premium chartered accountancy services across the UK. Expert personal tax, business accounting and tax planning advice from a qualified professional with over 10 years experience.">
+    <meta name="keywords" content="chartered accountant UK, personal tax accountant, business accounting, tax planning, Birmingham accountants, chartered tax advisor">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy: #0A2463;
+            --gold: #D4AF37;
+            --cream: #F8F4E9;
+            --dark: #1E293B;
+            --light: #FFFFFF;
+            --grey: #64748B;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        h1 { font-size: 3rem; line-height: 1.2; }
+        h2 { font-size: 2.2rem; }
+        h3 { font-size: 1.5rem; }
+
+        p { margin-bottom: 1rem; color: var(--grey); }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 999;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            padding: 0.7rem 0;
+            background: var(--light);
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--navy);
+            text-decoration: none;
+        }
+
+        .logo span { color: var(--gold); }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--gold);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background: var(--gold);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after, .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .menu-toggle { display: none; font-size: 1.8rem; cursor: pointer; color: var(--navy); }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(rgba(10, 36, 99, 0.85), rgba(10, 36, 99, 0.85)), 
+                        url('https://images.unsplash.com/photo-1554224155-6726b3ff851c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--light);
+            padding-top: 80px;
+        }
+
+        .hero-content { max-width: 800px; margin: 0 auto; }
+        .hero h1 { margin-bottom: 1.5rem; color: var(--light); }
+        .hero p { font-size: 1.2rem; margin-bottom: 2rem; color: rgba(255,255,255,0.9); }
+
+        .btn {
+            display: inline-block;
+            padding: 0.9rem 2rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary { background: var(--gold); color: var(--navy); }
+        .btn-primary:hover { background: #B8860B; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3); }
+        .btn-secondary { background: transparent; color: var(--light); border: 2px solid var(--gold); margin-left: 1rem; }
+        .btn-secondary:hover { background: var(--gold); color: var(--navy); }
+
+        /* Sections General */
+        section { padding: 6rem 0; }
+        .section-heading { text-align: center; margin-bottom: 4rem; }
+        .section-heading h2 { color: var(--navy); position: relative; padding-bottom: 1rem; }
+        .section-heading h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--gold);
+        }
+
+        /* About Section */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-img img {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        /* --- PHOTO PLACEHOLDER NOTE ---
+           Replace the image URL below with your actual professional photo when ready
+           Example: src="my-professional-photo.jpg"
+        */
+        .photo-placeholder {
+            background-color: var(--cream);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 450px;
+            text-align: center;
+            color: var(--navy);
+            border-radius: 8px;
+            border: 2px dashed var(--gold);
+        }
+
+        .photo-placeholder i {
+            font-size: 4rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .credentials {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .credential-item {
+            background: var(--cream);
+            padding: 0.7rem 1.2rem;
+            border-radius: 4px;
+            color: var(--navy);
+            font-weight: 500;
+        }
+
+        /* Services Section */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-card {
+            background: var(--light);
+            padding: 2.5rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 3px solid transparent;
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border-top-color: var(--gold);
+        }
+
+        .service-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--cream);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            color: var(--gold);
+        }
+
+        .service-card h3 { color: var(--navy); }
+
+        /* Calculator Section */
+        .calculator-section {
+            background: linear-gradient(135deg, var(--cream) 0%, #fff 100%);
+        }
+
+        .calculator-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--light);
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .calculator-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.9rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--dark);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .result-box {
+            background: var(--navy);
+            color: var(--light);
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin: 1rem 0;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* FAQ Section */
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--light);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            width: 100%;
+            text-align: left;
+            padding: 1.5rem;
+            background: var(--light);
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--navy);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question i { transition: transform 0.3s; color: var(--gold); }
+        .faq-question.active i { transform: rotate(180deg); }
+        .faq-answer {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            display: none;
+            color: var(--grey);
+        }
+
+        .faq-answer.show { display: block; }
+
+        /* Blog Section */
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .blog-card {
+            background: var(--light);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .blog-card:hover { transform: translateY(-5px); }
+        .blog-img img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .blog-content { padding: 1.5rem; }
+        .blog-date {
+            color: var(--gold);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .blog-content h3 {
+            color: var(--navy);
+            font-size: 1.3rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .read-more {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .read-more:hover { text-decoration: underline; }
+
+        /* Contact Section */
+        .contact-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+
+        .contact-info h3 { color: var(--navy); margin-bottom: 1.5rem; }
+        .contact-details { list-style: none; margin-bottom: 2rem; }
+        .contact-details li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: var(--grey);
+        }
+
+        .contact-details li i {
+            color: var(--gold);
+            font-size: 1.2rem;
+            width: 30px;
+        }
+
+        .contact-form .form-group { margin-bottom: 1.5rem; }
+        .contact-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .contact-form input, .contact-form textarea {
+            width: 100%;
+            padding: 0.9rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--dark);
+        }
+
+        .contact-form input:focus, .contact-form textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .contact-form textarea { min-height: 150px; resize: vertical; }
+
+        /* Footer */
+        footer {
+            background: var(--navy);
+            color: var(--light);
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .footer-logo span { color: var(--gold); }
+        .footer-col h4 {
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 0.8rem; }
+        .footer-col ul li a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-col ul li a:hover { color: var(--gold); }
+        .social-links { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .social-links a:hover { background: var(--gold); color: var(--navy); }
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+
+        /* Mobile Responsive */
+        @media(max-width: 992px) {
+            .about-content, .contact-wrapper, .calculator-form { grid-template-columns: 1fr; gap: 2rem; }
+            h1 { font-size: 2.4rem; }
+            .calculator-container { padding: 2rem 1.5rem; }
+        }
+
+        @media(max-width: 768px) {
+            .menu-toggle { display: block; }
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--light);
+                flex-direction: column;
+                padding: 1rem 2rem;
+                gap: 1rem;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+                display: none;
+            }
+
+            .nav-links.active { display: flex; }
+            .hero h1 { font-size: 2rem; }
+            .btn { padding: 0.8rem 1.5rem; }
+            .btn-secondary { margin-left: 0; margin-top: 1rem; display: inline-block; }
+            section { padding: 4rem 0; }
+        }
+
+        @media(max-width: 576px) {
+            .services-grid, .blog-grid { grid-template-columns: 1fr; }
+            .credentials { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="container nav-wrapper">
+            <a href="#" class="logo">Nicole Platten <span>Accounting</span></a>
+            <div class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#calculator">Tax Savings Calculator</a></li>
+                <li><a href="#faq">FAQs</a></li>
+                <li><a href="#blog">Blog</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container hero-content">
+            <h1>Expert Chartered Accountancy Services You Can Trust</h1>
+            <p>Personalised financial advice, tax planning and accounting solutions across the UK. Precision, integrity and excellence in every number.</p>
+            <div>
+                <a href="#contact" class="btn btn-primary">Book Your Consultation</a>
+                <a href="#services" class="btn btn-secondary">Explore Services</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="container">
+            <div class="section-heading">
+                <h2>About Nicole Platten</h2>
+            </div>
+            <div class="about-content">
+                <div class="about-img">
+                    <!-- YOUR PHOTO PLACEHOLDER - Replace when ready -->
+                    <div class="photo-placeholder">
+                        <i class="fas fa-user-circle"></i>
+                        <p>Professional Photo<br>To be added soon</p>
+                    </div>
+                    <!-- END PLACEHOLDER -->
+                </div>
+                <div class="about-text">
+                    <h3>Your Trusted Chartered Accountant</h3>
+                    <p>With <strong>over 10 years of experience</strong>, I am a dedicated chartered accountant based in the West Midlands, serving individuals and businesses throughout the United Kingdom. I combine deep technical expertise with a personal approach, ensuring every client receives tailored solutions that align perfectly with their financial goals.</p>
+                    <p>As a fully qualified chartered accountant regulated by the ICAEW, I adhere to the highest professional standards. I specialise in personal tax, business accounting, strategic planning and compliance — making complex finance simple, clear and stress-free for you.</p>
+                    <div class="credentials">
+                        <span class="credential-item">ICAEW Chartered</span>
+                        <span class="credential-item">HMRC Registered Agent</span>
+                        <span class="credential-item">10+ Years Experience</span>
+                        <span class="credential-item">UK Nationwide Service</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" style="background: #fafafa;">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Our Professional Services</h2>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <h3>Personal Taxation</h3>
+                    <p>Complete personal tax return preparation, proactive tax planning, capital gains tax, inheritance tax advice and full compliance with HMRC regulations.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-briefcase"></i></div>
+                    <h3>Business Accounting</h3>
+                    <p>Comprehensive accounting services for sole traders, partnerships and limited companies; annual accounts, bookkeeping, management reports and statutory compliance.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Tax Planning & Strategy</h3>
+                    <p>Strategic tax planning to legally minimise your liabilities, advice on business structure, profit extraction and long-term wealth preservation.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-calculator"></i></div>
+                    <h3>Payroll Services</h3>
+                    <p>Reliable payroll management including RTI submissions, pension auto-enrolment, payslips and year-end reporting for businesses of all sizes.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-handshake"></i></div>
+                    <h3>New Business Setup</h3>
+                    <p>Expert guidance on starting your business, choosing the right legal structure, registration, banking and setting up robust financial systems.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-landmark"></i></div>
+                    <h3>Wealth Advisory</h3>
+                    <p>Personalised advice on investments, pensions, retirement planning and asset protection to secure and grow your financial future.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tax Savings Calculator Section -->
+    <section id="calculator" class="calculator-section">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Potential Tax Savings Calculator</h2>
+                <p>Estimate how much you could save with expert professional advice</p>
+            </div>
+            <div class="calculator-container">
+                <div class="calculator-form">
+                    <div>
+                        <div class="form-group">
+                            <label for="incomeType">Income / Business Type</label>
+                            <select id="incomeType" required>
+                                <option value="">Select type</option>
+                                <option value="individual">Individual / Employee</option>
+                                <option value="soletrader">Sole Trader</option>
+                                <option value="partnership">Partnership</option>
+                                <option value="limitedcompany">Limited Company</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="annualIncome">Annual Income / Turnover (£)</label>
+                            <input type="number" id="annualIncome" min="0" step="1000" placeholder="e.g. 50000">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label for="industry">Industry / Sector</label>
+                            <select id="industry" required>
+                                <option value="">Select sector</option>
+                                <option value="general">General Services</option>
+                                <option value="retail">Retail / Wholesale</option>
+                                <option value="construction">Construction / Trades</option>
+                                <option value="professional">Professional Services</option>
+                                <option value="creative">Creative / Media</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="currentAdvice">Current Support</label>
+                            <select id="currentAdvice" required>
+                                <option value="">Select option</option>
+                                <option value="none">Self-managed / No advisor</option>
+                                <option value="basic">Basic bookkeeping support</option>
+                                <option value="regular">Regular professional advice</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align:center;">
+                    <button id="calculateBtn" class="btn btn-primary">Calculate Potential Savings</button>
+                </div>
+                <div id="resultBox" class="result-box">
+                    <h3>Estimated Annual Tax Savings</h3>
+                    <div class="result-value" id="savingValue">£0 - £0</div>
+                    <p>These figures are an estimate based on typical savings achieved by our clients. Every situation is unique — contact me for a personalised review.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" style="background: #fafafa;">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Frequently Asked Questions</h2>
+            </div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Do I really need a chartered accountant?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>While you can complete tax returns yourself, a chartered accountant brings expertise, accuracy and peace of mind. I will ensure you pay no more tax than necessary, stay fully compliant with ever-changing UK regulations, and save you valuable time. For businesses, professional advice often pays for itself through tax savings and improved profitability.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How do you structure your fees?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>I provide clear, transparent fees agreed upfront before any work begins. Fees are tailored to the complexity of your affairs and the level of service you require. Whether fixed-fee or hourly, there are never hidden costs, and you will always know exactly what you are investing and what value you will receive.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Can you help me reduce my tax bill legally?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Absolutely. Tax planning is a core part of what I do. I use all available reliefs, allowances and exemptions within UK tax law to structure your affairs as tax-efficiently as possible. This is completely legal and ethical — it is what good accountants are trained to do.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Do you meet clients in person or virtually?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>I offer both options. I am happy to meet at my offices, visit you at your premises, or hold meetings via video call or telephone — whichever works best for you. I serve clients throughout the UK, and technology allows me to deliver the same high-quality service remotely.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What records do I need to keep?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>You should keep records of all income, expenses, receipts, invoices and bank statements. I will provide you with a clear checklist tailored to your situation, and can advise on simple systems or software to make record keeping straightforward and less time-consuming.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section id="blog">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Latest Financial Insights</h2>
+            </div>
+            <div class="blog-grid">
+                <div class="blog-card">
+                    <div class="blog-img">
+                        <img src="https://images.unsplash.com/photo-1454165804606-c3d578b80900?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Tax planning">
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-date">22 May 2026</div>
+                        <h3>Top Tax Planning Tips for the New Financial Year</h3>
+                        <p>Essential strategies you should consider before the tax year ends to optimise your position and save money legally.</p>
+                        <a href="#" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="blog-card">
+                    <div class="blog-img">
+                        <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Business growth">
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-date">10 May 2026</div>
+                        <h3>How Strong Financial Management Drives Business Growth</h3>
+                        <p>Why accurate, timely financial information is the foundation of every successful growing business — and how to get it right.</p>
+                        <a href="#" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="blog-card">
+                    <div class="blog-img">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="HMRC compliance">
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-date">28 April 2026</div>
+                        <h3>Making Tax Digital: Everything You Need to Know</h3>
+                        <p>A complete guide to HMRC’s Making Tax Digital initiative, what it means for you, and how to stay compliant easily.</p>
+                        <a href="#" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" style="background: #fafafa;">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Get In Touch</h2>
+            </div>
+            <div class="contact-wrapper">
+                <div class="contact-info">
+                    <h3>We’re Here to Help</h3>
+                    <p>Whether you are an individual looking for tax advice or a business needing comprehensive accountancy support, I am ready to listen and deliver exactly what you need.</p>
+                    <ul class="contact-details">
+                        <li><i class="fas fa-map-marker-alt"></i> Birmingham, West Midlands, United Kingdom</li>
+                        <li><i class="fas fa-envelope"></i> <strong>NicolePlatten@outlook.com</strong></li>
+                    </ul>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form action="#" method="POST">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" required placeholder="Your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Your Message</label>
+                            <textarea id="message" name="message" required placeholder="Tell us about your requirements..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Enquiry</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <div class="footer-logo">Nicole Platten <span>Accounting</span></div>
+                    <p>Professional chartered accountancy services delivering accuracy, integrity and excellence across the United Kingdom.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#calculator">Tax Calculator</a></li>
+                        <li><a href="#blog">Blog</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:NicolePlatten@outlook.com">NicolePlatten@outlook.com</a></li>
+                        <li>Birmingham, United Kingdom</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2026 Nicole Platten Accounting. All rights reserved. Chartered Accountants regulated by the ICAEW.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Navigation scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if(window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        menuToggle.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+            const icon = menuToggle.querySelector('i');
+            if(navLinks.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Close menu when clicking a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', function() {
+                navLinks.classList.remove('active');
+                const icon = menuToggle.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            });
+        });
+
+        // FAQ accordion
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        faqQuestions.forEach(question => {
+            question.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const answer = this.nextElementSibling;
+                answer.classList.toggle('show');
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Active menu on scroll
+        window.addEventListener('scroll', function() {
+            let current = '';
+            const sections = document.querySelectorAll('section');
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if(pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // --- TAX SAVINGS CALCULATOR LOGIC ---
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultBox = document.getElementById('resultBox');
+        const savingValue = document.getElementById('savingValue');
+
+        calculateBtn.addEventListener('click', function() {
+            const incomeType = document.getElementById('incomeType').value;
+            const annualIncome = parseFloat(document.getElementById('annualIncome').value) || 0;
+            const currentAdvice = document.getElementById('currentAdvice').value;
+
+            let minSaving = 0;
+            let maxSaving = 0;
+
+            // Logic based on typical UK tax savings
+            if (incomeType === 'individual') {
+                minSaving = Math.round(annualIncome * 0.03);
+                maxSaving = Math.round(annualIncome * 0.08);
+            } else if (incomeType === 'soletrader') {
+                minSaving = Math.round(annualIncome * 0.08);
+                maxSaving = Math.round(annualIncome * 0.18);
+            } else if (incomeType === 'partnership' || incomeType === 'limitedcompany') {
+                minSaving = Math.round(annualIncome * 0.10);
+                maxSaving = Math.round(annualIncome * 0.22);
+            }
+
+            // Adjust if they already have some advice
+            if (currentAdvice === 'basic') {
+                minSaving = Math.round(minSaving * 0.6);
+                maxSaving = Math.round(maxSaving * 0.6);
+            } else if (currentAdvice === 'regular') {
+                minSaving = Math.round(minSaving * 0.25);
+                maxSaving = Math.round(maxSaving * 0.25);
+            }
+
+            // Minimum sensible values
+            if (minSaving < 300) minSaving = 300;
+            if (maxSaving < 800) maxSaving = 800;
+
+            // Format and show
+            savingValue.textContent = `£${minSaving.toLocaleString()} – £${maxSaving.toLocaleString()}`;
+            resultBox.style.display = 'block';
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    </script>
+
+</body>
+</html>
