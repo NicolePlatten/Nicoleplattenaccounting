@@ -1218,4 +1218,120 @@
     </section>
 
     <footer>
+
+    <div class="container">
+        <div class="copyright">
+            © 2026 Nicole Platten Accounting. All Rights Reserved.
+        </div>
+    </div>
+
+</footer>
+
+<script>
+
+/* MOBILE MENU */
+
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.getElementById('navLinks');
+
+if(menuToggle){
+    menuToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+    });
+}
+
+/* FAQS */
+
+document.querySelectorAll('.faq-question').forEach(button => {
+
+    button.addEventListener('click', () => {
+
+        const answer = button.nextElementSibling;
+
+        button.classList.toggle('active');
+
+        if(answer.style.display === 'block'){
+            answer.style.display = 'none';
+        } else {
+            answer.style.display = 'block';
+        }
+
+    });
+
+});
+
+/* TAX CALCULATOR */
+
+const calculateBtn = document.getElementById('calculateBtn');
+
+if(calculateBtn){
+
+    calculateBtn.addEventListener('click', () => {
+
+        const income =
+            parseFloat(document.getElementById('annualIncome').value) || 0;
+
+        const savingValue =
+            document.getElementById('savingValue');
+
+        const resultBox =
+            document.getElementById('resultBox');
+
+        let minSaving = Math.round(income * 0.02);
+        let maxSaving = Math.round(income * 0.08);
+
+        if(income < 10000){
+            minSaving = 100;
+            maxSaving = 500;
+        }
+
+        savingValue.textContent =
+            `£${minSaving.toLocaleString()} - £${maxSaving.toLocaleString()}`;
+
+        resultBox.style.display = 'block';
+
+    });
+
+}
+
+/* BLOG READ MORE */
+
+for(let i = 1; i <= 3; i++){
+
+    const btn =
+        document.getElementById(`readMore${i}`);
+
+    const content =
+        document.getElementById(`extra${i}`);
+
+    if(btn && content){
+
+        btn.addEventListener('click', () => {
+
+            if(content.style.display === 'block'){
+
+                content.style.display = 'none';
+
+                btn.innerHTML =
+                    'Read More <i class="fas fa-arrow-right"></i>';
+
+            } else {
+
+                content.style.display = 'block';
+
+                btn.innerHTML =
+                    'Show Less <i class="fas fa-arrow-up"></i>';
+
+            }
+
+        });
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
        
