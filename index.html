@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<link rel="canonical" href="https://nicoleplattenaccounting.co.uk/">
+<meta property="og:title" content="Nicole Platten Accounting">
+<meta property="og:description" content="ACCA Chartered Accountant in Birmingham offering tax and accounting support.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://nicoleplattenaccounting.co.uk/Nicolephoto.PNG">
+<meta property="og:url" content="https://nicoleplattenaccounting.co.uk/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#5A4A3C">
+    <link rel="icon" href="/favicon.ico">
+    <title>Nicole Platten Accounting | Chartered Accountant</title>
+    <meta name="description" content="Nicole Platten Accounting - ACCA Chartered Accountant based in Birmingham. Expert accounting and tax support for sole traders and limited companies.">
+<meta name="keywords" content="accountant Birmingham, ACCA accountant, tax returns UK, sole trader accountant">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Nicole Platten Accounting">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+.nav-shadow {
+    box-shadow: 0 4px 15px rgba(90, 74, 60, 0.08);
+}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #5A4A3C;
+            --secondary: #A68972;
+            --light-beige: #F5F0EB;
+            --pale-beige: #F9F6F3;
+            --white: #FFFFFF;
+            --text: #3A342E;
+            --light-text: #7A7269;
+            --border: #E8E0D8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            line-height: 1.7;
+            background-color: var(--white);
+        }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+}
+
+        h1, h2, h3, h4 {
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        h1 { font-size: 2.8rem; }
+        h2 { font-size: 2rem; }
+        h3 { font-size: 1.4rem; }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--light-text);
+            font-size: 1.05rem;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        nav {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 999;
+            padding: 1.5rem 0;
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .header-social {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .header-social a {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--light-beige);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .header-social a:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.7rem;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--secondary);
+        }
+
+    .hero {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top right,
+        rgba(166, 137, 114, 0.18),
+        transparent 30%),
+
+        linear-gradient(
+            135deg,
+            #F5F0EB 0%,
+            #FCFAF8 50%,
+            #F9F6F3 100%
+        );
+
+    display: flex;
+    align-items: center;
+    text-align: center;
+    padding: 170px 20px 100px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* HERO LIGHT GLOW (Step 3A FIXED) */
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle at 50% 20%,
+        rgba(255, 255, 255, 0.55),
+        transparent 60%
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+.hero-content {
+max-width: 900px;
+margin: auto;
+position: relative;
+z-index: 2;
+}
+
+.hero h1 {
+    font-size: 4.3rem;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    margin-bottom: 1.8rem;
+}
+
+@media(max-width: 768px) {
+    .hero h1 {
+        font-size: 2.8rem;
+        line-height: 1.15;
+    }
+
+    .consult-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+.hero-profile-photo {
+width: 155px;
+height: 155px;
+border-radius: 50%;
+object-fit: cover;
+border: 6px solid var(--white);
+
+
+box-shadow:
+    0 10px 35px rgba(90, 74, 60, 0.12),
+    0 0 0 12px rgba(255,255,255,0.45);
+
+margin-bottom: 2rem;
+
+position: relative;
+
+}
+
+
+.hero-text {
+    font-size: 1.25rem;
+    line-height: 1.9;
+    max-width: 750px;
+    margin: 0 auto 2.5rem auto;
+    color: rgba(58, 52, 46, 0.85);
+}
+
+.hero-buttons {
+    margin-top: 2.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.hero-subtitle {
+    display: inline-block;
+    background: rgba(166, 137, 114, 0.15);
+    color: var(--primary);
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            margin-left: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+.consult-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.2rem;
+    justify-content: flex-start;
+}
+@media(max-width: 768px) {
+    .btn-secondary {
+        margin-left: 0;
+    }
+}
+
+     section {
+    padding: 4rem 0;
+    scroll-margin-top: 90px;
+}
+#services,
+#contact {
+    background-color: var(--pale-beige);
+}
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-heading h2 {
+            padding-bottom: 0.8rem;
+            position: relative;
+        }
+
+        .section-heading h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background-color: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .about-image-container {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(90, 74, 60, 0.08);
+            background-color: var(--light-beige);
+            height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .credentials {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .credential-item {
+            background-color: var(--pale-beige);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+        }
+
+       .services-grid {
+display: grid;
+
+
+grid-template-columns:
+    repeat(auto-fit, minmax(320px, 1fr));
+
+gap: 2.5rem;
+
+align-items: stretch;
+
+
+}
+
+
+       .service-card {
+background-color: var(--white);
+padding: 2.6rem;
+border-radius: 16px;
+border: 1px solid var(--border);
+
+
+transition: all 0.35s ease;
+
+box-shadow:
+    0 6px 20px rgba(90, 74, 60, 0.04);
+
+height: 100%;
+
+
+}
+
+.service-card:hover {
+transform: translateY(-8px);
+
+
+box-shadow:
+    0 18px 40px rgba(90, 74, 60, 0.10);
+
+border-color: rgba(166, 137, 114, 0.35);
+
+
+        }
+
+        .service-icon {
+            width: 55px;
+            height: 55px;
+            background-color: var(--pale-beige);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            color: var(--secondary);
+        }
+
+        .service-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .service-list li {
+            padding: 0.3rem 0;
+            color: var(--light-text);
+            display: flex;
+            align-items: center;
+        }
+
+        .service-list li::before {
+            content: "✓";
+            color: var(--secondary);
+            font-weight: bold;
+            margin-right: 0.7rem;
+        }
+
+        .testimonial-card {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: var(--pale-beige);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .testimonial-stars {
+            color: #f5a623;
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .testimonial-text {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: var(--text);
+            font-style: italic;
+            margin-bottom: 1.5rem;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .testimonial-company {
+            font-size: 0.9rem;
+            color: var(--light-text);
+            margin-top: 0.2rem;
+        }
+
+        .calculator-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .calculator-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--text);
+            background-color: var(--white);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(166, 137, 114, 0.08);
+        }
+
+        .result-box {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin: 0.8rem 0;
+        }
+
+        .faq-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background-color: var(--white);
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            width: 100%;
+            text-align: left;
+            padding: 1.2rem;
+            background-color: transparent;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question i {
+            transition: transform 0.3s ease;
+            color: var(--secondary);
+        }
+
+        .faq-question.active i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.2rem 1.2rem 1.2rem;
+            display: none;
+            color: var(--light-text);
+        }
+        .faq-item.active .faq-answer {
+         display: block;
+}
+
+        .contact-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .contact-info h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-details {
+            list-style: none;
+            margin-bottom: 1.2rem;
+        }
+
+        .contact-details li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            color: var(--light-text);
+        }
+
+        .contact-details li i {
+            color: var(--secondary);
+            font-size: 1rem;
+            width: 22px;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        footer {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 2.5rem 0 1rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-logo span {
+            color: var(--secondary);
+        }
+
+        .footer-col h4 {
+            color: var(--secondary);
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-col ul li a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--secondary);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 0.7rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background-color: var(--secondary);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+        }
+
+      @media(max-width: 768px) {
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        background: white;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        padding: 1rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        line-height: 1.2;
+
+}
+
+.hero-text {
+font-size: 1.05rem;
+}
+
+            .about-content, .calculator-form, .contact-wrapper {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .btn-secondary { margin-left: 0; margin-top: 0.8rem; display: inline-block; }
+            .hero-profile-photo { width: 120px; height: 120px; }
+            .testimonial-card { padding: 2rem 1.5rem; }
+           .hero {
+padding: 140px 20px 80px;
+}
+
+.hero-text {
+font-size: 1.05rem;
+}
+
+.hero-profile-photo {
+width: 130px;
+height: 130px;
+}
+
+        }
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+    will-change: opacity, transform;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    align-items: stretch;
+}
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <div class="container nav-wrapper">
+            <a href="#" class="logo">Nicole Platten <span>Accounting</span></a>
+            
+            <div class="header-social">
+                <a href="https://www.linkedin.com/in/nicoleplatten" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a href="#" aria-label="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+            </div>
+            
+            <div class="menu-toggle" id="menuToggle" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#testimonials">Testimonials</a></li>
+                <li><a href="#calculator">Tax Savings</a></li>
+                <li><a href="#faq">FAQs</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+<section class="hero" id="home">
+
+<div class="container hero-content">
+
+    <img src="Nicolephoto.PNG"
+         alt="Nicole Platten - ACCA Chartered Accountant"
+         class="hero-profile-photo">
+
+<p class="hero-subtitle">
+    ACCA Chartered Accountant • 11+ Years Experience
+</p>
+
+    <h1>
+        Stress-Free Accounting Support
+        for Small Businesses & Sole Traders
+    </h1>
+
+    <p class="hero-text">
+        Friendly, professional accounting and tax support designed to
+        save you time, reduce stress and help your business grow with confidence.
+    </p>
+
+    <div class="hero-buttons">
+        <a href="#contact" class="btn btn-primary">
+            Book a Free Consultation
+        </a>
+
+        <a href="#services" class="btn btn-secondary">
+            View Services
+        </a>
+    </div>
+
+</div>
+
+</section>
+  
+
+    <section id="about">
+        <div class="container">
+            <div class="section-heading">
+                <h2>About Me</h2>
+            </div>
+            <div class="about-content">
+                <div class="about-image-container">
+                    <img src="Nicolephoto.PNG" alt="Nicole Platten - ACCA Chartered Accountant" class="profile-photo">
+                </div>
+                <div class="about-text">
+                    <h3>Your Dedicated Chartered Accountant</h3>
+                    <p>As an <strong>ACCA Chartered Accountant</strong> with over <strong>11 years’ experience in practice</strong>, I provide reliable, clear and professional accounting and tax support to sole traders, landlords and limited companies across the UK.</p>
+                    <p>I combine technical expertise with a friendly, approachable style. My goal is to make your finances straightforward, compliant and fully aligned with what you want to achieve — whether you are starting out or looking to change accountants.</p>
+                    <p><strong>I am available for free consultations</strong> to discuss your requirements, answer questions and see how I can best support you and your business.</p>
+                    
+                    <div class="credentials">
+                        <span class="credential-item">ACCA Chartered Accountant</span>
+                        <span class="credential-item">11+ Years Experience</span>
+                        <span class="credential-item">Sole Trader & Company Specialist</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services">
+        <div class="container">
+            <div class="section-heading">
+                <h2>My Services</h2>
+                <p>Helping you and your business with all your accounting and tax needs</p>
+            </div>
+            <div class="services-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-file-invoice"></i></div>
+                    <h3>What I Can Help With</h3>
+                    <ul class="service-list">
+                        <li>Annual Accounts Preparation</li>
+                        <li>Personal & Business Tax Returns</li>
+                        <li>VAT Returns & Submissions</li>
+                        <li>Bookkeeping & Record Keeping</li>
+                        <li>Payroll Services</li>
+                        <li>Management Accounts</li>
+                    </ul>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-handshake"></i></div>
+                    <h3>How I Work</h3>
+                    <p>Friendly, professional support with clear, jargon-free advice.</p>
+                    <p>Whether you are starting a new business or looking to change your current accountant, I offer a personal service tailored exactly to your needs.</p>
+<div class="consult-buttons"
+    
+    <!-- Call Button -->
+    <a href="tel:+447492990955" class="btn btn-primary">
+        📞 Call Now
+    </a>
+
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/447492990955?text=Hi%20Nicole,%20I%20would%20like%20to%20book%20a%20free%20consultation"
+       target="_blank"
+       class="btn btn-secondary">
+       💬 WhatsApp Me
+    </a>
+
+</div>
+                    <p>Services are delivered remotely or locally, whatever works best for you.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-comments"></i></div>
+                    <h3>Free Consultations</h3>
+                    <p><strong>I am available for free consultations</strong> to discuss your situation, explain how I can help, and answer any questions you may have.</p>
+                    <p>No obligation, no pressure — just honest, helpful advice to help you move forward with confidence.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonials" class="testimonials-section">
+        <div class="container">
+            <div class="section-heading">
+                <h2>What My Clients Say</h2>
+            </div>
+           <div class="testimonials-grid">
+
+
+<div class="testimonial-card">
+
+    <div class="testimonial-stars">
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+    </div>
+
+    <blockquote class="testimonial-text">
+        "Nicole prepared our financial statements and corporation tax return for our property company, handling everything from start to finish. Extremely professional, approachable and efficient throughout."
+    </blockquote>
+
+    <div class="testimonial-author">
+        Property Investment Client
+    </div>
+
+</div>
+
+<div class="testimonial-card">
+
+    <div class="testimonial-stars">
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+    </div>
+
+    <blockquote class="testimonial-text">
+        "The whole process was straightforward and stress-free. Nicole explained everything clearly and helped me feel confident that everything was being handled properly."
+    </blockquote>
+
+    <div class="testimonial-author">
+        Sole Trader Client
+    </div>
+
+</div>
+
+<div class="testimonial-card">
+
+    <div class="testimonial-stars">
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-star"></i>
+    </div>
+
+    <blockquote class="testimonial-text">
+        "Professional, reliable and always quick to respond. Switching accountants was much easier than expected and the support has been excellent."
+    </blockquote>
+
+    <div class="testimonial-author">
+        Limited Company Director
+    </div>
+
+</div>
+
+
+</div>
+
+        </div>
+    </section>
+
+    <section id="calculator" class="calculator-section">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Potential Tax Savings</h2>
+                <p>See how much you could save with professional planning and advice</p>
+            </div>
+            <div class="calculator-container">
+                <form class="calculator-form" onsubmit="return false;">
+    
+    <div>
+        <div class="form-group">
+            <label for="incomeType">Business / Income Type</label>
+            <select id="incomeType" required>
+                <option value="">Select type</option>
+                <option value="soletrader">Sole Trader</option>
+                <option value="landlord">Landlord</option>
+                <option value="limitedcompany">Limited Company</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="annualIncome">Annual Income / Turnover (£)</label>
+            <input type="number" id="annualIncome" min="0" step="1000" placeholder="e.g. 50000">
+        </div>
+    </div>
+
+    <div>
+        <div class="form-group">
+            <label for="industry">Sector / Industry</label>
+            <select id="industry" required>
+                <option value="">Select sector</option>
+                <option value="general">General Services</option>
+                <option value="retail">Retail / Wholesale</option>
+                <option value="construction">Construction / Trades</option>
+                <option value="professional">Professional Services</option>
+                <option value="property">Property / Lettings</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="currentAdvice">Current Arrangement</label>
+            <select id="currentAdvice" required>
+                <option value="">Select option</option>
+                <option value="none">Self-managed / No accountant</option>
+                <option value="change">Looking to change accountant</option>
+                <option value="existing">Already have professional advice</option>
+            </select>
+        </div>
+    </div>
+
+</form>
+                <div style="text-align:center;">
+                    <button id="calculateBtn" class="btn btn-primary">Calculate Potential Savings</button>
+                </div>
+                <div id="resultBox" class="result-box">
+                    <h3>Estimated Annual Tax Savings</h3>
+                    <div class="result-value" id="savingValue">£0 – £0</div>
+                    <p>These figures are an estimate based on typical savings achieved by my clients. Every situation is unique — contact me for a free consultation to discuss your specific circumstances.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" style="background-color: var(--white);">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Frequently Asked Questions</h2>
+            </div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Do I really need an accountant?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>While you can manage your own accounts and tax returns, working with a qualified accountant saves you valuable time, ensures everything is accurate and submitted on time, and means you will never pay more tax than you legally need to. For most businesses and individuals, the savings made through professional advice far outweigh the cost.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        How do you structure your fees?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>I provide clear, transparent fees agreed upfront before any work begins. Fees are tailored to the complexity of your affairs and the level of support you require — whether fixed-price or hourly. There are never hidden costs — you will always know exactly what you are investing.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Can you help me reduce my tax bill legally?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Absolutely. Tax planning is a core part of what I do. I use all available reliefs, allowances and exemptions within UK tax law to structure your affairs as tax-efficiently as possible. This is completely legal and ethical — it is what qualified accountants are trained to do.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        What records do I need to keep?
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>You should keep records of all income and expenses, receipts, invoices and bank statements. I will provide you with a clear checklist tailored to your situation, and can advise on simple systems or software to make record keeping straightforward and less time-consuming.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Get In Touch</h2>
+            </div>
+            <div class="contact-wrapper">
+                <div class="contact-info">
+                    <h3>Let’s Have a Free Consultation</h3>
+                    <p>Whether you are starting out, growing your business or looking to change accountants, I’d be happy to have a no-obligation conversation to discuss how I can support you.</p>
+                    <ul class="contact-details">
+                        <li><i class="fas fa-map-marker-alt"></i> Birmingham, West Midlands, United Kingdom</li>
+                        <li><i class="fas fa-envelope"></i> <strong>nicoleplatten@outlook.com</strong></li>
+                    </ul>
+
+<div class="consult-buttons">
+    
+    <a href="tel:+447492990955" class="btn btn-primary">
+        📞 Call Now
+    </a>
+
+    <a href="https://wa.me/447492990955?text=Hi%20Nicole,%20I%20would%20like%20to%20book%20a%20free%20consultation"
+       target="_blank"
+       class="btn btn-secondary">
+       💬 WhatsApp Me
+    </a>
+
+</div>
+                    <div class="social-links">
+                        <a href="https://www.linkedin.com/in/nicoleplatten" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <!-- ✅ FORM FIXED: BACK TO WORKING SETTINGS -->
+                    <form action="https://formspree.io/f/xbdegwjj" method="POST">
+                        <input type="hidden" name="_to" value="nicoleplatten@outlook.com">
+                        <input type="hidden" name="_subject" value="New enquiry from website!">
+                                               
+                        <!-- ✅ ALL EMPTY & SAFE - NO DATA EVER SHOWS -->
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" required placeholder="">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required placeholder="">
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Your Message</label>
+                            <textarea id="message" name="message" required placeholder=""></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Enquiry</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <div class="footer-logo">
+    <i class="fas fa-calculator" style="margin-right:10px; color: var(--secondary);"></i>
+    Nicole <span>Platten Accounting</span>
+</div>
+                    <p>Professional ACCA Chartered Accountants delivering reliable, friendly and expert support to businesses and individuals across the UK.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About Me</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#testimonials">Testimonials</a></li>
+                        <li><a href="#calculator">Tax Savings</a></li>
+                        <li><a href="#faq">FAQs</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:nicoleplatten@outlook.com">nicoleplatten@outlook.com</a></li>
+                        <li>Birmingham, United Kingdom</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2026 Nicole Platten Accounting. All rights reserved. ACCA Chartered Accountants.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+   
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        menuToggle.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+const expanded = navLinks.classList.contains('active');
+menuToggle.setAttribute('aria-expanded', expanded);
+            const icon = menuToggle.querySelector('i');
+            if(navLinks.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+faqQuestions.forEach(question => {
+    question.addEventListener('click', function () {
+
+        this.classList.toggle('active');
+
+        const item = this.parentElement;
+        item.classList.toggle('active');
+
+        const expanded = item.classList.contains('active');
+        this.setAttribute('aria-expanded', expanded);
+    });
+});
+document.addEventListener('click', (e) => {
+    const isClickInsideMenu = navLinks.contains(e.target);
+    const isClickOnToggle = menuToggle.contains(e.target);
+
+    if (!isClickInsideMenu && !isClickOnToggle) {
+        navLinks.classList.remove('active');
+
+        const icon = menuToggle.querySelector('i');
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+    }
+});
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+ window.addEventListener('scroll', function () {
+    const navbar = document.getElementById('navbar');
+
+    // navbar shadow
+   navbar.classList.toggle('nav-shadow', window.scrollY > 50);
+
+    // active nav
+    let current = 'home';
+
+document.querySelectorAll('section').forEach(section => {
+    const rect = section.getBoundingClientRect();
+
+    if (rect.top <= 150 && rect.bottom >= 150) {
+        current = section.id;
+    }
+});
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.classList.toggle(
+            'active',
+            link.getAttribute('href') === `#${current}`
+        );
+    });
+});
+
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultBox = document.getElementById('resultBox');
+        const savingValue = document.getElementById('savingValue');
+
+        calculateBtn.addEventListener('click', function() {
+            const incomeType = document.getElementById('incomeType').value;
+            const annualIncome = parseFloat(document.getElementById('annualIncome').value) || 0;
+            const currentAdvice = document.getElementById('currentAdvice').value;
+if (!incomeType || !currentAdvice || annualIncome <= 0) {
+    calculateBtn.textContent = "Please complete all fields";
+
+    setTimeout(() => {
+        calculateBtn.textContent = "Calculate Potential Savings";
+    }, 2000);
+
+    return;
+}
+
+            let minSaving = 0;
+            let maxSaving = 0;
+
+            if (incomeType === 'soletrader' || incomeType === 'landlord') {
+                minSaving = Math.round(annualIncome * 0.06);
+                maxSaving = Math.round(annualIncome * 0.15);
+            } else if (incomeType === 'limitedcompany') {
+                minSaving = Math.round(annualIncome * 0.09);
+                maxSaving = Math.round(annualIncome * 0.20);
+            }
+
+            if (minSaving < 250) minSaving = 250;
+            if (maxSaving < 600) maxSaving = 600;
+
+            savingValue.textContent = `£${minSaving.toLocaleString()} – £${maxSaving.toLocaleString()}`;
+            resultBox.style.display = 'block';
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+const fadeElements = document.querySelectorAll(
+    '.service-card, .testimonial-card, .faq-item'
+);
+
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+        }
+    });
+}, {
+    threshold: 0.15,
+    rootMargin: "0px 0px -50px 0px"
+});
+
+
+fadeElements.forEach(el => {
+el.classList.add('fade-in');
+observer.observe(el);
+});
+
+    </script>
+
+</body>
+</html>
