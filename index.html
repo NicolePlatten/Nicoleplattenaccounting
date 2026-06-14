@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#46382d" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Nicole Platten Accounting" />
+
+  <title>Chartered Accountant Birmingham | Nicole Platten Accounting</title>
+  <meta name="description" content="Chartered accountant in Birmingham offering friendly accounting, tax returns, VAT, payroll and business support for sole traders, landlords and limited companies across the UK." />
+  <meta name="keywords" content="chartered accountant Birmingham, accountant Birmingham, tax returns UK, sole trader accountant, limited company accountant, landlord accountant, VAT returns, payroll accountant" />
+  <link rel="canonical" href="https://nicoleplattenaccounting.co.uk/" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <meta property="og:title" content="Nicole Platten Accounting | Chartered Accountant Birmingham" />
+  <meta property="og:description" content="Professional accounting and tax support for sole traders, landlords and limited companies across the UK." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://nicoleplattenaccounting.co.uk/Nicolephoto.PNG" />
+  <meta property="og:url" content="https://nicoleplattenaccounting.co.uk/" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AccountingService",
+    "name": "Nicole Platten Accounting",
+    "url": "https://nicoleplattenaccounting.co.uk/",
+    "image": "https://nicoleplattenaccounting.co.uk/Nicolephoto.PNG",
+    "description": "Chartered accountant in Birmingham offering accounting and tax support for sole traders, landlords and limited companies across the UK.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Birmingham",
+      "addressRegion": "West Midlands",
+      "addressCountry": "GB"
+    },
+    "areaServed": ["Birmingham", "West Midlands", "United Kingdom"],
+    "email": "nicoleplatten@outlook.com",
+    "telephone": "+447492990955",
+    "sameAs": ["https://www.linkedin.com/in/nicoleplatten"],
+    "priceRange": "££",
+    "founder": {
+      "@type": "Person",
+      "name": "Nicole Platten",
+      "jobTitle": "Chartered Accountant"
+    },
+    "serviceType": ["Annual accounts", "Tax returns", "VAT returns", "Bookkeeping", "Payroll", "Management accounts", "Tax planning"]
+  }
+  </script>
+
+  <style>
+    :root{
+      --ink:#2f2923;
+      --espresso:#46382d;
+      --coffee:#6f5a48;
+      --taupe:#a98d77;
+      --sand:#f3eee8;
+      --champagne:#fbf8f4;
+      --ivory:#fffdf9;
+      --line:#e8ddd3;
+      --muted:#736960;
+      --green:#25d366;
+      --shadow:0 24px 70px rgba(48, 39, 31, .12);
+      --shadow-soft:0 14px 40px rgba(48, 39, 31, .08);
+      --radius:28px;
+      --container:1180px;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;overflow-x:hidden}
+    body{
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--ink);
+      background:var(--ivory);
+      line-height:1.7;
+      overflow-x:hidden;
+    }
+    body.menu-open{overflow:hidden}
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none}
+    button,input,select,textarea{font:inherit}
+    :focus-visible{outline:3px solid rgba(169,141,119,.45);outline-offset:4px}
+    .container{width:min(92%,var(--container));margin-inline:auto}
+    .eyebrow{display:inline-flex;align-items:center;gap:.55rem;border:1px solid rgba(169,141,119,.28);background:rgba(255,255,255,.62);border-radius:999px;padding:.55rem .9rem;color:var(--coffee);font-size:.74rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+    .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--taupe)}
+    h1,h2,h3{color:var(--espresso);line-height:1.04;letter-spacing:-.045em}
+    h1{font-family:"Playfair Display",serif;font-size:clamp(3.15rem,8vw,6.9rem);max-width:930px}
+    h2{font-family:"Playfair Display",serif;font-size:clamp(2.45rem,5vw,4.7rem)}
+    h3{font-size:1.25rem;letter-spacing:-.03em}
+    p{color:var(--muted);font-size:1.02rem}
+    .section{padding:clamp(4.5rem,8vw,7.5rem) 0;position:relative}
+    .section-head{max-width:760px;margin:0 auto 3.3rem;text-align:center}
+    .section-head .eyebrow{margin-bottom:1rem}
+    .section-head p{font-size:1.1rem;margin-top:1rem}
+
+    .nav{
+      position:fixed;inset:0 0 auto;z-index:1000;
+      background:rgba(255,253,249,.82);
+      border-bottom:1px solid rgba(232,221,211,.72);
+      backdrop-filter:blur(22px);
+      transition:box-shadow .25s ease, background .25s ease;
+    }
+    .nav.scrolled{box-shadow:0 10px 35px rgba(48,39,31,.08);background:rgba(255,253,249,.94)}
+    .nav-inner{height:82px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .brand{display:flex;align-items:center;gap:.8rem;min-width:0}
+    .brand-mark{width:44px;height:44px;border-radius:15px;background:linear-gradient(135deg,var(--espresso),var(--taupe));display:grid;place-items:center;color:white;box-shadow:0 12px 25px rgba(70,56,45,.18);flex:0 0 auto}
+    .brand-text{display:flex;flex-direction:column;line-height:1.1}
+    .brand-text strong{font-size:1rem;color:var(--espresso);letter-spacing:-.02em}
+    .brand-text span{font-size:.78rem;color:var(--muted)}
+    .nav-links{display:flex;align-items:center;gap:1.35rem;list-style:none}
+    .nav-links a{font-size:.88rem;font-weight:700;color:var(--coffee);transition:color .2s ease}
+    .nav-links a:hover,.nav-links a.active{color:var(--espresso)}
+    .nav-actions{display:flex;align-items:center;gap:.75rem}
+    .social-icon,.menu-btn{width:44px;height:44px;border:1px solid var(--line);border-radius:14px;background:white;color:var(--espresso);display:grid;place-items:center;transition:transform .2s ease,box-shadow .2s ease}
+    .social-icon:hover{transform:translateY(-2px);box-shadow:var(--shadow-soft)}
+    .menu-btn{display:none;cursor:pointer;-webkit-tap-highlight-color:transparent;appearance:none}
+    .menu-btn,.menu-btn:focus,.menu-btn:active{box-shadow:none;background:white;border-color:var(--line)}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.65rem;border-radius:999px;padding:1rem 1.45rem;font-weight:800;font-size:.94rem;transition:transform .22s ease,box-shadow .22s ease,background .22s ease;border:1px solid transparent;min-height:54px;cursor:pointer}
+    .btn:hover{transform:translateY(-3px);box-shadow:0 16px 35px rgba(48,39,31,.13)}
+    .btn-primary{background:var(--espresso);color:white}
+    .btn-primary:hover{background:#332920}
+    .btn-secondary{background:white;color:var(--espresso);border-color:rgba(70,56,45,.18)}
+    .btn-whatsapp{background:var(--green);color:white}
+    .btn-dark{background:#24211e;color:white}
+
+    .hero{min-height:100vh;padding:132px 0 70px;background:radial-gradient(circle at 15% 10%, rgba(169,141,119,.18), transparent 34%),radial-gradient(circle at 90% 20%, rgba(70,56,45,.12), transparent 28%),linear-gradient(135deg,#fbf8f4 0%,#fffdf9 55%,#f2ebe4 100%);display:flex;align-items:center;position:relative;overflow:hidden}
+    .hero::after{content:"";position:absolute;right:-170px;bottom:-220px;width:520px;height:520px;border-radius:50%;background:rgba(169,141,119,.13);filter:blur(4px)}
+    .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(2rem,5vw,5rem);align-items:center;position:relative;z-index:1}
+    .hero-copy{max-width:760px}
+    .hero-copy .eyebrow{margin-bottom:1.25rem}
+    .hero-copy h1 span{color:var(--taupe);font-style:italic}
+    .hero-lead{font-size:clamp(1.08rem,2vw,1.35rem);max-width:690px;margin:1.4rem 0 1.55rem;color:#5b5149}
+    .trust-row{display:flex;flex-wrap:wrap;gap:.65rem;margin:1.5rem 0 2rem}
+    .trust-pill{display:inline-flex;align-items:center;gap:.45rem;background:rgba(255,255,255,.78);border:1px solid rgba(232,221,211,.8);border-radius:999px;padding:.62rem .85rem;font-size:.85rem;font-weight:750;color:var(--coffee);box-shadow:0 8px 25px rgba(48,39,31,.04)}
+    .hero-buttons{display:flex;gap:.85rem;flex-wrap:wrap}
+    .hero-card{position:relative;min-height:620px}
+    .portrait-wrap{position:absolute;right:0;top:40px;width:min(410px,82%);border-radius:44px;background:white;padding:14px;box-shadow:var(--shadow);transform:rotate(1.5deg)}
+    .portrait-wrap img{height:500px;width:100%;object-fit:cover;border-radius:34px;object-position:center top}
+    .metric-card{position:absolute;left:0;bottom:75px;width:min(310px,72%);padding:1.4rem;border-radius:26px;background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.8);box-shadow:var(--shadow);backdrop-filter:blur(20px)}
+    .metric-card strong{display:block;color:var(--espresso);font-size:2.4rem;line-height:1;font-family:"Playfair Display",serif}
+    .metric-card span{display:block;margin-top:.45rem;color:var(--muted);font-weight:650;font-size:.95rem}
+    .mini-panel{position:absolute;right:20px;bottom:0;width:min(330px,76%);padding:1.2rem;border-radius:24px;background:var(--espresso);color:white;box-shadow:var(--shadow)}
+    .mini-panel p{color:rgba(255,255,255,.8);margin-top:.4rem;font-size:.93rem}.mini-panel strong{color:white}
+
+    .logo-strip{background:var(--espresso);color:white;padding:1rem 0}.strip-inner{display:flex;justify-content:center;gap:clamp(1rem,4vw,3rem);flex-wrap:wrap;font-size:.86rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+    .strip-inner i{color:var(--taupe);margin-right:.45rem}
+
+    .about-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:4rem;align-items:center}.image-frame{border-radius:var(--radius);background:linear-gradient(135deg,var(--sand),white);padding:12px;box-shadow:var(--shadow-soft);position:relative}.image-frame::before{content:"";position:absolute;inset:-18px auto auto -18px;width:140px;height:140px;border:1px solid var(--line);border-radius:30px;z-index:-1}.image-frame img{height:520px;width:100%;object-fit:cover;border-radius:20px;object-position:center top}.content-stack>*+*{margin-top:1rem}.credentials{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.5rem}.credential{border:1px solid var(--line);background:var(--champagne);border-radius:999px;padding:.55rem .85rem;color:var(--coffee);font-weight:800;font-size:.82rem}
+
+    .soft{background:linear-gradient(180deg,#fffdf9 0%,#f6f0ea 100%)}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}.card{position:relative;background:rgba(255,255,255,.82);border:1px solid rgba(232,221,211,.85);border-radius:var(--radius);padding:2rem;box-shadow:0 14px 42px rgba(48,39,31,.06);overflow:hidden;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}.card::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.0),rgba(169,141,119,.08));opacity:0;transition:opacity .25s ease;pointer-events:none}.card:hover{transform:translateY(-8px);box-shadow:var(--shadow);border-color:rgba(169,141,119,.34)}.card:hover::after{opacity:1}.icon{width:66px;height:66px;border-radius:22px;background:linear-gradient(135deg,var(--espresso),var(--taupe));color:white;display:grid;place-items:center;font-size:1.35rem;margin-bottom:1.25rem;box-shadow:0 14px 28px rgba(70,56,45,.18)}.card p{margin-top:.7rem}.service-list{list-style:none;margin-top:1rem}.service-list li{display:flex;align-items:flex-start;gap:.7rem;color:var(--muted);padding:.42rem 0}.service-list li::before{content:"✓";flex:0 0 auto;color:var(--taupe);font-weight:900}
+
+    .wide-card{background:var(--espresso);color:white;border-radius:calc(var(--radius) + 6px);padding:clamp(2rem,5vw,4rem);display:grid;grid-template-columns:1.1fr .9fr;gap:2rem;align-items:center;box-shadow:var(--shadow);overflow:hidden;position:relative}.wide-card::after{content:"";position:absolute;right:-120px;top:-160px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.08)}.wide-card h2,.wide-card h3{color:white}.wide-card p{color:rgba(255,255,255,.78)}.process{display:grid;gap:.8rem}.process-step{display:flex;gap:.85rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:1rem}.process-step span{width:32px;height:32px;border-radius:50%;background:var(--taupe);display:grid;place-items:center;color:white;font-weight:900;flex:0 0 auto}
+
+    .testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}.quote{background:white;border:1px solid var(--line);border-radius:var(--radius);padding:1.8rem;box-shadow:var(--shadow-soft)}.stars{color:#d9a441;margin-bottom:1rem}.quote blockquote{color:#4d443d;font-size:1.02rem}.quote-author{margin-top:1.2rem;font-weight:900;color:var(--espresso)}
+
+    .calculator{max-width:860px;margin:0 auto;background:white;border:1px solid var(--line);border-radius:var(--radius);padding:clamp(1.25rem,4vw,2.2rem);box-shadow:var(--shadow-soft)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.form-group{margin-bottom:1rem}.form-group label{display:block;color:var(--espresso);font-size:.86rem;font-weight:850;margin-bottom:.45rem}.form-group input,.form-group select,.form-group textarea{width:100%;border:1px solid var(--line);background:#fffdf9;color:var(--ink);border-radius:16px;padding:1rem;transition:border-color .2s ease,box-shadow .2s ease}.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--taupe);box-shadow:0 0 0 4px rgba(169,141,119,.12)}textarea{min-height:140px;resize:vertical}.result-box{display:none;margin-top:1.3rem;padding:1.4rem;border-radius:22px;background:linear-gradient(135deg,var(--espresso),var(--coffee));text-align:center}.result-box h3{color:white}.result-box p{color:rgba(255,255,255,.78);margin-bottom:0}.result-value{font-size:clamp(2rem,4vw,3.2rem);font-weight:900;color:#f3d6b9;margin:.65rem 0}
+
+    .faq{max-width:860px;margin:auto}.faq-item{background:white;border:1px solid var(--line);border-radius:20px;margin-bottom:.85rem;overflow:hidden;box-shadow:0 8px 24px rgba(48,39,31,.04)}.faq-question{width:100%;display:flex;justify-content:space-between;gap:1rem;align-items:center;border:0;background:transparent;padding:1.25rem;text-align:left;color:var(--espresso);font-weight:850;cursor:pointer}.faq-answer{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}.faq-answer>div{overflow:hidden}.faq-answer p{padding:0 1.25rem 1.25rem}.faq-item.active .faq-answer{grid-template-rows:1fr}.faq-question i{transition:transform .25s ease;color:var(--taupe)}.faq-item.active .faq-question i{transform:rotate(180deg)}
+
+    .contact-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:2rem;align-items:start}.contact-panel{background:var(--espresso);color:white;border-radius:var(--radius);padding:2rem;box-shadow:var(--shadow);position:sticky;top:106px}.contact-panel h3{color:white}.contact-panel p,.contact-panel li{color:rgba(255,255,255,.78)}.contact-list{list-style:none;margin:1.4rem 0}.contact-list li{display:flex;gap:.8rem;margin-bottom:.9rem}.contact-list i{color:#f3d6b9;width:22px;margin-top:.25rem}.form-card{background:white;border:1px solid var(--line);border-radius:var(--radius);padding:2rem;box-shadow:var(--shadow-soft)}
+
+    .final-cta{padding:5.5rem 0;background:linear-gradient(135deg,var(--espresso),#74604f);text-align:center;position:relative;overflow:hidden}.final-cta::before{content:"";position:absolute;inset:auto auto -140px -80px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.08)}.final-cta .container{position:relative}.final-cta h2{color:white}.final-cta p{color:rgba(255,255,255,.82);max-width:720px;margin:1rem auto 2rem}
+    footer{background:#261f19;color:white;padding:4.5rem 0 2rem}.footer-grid{display:grid;grid-template-columns:1.3fr repeat(3,1fr);gap:2rem;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:2rem}.footer-logo{font-weight:900;font-size:1.1rem;margin-bottom:.8rem}.footer-logo span{color:#f3d6b9}.footer-col h4{color:#f3d6b9;margin-bottom:.8rem;letter-spacing:0}.footer-col p,.footer-col li,.footer-col a{color:rgba(255,255,255,.66);font-size:.94rem}.footer-col ul{list-style:none}.footer-col li{margin-bottom:.5rem}.footer-col a:hover{color:white}.copyright{text-align:center;color:rgba(255,255,255,.52);padding-top:1.5rem;font-size:.82rem}
+
+    .sticky-mobile{display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:999;background:var(--green);color:white;border-radius:999px;padding:.95rem 1rem;text-align:center;font-weight:900;box-shadow:0 18px 40px rgba(37,211,102,.28)}
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}.reveal.visible{opacity:1;transform:translateY(0)}
+
+    @media (max-width:1050px){
+      .nav-links{position:fixed;top:82px;left:0;right:0;height:calc(100vh - 82px);background:rgba(255,253,249,.98);backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:stretch;gap:0;padding:1rem 1.2rem 7rem;transform:translateX(100%);transition:transform .25s ease;border-top:1px solid var(--line);overflow:auto}.nav-links.open{transform:translateX(0)}.nav-links a{display:block;padding:1rem;border-bottom:1px solid var(--line);font-size:1.05rem}.menu-btn{display:grid}.nav-actions .btn{display:none}.hero-grid,.about-grid,.wide-card,.contact-grid{grid-template-columns:1fr}.hero-card{min-height:560px;max-width:620px;margin:auto;width:100%}.cards,.testimonials{grid-template-columns:1fr 1fr}.contact-panel{position:relative;top:0}.footer-grid{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:720px){
+      .nav-inner{height:74px}.brand-text strong{font-size:.9rem}.brand-text span{display:none}.brand-mark{width:40px;height:40px}.nav-links{top:74px;height:calc(100vh - 74px)}.hero{padding:112px 0 48px;min-height:auto}.hero-copy{text-align:left}.hero-buttons .btn{width:100%}.trust-row{gap:.5rem}.trust-pill{font-size:.78rem}.hero-card{min-height:auto;display:grid;gap:1rem;margin-top:2rem}.portrait-wrap,.metric-card,.mini-panel{position:relative;inset:auto;width:100%;transform:none}.portrait-wrap img{height:420px}.metric-card,.mini-panel{bottom:auto;right:auto;left:auto}.strip-inner{justify-content:flex-start}.cards,.testimonials,.form-grid,.footer-grid{grid-template-columns:1fr}.section{padding:4rem 0}.section-head{text-align:left;margin-bottom:2rem}.section-head h2{font-size:2.5rem}.image-frame img{height:430px}.contact-panel,.form-card,.card,.quote{padding:1.35rem}.sticky-mobile{display:block}footer{padding-bottom:5.8rem}
+    }
+    @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+  <nav class="nav" id="navbar" aria-label="Primary navigation">
+    <div class="container nav-inner">
+      <a class="brand" href="#home" aria-label="Nicole Platten Accounting home">
+        <span class="brand-mark"><i class="fa-solid fa-calculator"></i></span>
+        <span class="brand-text"><strong>Nicole Platten Accounting</strong><span>Chartered Accountant • Birmingham</span></span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home" class="active">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#testimonials">Testimonials</a></li>
+        <li><a href="#calculator">Tax Savings</a></li>
+        <li><a href="#faq">FAQs</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a class="social-icon" href="https://www.linkedin.com/in/nicoleplatten" target="_blank" rel="noopener noreferrer" aria-label="Nicole Platten on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a class="btn btn-primary" href="#contact">Free Consultation</a>
+        <button class="menu-btn" id="menuToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <span class="eyebrow">Chartered Accountant • UK-wide support</span>
+          <h1>Accounting that feels clear, calm & <span>completely handled.</span></h1>
+          <p class="hero-lead">Friendly, professional accounting and tax support for sole traders, landlords and limited companies across Birmingham and the UK.</p>
+          <div class="trust-row" aria-label="Key trust points">
+            <span class="trust-pill"><i class="fa-solid fa-check"></i> 11+ years experience</span>
+            <span class="trust-pill"><i class="fa-solid fa-check"></i> Free consultation</span>
+            <span class="trust-pill"><i class="fa-solid fa-check"></i> Clear fixed fees</span>
+          </div>
+          <div class="hero-buttons">
+            <a href="#contact" class="btn btn-primary"><i class="fa-regular fa-calendar-check"></i> Arrange a Free Consultation</a>
+            <a href="https://wa.me/447492990955?text=Hi%20Nicole,%20I%20would%20like%20to%20book%20a%20free%20consultation" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp Nicole</a>
+          </div>
+        </div>
+
+        <div class="hero-card reveal" aria-label="Nicole Platten profile highlight">
+          <div class="portrait-wrap"><img src="Nicolephoto.PNG" alt="Nicole Platten - Chartered Accountant" /></div>
+          <div class="metric-card"><strong>11+</strong><span>Years supporting businesses, landlords and individuals with accounts and tax.</span></div>
+          <div class="mini-panel"><strong>Free, no-obligation consultation</strong><p>Discuss your current setup, deadlines and the best way forward.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="logo-strip">
+      <div class="container strip-inner">
+        <span><i class="fa-solid fa-file-invoice-pound"></i> Tax Returns</span>
+        <span><i class="fa-solid fa-building"></i> Limited Companies</span>
+        <span><i class="fa-solid fa-house-chimney"></i> Landlords</span>
+        <span><i class="fa-solid fa-user-tie"></i> Sole Traders</span>
+      </div>
+    </div>
+
+    <section class="section" id="about">
+      <div class="container about-grid">
+        <div class="image-frame reveal"><img src="Nicolephoto.PNG" alt="Nicole Platten smiling professionally" /></div>
+        <div class="content-stack reveal">
+          <span class="eyebrow">About Nicole</span>
+          <h2>Your dedicated Chartered Accountant</h2>
+          <p>As a <strong>Chartered Accountant with over 11 years’ experience in practice</strong>, I provide reliable, clear and professional accounting and tax support to sole traders, landlords and limited companies across the UK.</p>
+          <p>I combine technical expertise with a friendly, approachable style. My goal is to make your finances straightforward, compliant and aligned with what you want to achieve — whether you are starting out, growing, or looking to change accountants.</p>
+          <p><strong>I am available for free consultations</strong> to discuss your requirements, answer questions and explain how I can support you.</p>
+          <div class="credentials">
+            <span class="credential">Chartered Accountant</span>
+            <span class="credential">11+ Years Experience</span>
+            <span class="credential">Sole Traders</span>
+            <span class="credential">Landlords</span>
+            <span class="credential">Limited Companies</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft" id="why-choose-me">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Why clients choose Nicole</span>
+          <h2>Clear advice, personal service and no unnecessary jargon.</h2>
+          <p>Professional support tailored around your business, your deadlines and your goals.</p>
+        </div>
+        <div class="cards">
+          <article class="card reveal"><div class="icon"><i class="fas fa-user-check"></i></div><h3>Personal Service</h3><p>You deal directly with Nicole, giving you consistent, responsive support from someone who understands your business.</p></article>
+          <article class="card reveal"><div class="icon"><i class="fas fa-file-invoice-pound"></i></div><h3>Clear Pricing</h3><p>Transparent fees agreed upfront, with no hidden costs or confusing surprise invoices.</p></article>
+          <article class="card reveal"><div class="icon"><i class="fas fa-chart-line"></i></div><h3>Proactive Advice</h3><p>More than compliance. Nicole helps identify opportunities to save tax and improve business performance.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="services">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Services</span>
+          <h2>Professional accounting & tax support</h2>
+          <p>Everything you need to stay compliant, organised and confident about your numbers.</p>
+        </div>
+        <div class="cards">
+          <article class="card reveal"><div class="icon"><i class="fas fa-file-invoice"></i></div><h3>Accounting & Tax</h3><ul class="service-list"><li>Annual accounts preparation</li><li>Personal and business tax returns</li><li>Corporation tax returns</li><li>VAT returns and submissions</li><li>Management accounts</li><li>Payroll services</li></ul></article>
+          <article class="card reveal"><div class="icon"><i class="fas fa-briefcase"></i></div><h3>Business Support</h3><p>Friendly, professional support with clear, jargon-free advice for new and growing businesses.</p><ul class="service-list"><li>Sole trader support</li><li>Limited company support</li><li>Landlord and property accounts</li><li>Bookkeeping and record keeping</li></ul></article>
+          <article class="card reveal"><div class="icon"><i class="fas fa-comments"></i></div><h3>Free Consultations</h3><p>No obligation, no pressure — just honest, helpful advice to understand your situation and recommend the best next step.</p><div style="margin-top:1.4rem"><a href="#contact" class="btn btn-primary">Book Consultation</a></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="wide-card reveal">
+          <div>
+            <span class="eyebrow" style="background:rgba(255,255,255,.12);color:#f3d6b9;border-color:rgba(255,255,255,.16)">How it works</span>
+            <h2 style="margin-top:1rem">A simpler way to manage your accounts.</h2>
+            <p>Whether you need a one-off tax return or ongoing accounting support, the process is designed to be straightforward from the first conversation.</p>
+          </div>
+          <div class="process">
+            <div class="process-step"><span>1</span><div><h3>Free consultation</h3><p>Talk through your situation, deadlines and current setup.</p></div></div>
+            <div class="process-step"><span>2</span><div><h3>Clear proposal</h3><p>Receive transparent pricing and a clear scope of work.</p></div></div>
+            <div class="process-step"><span>3</span><div><h3>Handled with care</h3><p>Your accounts, tax and compliance are managed professionally.</p></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft" id="testimonials">
+      <div class="container">
+        <div class="section-head reveal"><span class="eyebrow">Client feedback</span><h2>What clients say</h2></div>
+        <div class="testimonials">
+          <article class="quote reveal"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><blockquote>“Nicole prepared our financial statements and corporation tax return for our property company, handling everything from start to finish. Extremely professional, approachable and efficient throughout.”</blockquote><div class="quote-author">Property Investment Client</div></article>
+          <article class="quote reveal"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><blockquote>“The whole process was straightforward and stress-free. Nicole explained everything clearly and helped me feel confident that everything was being handled properly.”</blockquote><div class="quote-author">Sole Trader Client</div></article>
+          <article class="quote reveal"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><blockquote>“Professional, reliable and always quick to respond. Switching accountants was much easier than expected and the support has been excellent.”</blockquote><div class="quote-author">Limited Company Director</div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="calculator">
+      <div class="container">
+        <div class="section-head reveal"><span class="eyebrow">Tax savings</span><h2>Estimate potential savings</h2><p>This tool gives a simple estimate only. Your real savings depend on your individual circumstances.</p></div>
+        <div class="calculator reveal">
+          <form class="form-grid" onsubmit="return false;">
+            <div><div class="form-group"><label for="incomeType">Business / Income Type</label><select id="incomeType" required><option value="">Select type</option><option value="soletrader">Sole Trader</option><option value="landlord">Landlord</option><option value="limitedcompany">Limited Company</option></select></div><div class="form-group"><label for="annualIncome">Annual Income / Turnover (£)</label><input type="number" id="annualIncome" min="0" step="1000" placeholder="e.g. 50000" /></div></div>
+            <div><div class="form-group"><label for="industry">Sector / Industry</label><select id="industry" required><option value="">Select sector</option><option value="general">General Services</option><option value="retail">Retail / Wholesale</option><option value="construction">Construction / Trades</option><option value="professional">Professional Services</option><option value="property">Property / Lettings</option></select></div><div class="form-group"><label for="currentAdvice">Current Arrangement</label><select id="currentAdvice" required><option value="">Select option</option><option value="none">Self-managed / No accountant</option><option value="change">Looking to change accountant</option><option value="existing">Already have professional advice</option></select></div></div>
+          </form>
+          <div style="text-align:center;margin-top:.5rem"><button id="calculateBtn" class="btn btn-primary" type="button">Calculate Potential Savings</button></div>
+          <div id="resultBox" class="result-box" aria-live="polite"><h3>Estimated Annual Tax Savings</h3><div class="result-value" id="savingValue">£0 – £0</div><p>These figures are an estimate. Every situation is unique — contact Nicole for a free consultation to discuss your specific circumstances.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft" id="faq">
+      <div class="container">
+        <div class="section-head reveal"><span class="eyebrow">FAQs</span><h2>Common questions</h2></div>
+        <div class="faq reveal">
+          <div class="faq-item"><button class="faq-question" aria-expanded="false">Do I really need an accountant?<i class="fas fa-chevron-down"></i></button><div class="faq-answer"><div><p>While you can manage your own accounts and tax returns, a qualified accountant can save time, reduce stress, improve accuracy and help ensure you do not pay more tax than legally required.</p></div></div></div>
+          <div class="faq-item"><button class="faq-question" aria-expanded="false">How do you structure your fees?<i class="fas fa-chevron-down"></i></button><div class="faq-answer"><div><p>Fees are clear, transparent and agreed upfront before work begins. Pricing depends on the complexity of your affairs and the level of support you need.</p></div></div></div>
+          <div class="faq-item"><button class="faq-question" aria-expanded="false">Can you help reduce my tax bill legally?<i class="fas fa-chevron-down"></i></button><div class="faq-answer"><div><p>Yes. Nicole can advise on available reliefs, allowances and exemptions within UK tax law to help structure your affairs efficiently and ethically.</p></div></div></div>
+          <div class="faq-item"><button class="faq-question" aria-expanded="false">What records do I need to keep?<i class="fas fa-chevron-down"></i></button><div class="faq-answer"><div><p>You should keep records of income, expenses, receipts, invoices and bank statements. Nicole can provide a tailored checklist and recommend simple systems to make this easier.</p></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="container contact-grid">
+        <div class="contact-panel reveal">
+          <span class="eyebrow" style="background:rgba(255,255,255,.12);color:#f3d6b9;border-color:rgba(255,255,255,.16)">Contact</span>
+          <h2 style="font-size:clamp(2.2rem,4vw,3.8rem);margin-top:1rem">Arrange your free consultation</h2>
+          <p>Whether you are starting out, growing your business or looking to change accountants, Nicole would be happy to have a no-obligation conversation.</p>
+          <ul class="contact-list">
+            <li><i class="fas fa-map-marker-alt"></i><span>Birmingham, West Midlands, United Kingdom</span></li>
+            <li><i class="fas fa-envelope"></i><a href="mailto:nicoleplatten@outlook.com">nicoleplatten@outlook.com</a></li>
+            <li><i class="fas fa-phone-alt"></i><a href="tel:+447492990955">07492 990955</a></li>
+          </ul>
+          <div class="hero-buttons"><a href="tel:+447492990955" class="btn btn-dark"><i class="fas fa-phone-alt"></i> Call Now</a><a href="https://wa.me/447492990955?text=Hi%20Nicole,%20I%20would%20like%20to%20book%20a%20free%20consultation" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp Me</a></div>
+        </div>
+        <div class="form-card reveal">
+          <form action="https://formspree.io/f/xbdegwjj" method="POST">
+            <input type="hidden" name="_next" value="https://nicoleplattenaccounting.co.uk/thank-you.html" />
+            <input type="hidden" name="_to" value="nicoleplatten@outlook.com" />
+            <input type="hidden" name="_subject" value="New enquiry from website!" />
+            <div class="form-group"><label for="name">Full Name</label><input type="text" id="name" name="name" autocomplete="name" required /></div>
+            <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" name="email" autocomplete="email" required /></div>
+            <div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" name="phone" autocomplete="tel" /></div>
+            <div class="form-group"><label for="service">What do you need help with?</label><select id="service" name="service"><option value="">Please select</option><option>Tax return</option><option>Limited company accounts</option><option>Sole trader accounts</option><option>Landlord / property accounts</option><option>VAT / bookkeeping / payroll</option><option>Changing accountant</option></select></div>
+            <div class="form-group"><label for="message">Your Message</label><textarea id="message" name="message" required></textarea></div>
+            <button type="submit" class="btn btn-primary" style="width:100%"><i class="fa-regular fa-paper-plane"></i> Send Enquiry</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="container reveal">
+        <h2>Ready to simplify your accounting?</h2>
+        <p>Arrange a free consultation and discover how professional accounting support can help you stay compliant, save time and move forward with confidence.</p>
+        <div class="hero-buttons" style="justify-content:center"><a href="tel:+447492990955" class="btn btn-dark"><i class="fas fa-phone-alt"></i> Call Now</a><a href="https://wa.me/447492990955?text=Hi%20Nicole,%20I%20would%20like%20to%20book%20a%20free%20consultation" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp Me</a></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col"><div class="footer-logo"><i class="fas fa-calculator" style="margin-right:10px;color:#f3d6b9"></i>Nicole <span>Platten Accounting</span></div><p>Professional accounting and tax support for businesses, landlords and sole traders across the UK.</p></div>
+        <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="#home">Home</a></li><li><a href="#about">About</a></li><li><a href="#services">Services</a></li><li><a href="#calculator">Tax Savings</a></li><li><a href="#faq">FAQs</a></li><li><a href="#contact">Contact</a></li></ul></div>
+        <div class="footer-col"><h4>Contact</h4><ul><li><a href="mailto:nicoleplatten@outlook.com">nicoleplatten@outlook.com</a></li><li><a href="tel:+447492990955">07492 990955</a></li><li>Birmingham, United Kingdom</li></ul></div>
+        <div class="footer-col"><h4>Social</h4><ul><li><a href="https://www.linkedin.com/in/nicoleplatten" target="_blank" rel="noopener noreferrer">LinkedIn</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Cookie Policy</a></li></ul></div>
+      </div>
+      <div class="copyright">© 2026 Nicole Platten Accounting. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <a class="sticky-mobile" href="https://wa.me/447492990955?text=Hi%20Nicole,%20I%20would%20like%20to%20book%20a%20free%20consultation" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> WhatsApp Nicole</a>
+
+  <script>
+    const navbar = document.getElementById('navbar');
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.getElementById('navLinks');
+    const menuIcon = menuToggle.querySelector('i');
+
+    function closeMenu(){
+      navLinks.classList.remove('open');
+      document.body.classList.remove('menu-open');
+      menuToggle.setAttribute('aria-expanded','false');
+      menuToggle.setAttribute('aria-label','Open menu');
+      menuIcon.classList.remove('fa-xmark');
+      menuIcon.classList.add('fa-bars');
+    }
+
+    menuToggle.addEventListener('click', () => {
+      const isOpen = navLinks.classList.toggle('open');
+      document.body.classList.toggle('menu-open', isOpen);
+      menuToggle.setAttribute('aria-expanded', String(isOpen));
+      menuToggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+      menuIcon.classList.toggle('fa-bars', !isOpen);
+      menuIcon.classList.toggle('fa-xmark', isOpen);
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', e => {
+        const targetId = anchor.getAttribute('href');
+        if(targetId === '#') return;
+        const target = document.querySelector(targetId);
+        if(!target) return;
+        e.preventDefault();
+        closeMenu();
+        const offset = window.innerWidth < 720 ? 74 : 82;
+        window.scrollTo({ top: target.offsetTop - offset, behavior: 'smooth' });
+      });
+    });
+
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+      let current = 'home';
+      document.querySelectorAll('main section[id]').forEach(section => {
+        const rect = section.getBoundingClientRect();
+        if(rect.top <= 140 && rect.bottom >= 140) current = section.id;
+      });
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${current}`);
+      });
+    }, { passive:true });
+
+    document.querySelectorAll('.faq-question').forEach(button => {
+      button.addEventListener('click', () => {
+        const item = button.closest('.faq-item');
+        const isActive = item.classList.toggle('active');
+        button.setAttribute('aria-expanded', String(isActive));
+      });
+    });
+
+    const calculateBtn = document.getElementById('calculateBtn');
+    const resultBox = document.getElementById('resultBox');
+    const savingValue = document.getElementById('savingValue');
+
+    calculateBtn.addEventListener('click', () => {
+      const incomeType = document.getElementById('incomeType').value;
+      const annualIncome = parseFloat(document.getElementById('annualIncome').value) || 0;
+      const currentAdvice = document.getElementById('currentAdvice').value;
+      if(!incomeType || !currentAdvice || annualIncome <= 0){
+        const original = calculateBtn.textContent;
+        calculateBtn.textContent = 'Please complete all fields';
+        setTimeout(() => calculateBtn.textContent = original, 1800);
+        return;
+      }
+      let minSaving = 0, maxSaving = 0;
+      if(incomeType === 'soletrader' || incomeType === 'landlord'){
+        minSaving = Math.round(annualIncome * 0.06);
+        maxSaving = Math.round(annualIncome * 0.15);
+      } else {
+        minSaving = Math.round(annualIncome * 0.09);
+        maxSaving = Math.round(annualIncome * 0.20);
+      }
+      minSaving = Math.max(minSaving, 250);
+      maxSaving = Math.max(maxSaving, 600);
+      savingValue.textContent = `£${minSaving.toLocaleString()} – £${maxSaving.toLocaleString()}`;
+      resultBox.style.display = 'block';
+      resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold:.12, rootMargin:'0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach((el, index) => {
+      el.style.transitionDelay = `${Math.min(index % 3, 2) * 70}ms`;
+      revealObserver.observe(el);
+    });
+  </script>
+</body>
+</html>
