@@ -1539,3 +1539,85 @@ html:not(.js) [data-reveal] { opacity: 1; transform: none; }
   .confirm-foot .btn { width: 100%; }
   .confirm-foot .quick-routes { gap: 1rem; }
 }
+
+/* 22. Phone-only layout ====================================================
+   Everything below applies at 640px and under only, so the desktop and
+   tablet layouts above are untouched.
+
+   Two changes: Nicole is introduced near the top of the page instead of two
+   thirds down it, and her portrait becomes a compact byline rather than a
+   full-width image. Reordering is done with flex `order` so the HTML — and
+   therefore the desktop layout and the reading order for search engines —
+   stays exactly as it was.
+   ======================================================================== */
+
+@media (max-width: 640px) {
+
+  main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  main > section { min-width: 0; }
+
+  .hero        { order: 1; }
+  .credentials { order: 2; }
+  #about       { order: 3; }
+  .statement   { order: 4; }
+  #services    { order: 5; }
+  #who         { order: 6; }
+  #process     { order: 7; }
+  #feedback    { order: 8; }
+  #faq         { order: 9; }
+  #contact     { order: 10; }
+
+  /* Portrait becomes a small byline beside the name */
+  .about-grid { gap: 1.75rem; }
+
+  .about-portrait {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .about-portrait picture,
+  .about-portrait img {
+    flex: 0 0 auto;
+    width: 92px;
+    height: 115px;
+  }
+
+  .about-portrait img {
+    border-radius: var(--radius-lg);
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 18%;
+    box-shadow: 0 12px 28px -18px rgba(74, 53, 36, .55);
+  }
+
+  .about-caption {
+    padding: 0;
+    background: none;
+    border-top: 0;
+  }
+
+  .about-caption strong { font-size: 1.3rem; }
+  .about-caption span { margin-top: .3rem; }
+
+  /* The byline introduces her, so the section label above the heading is
+     redundant on phones and reads oddly beneath the name. */
+  #about .about-copy .eyebrow {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  #about .about-copy h2 { margin-top: -.25rem; }
+}
