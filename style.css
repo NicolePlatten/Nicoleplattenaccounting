@@ -306,7 +306,7 @@ em.accent {
   flex: 0 0 auto;
 }
 
-.brand img { width: 54px; height: 33px; object-fit: contain; }
+.brand img { width: 46px; height: 46px; object-fit: contain; }
 
 .brand-text {
   display: flex;
@@ -1125,7 +1125,7 @@ em.accent {
   border-bottom: 1px solid var(--ink-line);
 }
 
-.footer-brand img { width: 76px; height: 77px; }
+.footer-brand img { width: 82px; height: 82px; }
 .footer-brand p { margin-top: 1.25rem; max-width: 30ch; font-size: .875rem; }
 
 .footer-col h3 {
@@ -1307,7 +1307,7 @@ html:not(.js) [data-reveal] { opacity: 1; transform: none; }
 @media (max-width: 640px) {
   .section { padding-block: clamp(3.5rem, 12vw, 5rem); }
 
-  .brand img { width: 46px; height: 28px; }
+  .brand img { width: 40px; height: 40px; }
   .brand-name { font-size: 1.05rem; }
   .brand-role { font-size: .5625rem; }
 
@@ -1388,7 +1388,7 @@ html:not(.js) [data-reveal] { opacity: 1; transform: none; }
 .page-narrow .updated { margin-top: 1.5rem; font-size: .8125rem; color: var(--text-soft); }
 
 .page-centre { text-align: center; max-width: 34rem; margin-inline: auto; }
-.page-centre .page-mark { width: 96px; height: 98px; margin: 0 auto 2rem; }
+.page-centre .page-mark { width: 100px; height: 100px; margin: 0 auto 2rem; }
 .page-centre h1 { margin-bottom: 1.25rem; }
 .page-centre p { font-size: 1.0625rem; }
 .page-centre .btn { margin-top: 2.25rem; }
