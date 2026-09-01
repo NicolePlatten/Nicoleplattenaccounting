@@ -175,16 +175,60 @@
     countEl.textContent = "1 — " + testimonials.length;
   }
 
-  /* --- Contact form submit state ---------------------------------------- */
+  /* --- Contact form -----------------------------------------------------
+     Submitted with fetch so we control the redirect ourselves. Formspree's
+     legacy _next field is not honoured on all plans, which sent people to
+     Formspree's own "Thanks!" page instead of ours. Without JS the form
+     still posts natively, so nothing is lost. */
   var form = $("#contactForm");
   var submit = $("#formSubmit");
+  var formError = $("#formError");
+
+  var showError = function (message) {
+    if (!formError) return;
+    formError.textContent = message;
+    formError.hidden = false;
+  };
+
+  var resetButton = function () {
+    if (!submit) return;
+    submit.removeAttribute("data-sending");
+    submit.disabled = false;
+  };
 
   if (form && submit) {
-    form.addEventListener("submit", function () {
-      if (!form.checkValidity || form.checkValidity()) {
-        submit.setAttribute("data-sending", "true");
-        submit.disabled = true;
-      }
+    form.addEventListener("submit", function (event) {
+      if (form.checkValidity && !form.checkValidity()) return;
+
+      if (!window.fetch || !window.FormData) return;   // native POST fallback
+
+      event.preventDefault();
+      if (formError) formError.hidden = true;
+      submit.setAttribute("data-sending", "true");
+      submit.disabled = true;
+
+      window.fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { Accept: "application/json" }
+      }).then(function (response) {
+        if (response.ok) {
+          window.location.href = "/thank-you.html";
+          return;
+        }
+        return response.json().then(function (data) {
+          var detail = data && data.errors && data.errors.length
+            ? data.errors.map(function (e) { return e.message; }).join(" ")
+            : "";
+          throw new Error(detail);
+        }, function () { throw new Error(""); });
+      }).catch(function (error) {
+        resetButton();
+        showError(
+          (error && error.message ? error.message + " " : "") +
+          "Sorry — that didn't send. Please call 07492 990955 or email nicoleplatten@outlook.com and I'll pick it up from there."
+        );
+      });
     });
   }
 }());

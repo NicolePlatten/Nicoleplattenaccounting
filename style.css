@@ -306,7 +306,7 @@ em.accent {
   flex: 0 0 auto;
 }
 
-.brand img { width: 40px; height: 25px; object-fit: contain; }
+.brand img { width: 54px; height: 33px; object-fit: contain; }
 
 .brand-text {
   display: flex;
@@ -1079,6 +1079,18 @@ em.accent {
 .form-note svg { width: 15px; height: 15px; flex: 0 0 auto; margin-top: .15rem; color: var(--bronze); }
 .form-note a { text-decoration: underline; text-underline-offset: 2px; }
 
+.form-error {
+  margin-top: 1rem;
+  padding: .85rem 1rem;
+  border: 1px solid #c08a7c;
+  border-left: 2px solid #9a5346;
+  border-radius: var(--radius);
+  background: #fdf4f1;
+  color: #6d3226;
+  font-size: .875rem;
+  line-height: 1.5;
+}
+
 .honeypot {
   position: absolute !important;
   left: -9999px !important;
@@ -1295,7 +1307,7 @@ html:not(.js) [data-reveal] { opacity: 1; transform: none; }
 @media (max-width: 640px) {
   .section { padding-block: clamp(3.5rem, 12vw, 5rem); }
 
-  .brand img { width: 34px; height: 21px; }
+  .brand img { width: 46px; height: 28px; }
   .brand-name { font-size: 1.05rem; }
   .brand-role { font-size: .5625rem; }
 
