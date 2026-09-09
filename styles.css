@@ -1191,3 +1191,39 @@ body:not(.home-v4) .calc-panel{border-color:rgba(174,129,97,.14);box-shadow:0 10
   .mobile-hero-portrait{width:102px;height:138px;}
   .hero-luxe h1{font-size:clamp(1.9rem,7.4vw,2.25rem)!important;}
 }
+
+
+/* ============================================================
+   v4.5 — forms, trust marks and thank-you page
+   ============================================================ */
+.credential-brand-badge{
+  min-width:58px;height:42px;padding:0 .7rem;border-radius:8px;
+  display:inline-flex!important;align-items:center;justify-content:center;
+  background:#9b6b4e!important;color:#fffaf4!important;border:1px solid #9b6b4e!important;
+  font-family:var(--sans)!important;font-size:.86rem!important;font-weight:700!important;
+  letter-spacing:.015em;text-transform:none;
+}
+.credential-xero{font-weight:600!important;letter-spacing:-.03em;text-transform:lowercase;}
+.contact-form .btn[type="submit"]{min-width:150px;justify-content:center;}
+.thank-you-hero{
+  min-height:68vh;display:flex;align-items:center;position:relative;overflow:hidden;
+  padding:clamp(4rem,9vw,8rem) 0;
+  background:radial-gradient(circle at 18% 14%,rgba(242,220,201,.48),transparent 25%),radial-gradient(circle at 84% 38%,rgba(240,218,199,.32),transparent 27%),linear-gradient(180deg,#fffaf5,#fbf3e9);
+}
+.thank-you-card{position:relative;z-index:2;max-width:760px;margin:auto;text-align:center;padding:clamp(2rem,5vw,4rem);background:rgba(255,253,249,.82);border:1px solid rgba(174,129,97,.14);border-radius:22px;box-shadow:0 20px 55px rgba(112,80,59,.10);backdrop-filter:blur(8px)}
+.thank-you-card .hero-kicker{margin-bottom:.9rem!important;color:#8f6348!important;letter-spacing:.12em!important}
+.thank-you-card h1{font-size:clamp(2.4rem,5vw,4.7rem);line-height:.98;max-width:12ch;margin-inline:auto}
+.thank-you-card .lede{margin:1.2rem auto 0;max-width:52ch}
+.success-mark{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;margin:0 auto 1.2rem;background:#ead7c6;color:#9b6b4e}
+.success-mark svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.thank-actions{display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap;margin-top:2rem}
+.thank-leaf{right:3%;top:16%;width:160px;transform:rotate(8deg)}
+@media(max-width:520px){
+  .credential-brand-badge{min-width:56px;height:38px;font-size:.78rem!important;border-radius:7px}
+  .thank-you-hero{min-height:72vh;padding:3rem 0}
+  .thank-you-card{padding:2rem 1.1rem;border-radius:18px}
+  .thank-you-card h1{font-size:2.55rem}
+  .thank-actions{display:grid;grid-template-columns:1fr;width:100%}
+  .thank-actions .btn{width:100%;justify-content:center}
+  .thank-leaf{width:105px;right:-22px;top:9%}
+}
