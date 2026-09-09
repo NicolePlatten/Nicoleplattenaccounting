@@ -1227,3 +1227,9 @@ body:not(.home-v4) .calc-panel{border-color:rgba(174,129,97,.14);box-shadow:0 10
   .thank-actions .btn{width:100%;justify-content:center}
   .thank-leaf{width:105px;right:-22px;top:9%}
 }
+
+
+/* v4.6 Formspree form states */
+#enquiry-form{scroll-margin-top:110px;}
+.form-error{margin-top:.85rem;padding:.8rem 1rem;border:1px solid rgba(145,82,62,.22);border-radius:8px;background:#fff3ef;color:#7d4436;font-size:.9rem;}
+#formSubmit[aria-busy="true"]{opacity:.75;cursor:wait;}

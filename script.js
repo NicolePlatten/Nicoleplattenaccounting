@@ -55,3 +55,57 @@ runCalc();
 
 // ---------- current year in footer ----------
 document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date().getFullYear());
+
+
+// ---------- contact form via Formspree ----------
+const websiteForm = document.getElementById('enquiry-form');
+const formSubmitButton = document.getElementById('formSubmit');
+const websiteFormError = document.getElementById('formError');
+
+if (websiteForm) {
+  websiteForm.addEventListener('submit', async (event) => {
+    if (!websiteForm.checkValidity()) return;
+    if (!window.fetch || !window.FormData) return; // native Formspree fallback
+
+    event.preventDefault();
+    if (websiteFormError) websiteFormError.hidden = true;
+    if (formSubmitButton) {
+      formSubmitButton.disabled = true;
+      formSubmitButton.setAttribute('aria-busy', 'true');
+      const label = formSubmitButton.querySelector('.form-submit-label');
+      if (label) label.textContent = 'Sending…';
+    }
+
+    try {
+      const response = await fetch(websiteForm.action, {
+        method: 'POST',
+        body: new FormData(websiteForm),
+        headers: { Accept: 'application/json' }
+      });
+
+      if (!response.ok) {
+        let message = 'Sorry — your enquiry could not be sent. Please try again.';
+        try {
+          const data = await response.json();
+          if (data && data.errors && data.errors.length) {
+            message = data.errors.map(error => error.message).join(' ');
+          }
+        } catch (_) {}
+        throw new Error(message);
+      }
+
+      window.location.href = 'thank-you.html';
+    } catch (error) {
+      if (websiteFormError) {
+        websiteFormError.textContent = error.message || 'Sorry — your enquiry could not be sent. Please try again.';
+        websiteFormError.hidden = false;
+      }
+      if (formSubmitButton) {
+        formSubmitButton.disabled = false;
+        formSubmitButton.removeAttribute('aria-busy');
+        const label = formSubmitButton.querySelector('.form-submit-label');
+        if (label) label.textContent = 'Send Enquiry';
+      }
+    }
+  });
+}
