@@ -16,3 +16,7 @@ Keep the `assets` folder exactly as supplied. The HTML files use relative paths 
 
 ## v4.7 technical SEO pass
 Visible design/copy unchanged. Added local metadata, structured data, Open Graph/Twitter metadata, robots.txt and sitemap.xml.
+
+
+## v4.9 Social preview
+Added `assets/og-image.jpg` (1200x630) and updated Open Graph/Twitter image metadata across the site.
