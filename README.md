@@ -12,3 +12,7 @@ Static website ready for GitHub Pages.
 
 ## Important
 Keep the `assets` folder exactly as supplied. The HTML files use relative paths such as `assets/logo.png`, so this works both on a project GitHub Pages URL and on a custom domain.
+
+
+## v4.7 technical SEO pass
+Visible design/copy unchanged. Added local metadata, structured data, Open Graph/Twitter metadata, robots.txt and sitemap.xml.
