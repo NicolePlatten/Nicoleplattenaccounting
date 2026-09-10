@@ -1233,3 +1233,41 @@ body:not(.home-v4) .calc-panel{border-color:rgba(174,129,97,.14);box-shadow:0 10
 #enquiry-form{scroll-margin-top:110px;}
 .form-error{margin-top:.85rem;padding:.8rem 1rem;border:1px solid rgba(145,82,62,.22);border-radius:8px;background:#fff3ef;color:#7d4436;font-size:.9rem;}
 #formSubmit[aria-busy="true"]{opacity:.75;cursor:wait;}
+
+
+/* Analytics consent UI — matches Nicole Platten Accounting brand */
+.cookie-banner{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10050;width:min(920px,calc(100% - 28px));display:flex;align-items:center;justify-content:space-between;gap:22px;padding:17px 18px 17px 20px;border:1px solid rgba(111,89,71,.18);border-radius:18px;background:rgba(255,250,244,.98);box-shadow:0 20px 55px rgba(46,41,36,.22);backdrop-filter:blur(16px);color:#33291f}
+.cookie-banner-copy strong{display:block;font-family:var(--serif);font-size:1.08rem;font-weight:500;margin-bottom:3px}.cookie-banner-copy p{margin:0;max-width:620px;color:#6e6258;font-size:.84rem;line-height:1.5}.cookie-banner-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}.cookie-btn{border:0;border-radius:999px;padding:10px 14px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}.cookie-btn:hover{transform:translateY(-1px)}.cookie-btn-primary{background:#6f5947;color:#fff;box-shadow:0 7px 18px rgba(111,89,71,.18)}.cookie-btn-secondary{background:#f5eee7;color:#33291f}.cookie-settings-link{appearance:none;border:0;background:none;color:inherit;font:inherit;font-size:.78rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer;margin-left:12px;padding:0;opacity:.8}.cookie-settings-link:hover{opacity:1}
+@media(max-width:700px){.cookie-banner{bottom:10px;display:block;padding:16px}.cookie-banner-copy p{font-size:.8rem}.cookie-banner-actions{margin-top:12px;display:grid;grid-template-columns:1fr 1fr}.cookie-btn{width:100%;padding:11px 10px}.cookie-settings-link{display:block;margin:9px 0 0}}
+
+
+/* WEB5 timed offer */
+.offer-modal-open{overflow:hidden}
+.web5-offer-backdrop{position:fixed;inset:0;z-index:12000;display:grid;place-items:center;padding:22px;background:rgba(46,41,36,.38);backdrop-filter:blur(7px);opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}
+.web5-offer-backdrop.is-visible{opacity:1;visibility:visible}
+.web5-offer{position:relative;width:min(530px,100%);overflow:hidden;padding:38px 38px 28px;border-radius:24px;background:radial-gradient(circle at 85% 10%,rgba(184,148,120,.14),transparent 32%),linear-gradient(180deg,#fffaf4 0%,#fbf4ec 100%);border:1px solid rgba(111,89,71,.16);box-shadow:0 28px 80px rgba(46,41,36,.28);color:#33291f;text-align:center;transform:translateY(20px) scale(.975);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.web5-offer-backdrop.is-visible .web5-offer{transform:translateY(0) scale(1)}
+.web5-offer::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#6f5947,#b89478,#6f5947)}
+.web5-offer-close{position:absolute;right:15px;top:13px;width:36px;height:36px;border:0;border-radius:50%;background:rgba(111,89,71,.08);color:#6f5947;font:300 26px/1 Arial,sans-serif;cursor:pointer}
+.web5-offer-mark{width:62px;height:62px;margin:0 auto 15px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(111,89,71,.35);color:#6f5947;font-family:var(--serif);font-size:1.28rem;background:rgba(255,255,255,.38)}
+.web5-offer-kicker{margin:0 0 8px;color:#8f6b53;font-size:.7rem;font-weight:700;letter-spacing:.16em}
+.web5-offer h2{margin:0;font-family:var(--serif);font-weight:500;color:#33291f;font-size:clamp(2rem,5vw,3rem);line-height:1.02;letter-spacing:-.035em}
+.web5-offer-copy{max-width:430px;margin:14px auto 22px;color:#6e6258;line-height:1.62;font-size:.96rem}
+.web5-offer-field{display:flex;gap:8px;padding:6px;background:#fff;border:1px solid rgba(111,89,71,.16);border-radius:999px;box-shadow:0 9px 26px rgba(111,89,71,.08)}
+.web5-offer-field input{min-width:0;flex:1;border:0;outline:0;background:transparent;padding:0 10px 0 14px;color:#33291f;font:inherit;font-size:.92rem}
+.web5-offer-field button,.web5-offer-cta{border:0;border-radius:999px;background:#6f5947;color:#fffaf4;padding:13px 19px;font:inherit;font-size:.84rem;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;box-shadow:0 8px 20px rgba(111,89,71,.18)}
+.web5-offer-field button:disabled{opacity:.7;cursor:wait}
+.web5-offer-fine{margin:11px auto 0;color:#8a7b70;font-size:.69rem;line-height:1.45;max-width:430px}
+.web5-offer-fine a{color:#6f5947;text-underline-offset:2px}
+.web5-offer-error{margin:10px 0 0;color:#8d4336;font-size:.78rem}
+.web5-offer-later{margin-top:14px;border:0;background:none;color:#88786d;font:inherit;font-size:.76rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.web5-offer-success{padding-top:4px}
+.web5-offer-tick{width:46px;height:46px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;background:#e7eee2;color:#53654d;font-weight:700;font-size:1.2rem}
+.web5-offer-success-label{margin:0 0 7px;color:#6e6258;font-size:.78rem;text-transform:uppercase;letter-spacing:.11em}
+.web5-code-row{width:min(360px,100%);margin:0 auto 13px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 18px;border:1px dashed rgba(111,89,71,.35);border-radius:14px;background:#fff}
+.web5-code-row strong{font-size:1.16rem;letter-spacing:.13em;color:#33291f}
+.web5-code-row button{border:0;border-radius:999px;background:#f5eee7;color:#6f5947;padding:9px 12px;font:inherit;font-size:.74rem;font-weight:700;cursor:pointer}
+.web5-offer-success>p:last-of-type{max-width:410px;margin:0 auto 18px;color:#6e6258;font-size:.88rem;line-height:1.55}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(max-width:600px){.web5-offer-backdrop{padding:14px;align-items:end}.web5-offer{padding:31px 18px 22px;border-radius:22px}.web5-offer-mark{width:54px;height:54px}.web5-offer-copy{font-size:.9rem;margin-bottom:18px}.web5-offer-field{display:block;border-radius:16px;padding:7px}.web5-offer-field input{width:100%;height:48px;padding:0 12px;text-align:center}.web5-offer-field button{width:100%;padding:13px 15px;border-radius:12px}.web5-offer-fine{font-size:.66rem}}
+
