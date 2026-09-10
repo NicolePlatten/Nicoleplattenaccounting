@@ -60,7 +60,7 @@ Once data arrives, look at:
 - `sitemap.xml` and `robots.txt` — refreshed SEO crawl files
 
 ## Website 5% offer popup
-A branded offer appears after 60 seconds on normal site pages. It captures the visitor email through the existing Formspree endpoint, then reveals code `WEB5OFF`.
+A branded offer appears after 10 seconds on normal site pages. It captures the visitor email through the existing Formspree endpoint, then reveals code `WEB5OFF`.
 
 GA4 events, once analytics is connected and consent is accepted:
 - `discount_offer_view`

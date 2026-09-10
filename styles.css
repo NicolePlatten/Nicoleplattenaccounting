@@ -1249,7 +1249,7 @@ body:not(.home-v4) .calc-panel{border-color:rgba(174,129,97,.14);box-shadow:0 10
 .web5-offer-backdrop.is-visible .web5-offer{transform:translateY(0) scale(1)}
 .web5-offer::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#6f5947,#b89478,#6f5947)}
 .web5-offer-close{position:absolute;right:15px;top:13px;width:36px;height:36px;border:0;border-radius:50%;background:rgba(111,89,71,.08);color:#6f5947;font:300 26px/1 Arial,sans-serif;cursor:pointer}
-.web5-offer-mark{width:62px;height:62px;margin:0 auto 15px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(111,89,71,.35);color:#6f5947;font-family:var(--serif);font-size:1.28rem;background:rgba(255,255,255,.38)}
+.web5-offer-logo{width:112px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center}.web5-offer-logo img{display:block;width:100%;height:auto;max-height:78px;object-fit:contain}
 .web5-offer-kicker{margin:0 0 8px;color:#8f6b53;font-size:.7rem;font-weight:700;letter-spacing:.16em}
 .web5-offer h2{margin:0;font-family:var(--serif);font-weight:500;color:#33291f;font-size:clamp(2rem,5vw,3rem);line-height:1.02;letter-spacing:-.035em}
 .web5-offer-copy{max-width:430px;margin:14px auto 22px;color:#6e6258;line-height:1.62;font-size:.96rem}
@@ -1269,5 +1269,5 @@ body:not(.home-v4) .calc-panel{border-color:rgba(174,129,97,.14);box-shadow:0 10
 .web5-code-row button{border:0;border-radius:999px;background:#f5eee7;color:#6f5947;padding:9px 12px;font:inherit;font-size:.74rem;font-weight:700;cursor:pointer}
 .web5-offer-success>p:last-of-type{max-width:410px;margin:0 auto 18px;color:#6e6258;font-size:.88rem;line-height:1.55}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-@media(max-width:600px){.web5-offer-backdrop{padding:14px;align-items:end}.web5-offer{padding:31px 18px 22px;border-radius:22px}.web5-offer-mark{width:54px;height:54px}.web5-offer-copy{font-size:.9rem;margin-bottom:18px}.web5-offer-field{display:block;border-radius:16px;padding:7px}.web5-offer-field input{width:100%;height:48px;padding:0 12px;text-align:center}.web5-offer-field button{width:100%;padding:13px 15px;border-radius:12px}.web5-offer-fine{font-size:.66rem}}
+@media(max-width:600px){.web5-offer-backdrop{padding:14px;align-items:end}.web5-offer{padding:31px 18px 22px;border-radius:22px}.web5-offer-logo{width:96px}.web5-offer-copy{font-size:.9rem;margin-bottom:18px}.web5-offer-field{display:block;border-radius:16px;padding:7px}.web5-offer-field input{width:100%;height:48px;padding:0 12px;text-align:center}.web5-offer-field button{width:100%;padding:13px 15px;border-radius:12px}.web5-offer-fine{font-size:.66rem}}
 

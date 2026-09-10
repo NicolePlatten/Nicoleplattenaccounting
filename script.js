@@ -114,7 +114,7 @@ if (websiteForm) {
 
 // ---------- timed first-package offer ----------
 (() => {
-  const OFFER_DELAY_MS = 60000;
+  const OFFER_DELAY_MS = 10000;
   const DISMISS_FOR_DAYS = 7;
   const CLAIM_FOR_DAYS = 180;
   const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xbdegwjj';
@@ -161,7 +161,7 @@ if (websiteForm) {
     backdrop.innerHTML = `
       <section class="web5-offer" role="dialog" aria-modal="true" aria-labelledby="web5OfferTitle">
         <button class="web5-offer-close" type="button" aria-label="Close offer">×</button>
-        <div class="web5-offer-mark" aria-hidden="true">NP</div>
+        <div class="web5-offer-logo"><img src="assets/logo.png" alt="Nicole Platten Accounting"></div>
         <p class="web5-offer-kicker">A LITTLE WELCOME FROM NICOLE</p>
         <h2 id="web5OfferTitle">Save 5% on your first package</h2>
         <p class="web5-offer-copy">Thinking about working with Nicole? Leave your email and unlock 5% off your first package.</p>
