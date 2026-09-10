@@ -7,7 +7,7 @@
 <meta name="description" content="Personal accounting, tax and bookkeeping support for businesses, landlords, individuals and content creators in Marston Green, Solihull, Birmingham and across the UK.">
 <link rel="canonical" href="https://nicoleplattenaccounting.co.uk/">
 <meta name="theme-color" content="#fbf5ed">
-<link rel="stylesheet" href="styles.css?v=4.9">
+<link rel="stylesheet" href="styles.css?v=5.0">
 <!-- SEO v4.7 -->
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <meta property="og:locale" content="en_GB">
@@ -153,160 +153,36 @@
 <!-- /SEO v4.7 -->
 
 <style>
-/* Homepage refinements — 2026-09 */
-.hero-ctas .btn-primary,
-.hero-ctas .hero-services-btn {
-  background: #6f5947;
-  border-color: #6f5947;
-  color: #fff;
-}
-.hero-ctas .btn-primary:hover,
-.hero-ctas .hero-services-btn:hover {
-  background: #33291f;
-  border-color: #33291f;
-  color: #fff;
-  transform: translateY(-2px);
-}
+/* Homepage fixes v5.0 */
+.hero-ctas .btn-primary { transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease; }
+.hero-ctas .btn-primary:hover { transform: translateY(-2px); }
 
-/* Match the two icon credentials to the same premium brown treatment */
-.credential-home .cred-icon {
-  width: 54px;
-  height: 54px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #6f5947;
-  color: #fff;
-  box-shadow: 0 10px 24px rgba(51,41,31,.14);
-}
-.credential-home .cred-icon .cred-svg {
-  width: 28px;
-  height: 28px;
-  stroke: currentColor;
-  fill: none;
-}
-.credential-home .cred-icon .uk-pin text {
-  fill: currentColor;
-  stroke: none;
-  font-size: 6px;
-  font-weight: 700;
-}
+/* Experience + UK now use credential-brand-badge in the HTML, exactly like AAT/ACCA/Xero. */
+.credential-home .credential-brand-badge.cred-icon .cred-svg { width: 27px; height: 27px; stroke: currentColor; fill: none; }
+.credential-home .credential-brand-badge.cred-icon .uk-pin text { fill: currentColor; stroke: none; font-size: 6px; font-weight: 700; }
 
-/* Higher-quality brand image rendering */
-.modern-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  image-rendering: auto;
-}
-
-/* Premium floating contact dock */
-.contact-dock {
-  position: fixed;
-  right: clamp(16px, 2.2vw, 30px);
-  bottom: max(18px, env(safe-area-inset-bottom));
-  z-index: 999;
-  font-family: inherit;
-}
-.contact-dock summary {
-  list-style: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 52px;
-  padding: 0 17px;
-  border-radius: 999px;
-  background: rgba(51,41,31,.96);
-  color: #fff;
-  box-shadow: 0 14px 34px rgba(51,41,31,.28);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,.14);
-  font-weight: 700;
-  letter-spacing: .01em;
-  transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
-}
+/* Premium expandable contact button */
+.contact-dock { position: fixed; right: clamp(14px,2vw,28px); bottom: max(16px,env(safe-area-inset-bottom)); z-index: 9999; font-family: inherit; }
+.contact-dock summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:10px; min-height:54px; padding:0 16px 0 13px; border-radius:999px; background:#5A4A3C; color:#fff; box-shadow:0 14px 35px rgba(46,41,36,.25); user-select:none; transition:transform .2s ease, box-shadow .2s ease, background .2s ease; }
 .contact-dock summary::-webkit-details-marker { display:none; }
-.contact-dock summary:hover {
-  transform: translateY(-2px);
-  background: #6f5947;
-  box-shadow: 0 18px 42px rgba(51,41,31,.34);
-}
-.contact-dock summary svg {
-  width: 17px;
-  height: 17px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  transition: transform .25s ease;
-}
-.contact-dock[open] summary svg { transform: rotate(180deg); }
-.contact-dock-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 5px rgba(255,255,255,.12);
-}
-.contact-dock-menu {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 10px);
-  width: min(290px, calc(100vw - 32px));
-  padding: 8px;
-  border-radius: 18px;
-  background: rgba(255,250,244,.98);
-  border: 1px solid #eaded2;
-  box-shadow: 0 18px 50px rgba(51,41,31,.20);
-  transform-origin: bottom right;
-  animation: dockIn .22s ease both;
-}
-.dock-action {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 13px;
-  text-decoration: none;
-  color: #33291f;
-  transition: background .2s ease, transform .2s ease;
-}
-.dock-action:hover {
-  background: #f5eee7;
-  transform: translateX(-2px);
-}
-.dock-action + .dock-action { border-top: 1px solid #eaded2; }
-.dock-icon {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 11px;
-  background: #6f5947;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 800;
-}
-.dock-action span:last-child { display:flex; flex-direction:column; gap:2px; }
-.dock-action strong { font-size: 14px; }
-.dock-action small { color:#6e6258; font-size:12px; }
-@keyframes dockIn {
-  from { opacity:0; transform: translateY(8px) scale(.97); }
-  to { opacity:1; transform: translateY(0) scale(1); }
-}
-@media (max-width: 640px) {
-  .contact-dock { right: 14px; bottom: max(14px, env(safe-area-inset-bottom)); }
-  .contact-dock summary { min-height: 50px; padding: 0 15px; }
-  .contact-dock-menu { width: min(280px, calc(100vw - 28px)); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .contact-dock-menu { animation: none; }
-  .contact-dock summary, .contact-dock summary svg, .dock-action { transition: none; }
-}
+.contact-dock summary:hover { transform:translateY(-2px); box-shadow:0 18px 42px rgba(46,41,36,.30); }
+.contact-dock-main-icon { width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.14); }
+.contact-dock-main-icon svg { width:19px; height:19px; fill:none; stroke:#fff; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.contact-dock summary > span:nth-child(2) { font-weight:650; font-size:14px; letter-spacing:.01em; white-space:nowrap; }
+.contact-dock-chevron { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; transition:transform .25s ease; }
+.contact-dock[open] .contact-dock-chevron { transform:rotate(180deg); }
+.contact-dock-menu { position:absolute; right:0; bottom:66px; width:255px; padding:9px; border:1px solid rgba(111,89,71,.16); border-radius:20px; background:rgba(255,250,244,.98); backdrop-filter:blur(15px); box-shadow:0 18px 50px rgba(46,41,36,.20); transform-origin:bottom right; animation:dockIn .22s ease both; }
+@keyframes dockIn { from { opacity:0; transform:translateY(8px) scale(.97); } to { opacity:1; transform:none; } }
+.dock-action { display:flex; align-items:center; gap:11px; padding:10px; border-radius:14px; color:#33291f; text-decoration:none; transition:background .18s ease, transform .18s ease; }
+.dock-action:hover { background:#f5eee7; transform:translateX(-2px); }
+.dock-icon { width:40px; height:40px; flex:0 0 40px; border-radius:50%; display:grid; place-items:center; background:#6f5947; color:#fff; }
+.dock-icon svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.dock-icon-whatsapp { background:#25D366; }
+.dock-icon-whatsapp svg { width:24px; height:24px; fill:#fff; stroke:none; }
+.dock-action strong,.dock-action small { display:block; }
+.dock-action strong { font-size:13.5px; line-height:1.25; }
+.dock-action small { margin-top:2px; color:#6e6258; font-size:11.5px; }
+@media (max-width:640px) { .contact-dock { right:12px; bottom:max(12px,env(safe-area-inset-bottom)); } .contact-dock summary { min-height:50px; padding:0 14px 0 10px; } .contact-dock-main-icon { width:31px; height:31px; } .contact-dock-menu { width:min(250px,calc(100vw - 24px)); bottom:61px; } }
 </style>
 </head>
 <body class="home-v4">
@@ -359,7 +235,7 @@
         <p class="lede">Supporting individuals, businesses, landlords and content creators with straightforward, personalised accounting.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="contact.html">Get in touch</a>
-          <a class="btn btn-primary hero-services-btn" href="#services">Explore services</a>
+          <a class="btn btn-primary" href="#services">Explore services</a>
         </div>
         <p class="scribble">Your finances. A brighter future. ♡</p>
       </div>
@@ -376,8 +252,8 @@
       <div class="credential-home"><strong class="credential-brand-badge">AAT</strong><span>AAT Qualified</span></div>
       <div class="credential-home"><strong class="credential-brand-badge">ACCA</strong><span>ACCA Qualified</span></div>
       <div class="credential-home"><strong class="credential-brand-badge credential-xero">xero</strong><span>Xero Partner</span></div>
-      <div class="credential-home"><strong class="cred-icon"><svg class="cred-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v3M19 4v3M4 8h16v12H4zM4 11h16M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg></strong><span>11+ Years<br>Experience</span></div>
-      <div class="credential-home"><strong class="cred-icon"><svg class="cred-svg uk-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.1 6-11a6 6 0 1 0-12 0c0 5.9 6 11 6 11Z"/><text x="12" y="12.2" text-anchor="middle">UK</text></svg></strong><span>UK-Wide<br>Support</span></div>
+      <div class="credential-home"><strong class="credential-brand-badge cred-icon"><svg class="cred-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v3M19 4v3M4 8h16v12H4zM4 11h16M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg></strong><span>11+ Years<br>Experience</span></div>
+      <div class="credential-home"><strong class="credential-brand-badge cred-icon"><svg class="cred-svg uk-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.1 6-11a6 6 0 1 0-12 0c0 5.9 6 11 6 11Z"/><text x="12" y="12.2" text-anchor="middle">UK</text></svg></strong><span>UK-Wide<br>Support</span></div>
     </div>
   </section>
 
@@ -417,7 +293,7 @@
   </section>
 
   <section class="modern-section">
-    <div class="modern-image reveal"><img src="assets/desk-brand-hq.png" alt="Nicole Platten Accounting brand desk scene with calculator, notebook and coffee"></div>
+    <div class="modern-image reveal"><img src="assets/desk-brand.png" alt="Nicole Platten Accounting brand desk scene with calculator, notebook and coffee"></div>
     <div class="modern-copy reveal">
       <img class="line-leaf modern-leaf" src="assets/leaf.svg" alt="" aria-hidden="true">
       <h2>Modern businesses need<br>modern accounting.</h2>
@@ -430,9 +306,9 @@
     <div class="container">
       <div class="section-heading center reveal"><h2>What Clients Say</h2></div>
       <div class="review-grid reveal-group">
-        <blockquote class="review-card reveal"><div class="stars">★★★★★</div><p>“Nicole made the whole self-assessment process feel simple and stress-free. Everything was explained clearly, questions were answered quickly, and I always felt supported from start to finish.”</p><footer>Self-employed client</footer></blockquote>
-        <blockquote class="review-card reveal"><div class="stars">★★★★★</div><p>“I was earning through social media but had no idea where to start with the tax side. Nicole explained everything in a way that actually made sense and made the whole process feel straightforward and manageable.”</p><footer>Social media content creator</footer></blockquote>
-        <blockquote class="review-card reveal"><div class="stars">★★★★★</div><p>“Nicole is easily the best accountant I’ve worked with. She’s reliable, approachable and makes dealing with tax far less stressful. I wouldn’t go anywhere else for my accounting work.”</p><footer>Self-employed barber</footer></blockquote>
+        <blockquote class="review-card reveal"><div class="stars">★★★★★</div><p>“Nicole made my self-assessment feel simple from start to finish. Everything was explained clearly, my questions were always answered, and I felt supported throughout the whole process.”</p><footer>Self-employed client</footer></blockquote>
+        <blockquote class="review-card reveal"><div class="stars">★★★★★</div><p>“I was earning through social media but had no idea where to start with the tax side. Nicole explained everything in a way that was easy to understand and made the whole process feel completely straightforward.”</p><footer>Social media content creator</footer></blockquote>
+        <blockquote class="review-card reveal"><div class="stars">★★★★★</div><p>“Nicole is the best accountant I’ve used. She makes everything clear, is always approachable, and I wouldn’t go anywhere else for my tax or accounting work.”</p><footer>Self-employed barber</footer></blockquote>
       </div>
     </div>
   </section>
@@ -466,25 +342,31 @@
   <div class="container footer-legal"><span>© <span data-year></span> Nicole Platten Accounting</span><span><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></span></div>
 </footer>
 
-<!-- Floating contact dock -->
 <details class="contact-dock">
   <summary aria-label="Open contact options">
-    <span class="contact-dock-dot" aria-hidden="true"></span>
+    <span class="contact-dock-main-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M4.5 5.5A2.5 2.5 0 0 1 7 3h10a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 17 15H10l-4.6 4v-4.4a2.5 2.5 0 0 1-.9-1.9Z"/></svg>
+    </span>
     <span>Get in touch</span>
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>
+    <svg class="contact-dock-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>
   </summary>
   <div class="contact-dock-menu">
     <a class="dock-action" href="https://wa.me/447492990955?text=Hi%20Nicole%2C%20I%27d%20like%20to%20ask%20about%20accountancy%20support" target="_blank" rel="noopener" aria-label="Message Nicole on WhatsApp">
-      <span class="dock-icon">W</span><span><strong>WhatsApp</strong><small>Message Nicole</small></span>
+      <span class="dock-icon dock-icon-whatsapp" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><path d="M16 3.2A12.7 12.7 0 0 0 5.2 22.5L3.5 28.7l6.4-1.7A12.8 12.8 0 1 0 16 3.2Zm0 23.2c-2 0-3.9-.6-5.5-1.6l-.4-.2-3.8 1 1-3.7-.2-.4A10.4 10.4 0 1 1 16 26.4Zm5.7-7.8c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.3-.4.3-.7.1-1.9-.9-3.5-2.4-4.5-4.2-.2-.3 0-.5.1-.7l.7-.8c.2-.2.2-.4.3-.6.1-.2.1-.4 0-.6l-1-2.5c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.6 0 1.5 1.1 3 1.3 3.2.1.2 2.2 3.4 5.4 4.8 2 .9 3.2.9 4.3.8.7-.1 1.8-.7 2.1-1.4.3-.7.3-1.3.2-1.5-.2-.2-.5-.3-.9-.5Z"/></svg>
+      </span>
+      <span><strong>WhatsApp</strong><small>Message Nicole</small></span>
     </a>
     <a class="dock-action" href="tel:+447492990955" aria-label="Call Nicole">
-      <span class="dock-icon">☎</span><span><strong>Call</strong><small>07492 990955</small></span>
+      <span class="dock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.6 3.5h2.7l1.35 4.15-1.8 1.65a14.2 14.2 0 0 0 5.85 5.85l1.65-1.8 4.15 1.35v2.7c0 1.1-.9 2-2 2C10.82 19.4 4.6 13.18 4.6 5.5c0-1.1.9-2 2-2Z"/></svg></span>
+      <span><strong>Call</strong><small>07492 990955</small></span>
     </a>
     <a class="dock-action" href="mailto:nicoleplatten@outlook.com" aria-label="Email Nicole">
-      <span class="dock-icon">✉</span><span><strong>Email</strong><small>Send an enquiry</small></span>
+      <span class="dock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m5 7 7 5.5L19 7"/></svg></span>
+      <span><strong>Email</strong><small>Send an enquiry</small></span>
     </a>
   </div>
 </details>
-<script src="script.js?v=4.9"></script>
+<script src="script.js?v=5.0"></script>
 </body>
 </html>
