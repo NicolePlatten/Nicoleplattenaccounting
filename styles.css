@@ -1271,3 +1271,5 @@ body:not(.home-v4) .calc-panel{border-color:rgba(174,129,97,.14);box-shadow:0 10
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 @media(max-width:600px){.web5-offer-backdrop{padding:14px;align-items:end}.web5-offer{padding:31px 18px 22px;border-radius:22px}.web5-offer-logo{width:96px}.web5-offer-copy{font-size:.9rem;margin-bottom:18px}.web5-offer-field{display:block;border-radius:16px;padding:7px}.web5-offer-field input{width:100%;height:48px;padding:0 12px;text-align:center}.web5-offer-field button{width:100%;padding:13px 15px;border-radius:12px}.web5-offer-fine{font-size:.66rem}}
 
+
+.field-note{display:block;margin-top:6px;color:#8a7b70;font-size:.76rem;line-height:1.4}

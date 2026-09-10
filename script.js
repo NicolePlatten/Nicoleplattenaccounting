@@ -65,6 +65,22 @@ const websiteFormError = document.getElementById('formError');
 if (websiteForm) {
   websiteForm.addEventListener('submit', async (event) => {
     if (!websiteForm.checkValidity()) return;
+
+    const promoCodeInput = websiteForm.querySelector('#promoCode');
+    if (promoCodeInput) {
+      const enteredPromo = promoCodeInput.value.trim().toUpperCase();
+      promoCodeInput.value = enteredPromo;
+      if (enteredPromo && enteredPromo !== 'WEB5OFF') {
+        event.preventDefault();
+        if (websiteFormError) {
+          websiteFormError.textContent = 'That promo code is not valid. The only valid website promo code is WEB5OFF.';
+          websiteFormError.hidden = false;
+        }
+        promoCodeInput.focus();
+        return;
+      }
+    }
+
     if (!window.fetch || !window.FormData) return; // native Formspree fallback
 
     event.preventDefault();
