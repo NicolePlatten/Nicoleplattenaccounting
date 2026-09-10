@@ -73,7 +73,7 @@ if (websiteForm) {
       if (enteredPromo && enteredPromo !== 'WEB5OFF') {
         event.preventDefault();
         if (websiteFormError) {
-          websiteFormError.textContent = 'That promo code is not valid. The only valid website promo code is WEB5OFF.';
+          websiteFormError.textContent = 'That promo code is not valid. Please check the code and try again.';
           websiteFormError.hidden = false;
         }
         promoCodeInput.focus();
