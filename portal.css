@@ -628,3 +628,124 @@ body.drawer-open{overflow:hidden}
   .notification-actions{margin-top:10px;justify-content:flex-start}
   .notification-topline time{font-size:.63rem}
 }
+
+
+/* =========================================================
+   V8 — Botanical practice dashboard
+   ========================================================= */
+body.portal-body{background:#fbf7f2}
+.admin-app-main{margin-left:220px;min-height:100vh}
+.admin-sidebar{
+  position:fixed;inset:0 auto 0 0;width:220px;z-index:90;
+  display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#fffaf4 0%,#f8efe7 100%);
+  border-right:1px solid var(--line);overflow:hidden
+}
+.sidebar-logo{display:grid;place-items:center;padding:28px 20px 24px}
+.sidebar-logo img{width:105px;height:105px;object-fit:contain}
+.sidebar-nav{display:grid;gap:6px;padding:10px 12px}
+.sidebar-link{
+  display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:8px;
+  width:100%;padding:13px 14px;border:0;border-radius:11px;background:transparent;
+  color:#59483b;text-align:left;font:inherit;font-size:.82rem;cursor:pointer
+}
+.sidebar-link>span{font-size:1rem;color:#7a5f4b}
+.sidebar-link:hover,.sidebar-link.active{background:#eee0d5;color:#33291f}
+.sidebar-link b{
+  min-width:22px;height:22px;padding:0 6px;display:grid;place-items:center;
+  border-radius:999px;background:#765944;color:#fff;font-size:.65rem
+}
+.sidebar-flourish{position:relative;flex:1;min-height:280px;margin-top:10px;overflow:hidden}
+.sidebar-flourish .script-note{
+  position:absolute;left:34px;top:36px;z-index:2;transform:rotate(-7deg);
+  font-family:'Playfair Display',Georgia,serif;font-style:italic;color:#8b654f;
+  font-size:1.25rem;line-height:1.25
+}
+.botanical-svg{
+  position:absolute;left:-22px;bottom:-26px;width:210px;height:280px;
+  color:#a88670;opacity:.48
+}
+.sidebar-flourish small{
+  position:absolute;left:18px;bottom:112px;z-index:2;
+  color:#7c6a5d;font-size:.49rem;line-height:1.8;letter-spacing:.18em
+}
+
+.admin-app-main .admin-topbar{border-top:0}
+.admin-app-main .admin-header-inner{width:min(1270px,calc(100% - 40px))}
+.admin-app-main main{width:min(1270px,calc(100% - 40px));margin:0 auto;padding-top:0}
+
+.admin-dashboard-head{
+  grid-template-columns:minmax(0,1fr);
+  gap:14px;margin-top:0
+}
+.admin-welcome-panel{
+  position:relative;overflow:hidden;min-height:174px;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:28px 36px;background:
+    linear-gradient(90deg,rgba(247,238,230,.98) 0%,rgba(249,241,234,.94) 49%,rgba(245,232,221,.78) 100%)
+}
+.admin-welcome-panel>*:not(.welcome-botanical){position:relative;z-index:2}
+.admin-welcome-panel h1{max-width:700px;font-size:clamp(2.4rem,4.2vw,4rem)}
+.welcome-botanical{
+  position:absolute;right:-15px;top:0;width:48%;height:100%;
+  color:#876650;opacity:.55;pointer-events:none
+}
+.welcome-botanical svg{width:100%;height:100%}
+.admin-overview{grid-template-columns:repeat(4,1fr);gap:12px}
+.overview-stat{min-height:112px}
+.upcoming-stat{background:linear-gradient(145deg,#fffdf9,#f7eee7)}
+
+.compact-centre{margin-top:0}
+.compact-centre .notification-centre-head{padding:15px 20px 12px}
+.compact-notification{min-height:62px}
+.notification-empty{min-height:62px;padding:13px 20px}
+
+.admin-layout{scroll-margin-top:92px}
+#notificationSection,#dashboardTop{scroll-margin-top:92px}
+
+.admin-footer{
+  width:min(1270px,calc(100% - 40px));margin:18px auto 0;padding:22px 0 28px;
+  border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto 1fr;
+  align-items:center;gap:20px;color:#6f5e51;font-size:.72rem
+}
+.admin-footer div{display:flex;gap:24px}
+.admin-footer a{color:inherit;text-decoration:none}.admin-footer a:hover{text-decoration:underline}
+.admin-footer em{
+  justify-self:end;font-family:'Playfair Display',Georgia,serif;
+  font-size:1rem;color:#9a7158
+}
+
+/* More application-like lower workspace */
+.admin-layout>aside,.admin-layout>section{border-radius:18px}
+.client-list{margin-top:12px}
+.client-item{border-radius:12px}
+.client-item.active{box-shadow:inset 3px 0 0 #80634e}
+#clientHeading{font-size:clamp(2rem,3vw,3rem)}
+
+@media(max-width:1050px){
+  .admin-sidebar{width:82px}
+  .admin-app-main{margin-left:82px}
+  .sidebar-logo img{width:58px;height:58px}
+  .sidebar-nav{padding:8px}
+  .sidebar-link{grid-template-columns:1fr;padding:12px;place-items:center}
+  .sidebar-link:not(.active){color:#765f4e}
+  .sidebar-link{font-size:0}
+  .sidebar-link>span{font-size:1.05rem}
+  .sidebar-link b{position:absolute;margin:0 0 26px 26px;font-size:.58rem}
+  .sidebar-flourish{display:none}
+}
+@media(max-width:760px){
+  .admin-sidebar{display:none}
+  .admin-app-main{margin-left:0}
+  .admin-app-main .admin-header-inner,.admin-app-main main,.admin-footer{width:min(100% - 18px,1270px)}
+  .admin-overview{grid-template-columns:repeat(2,1fr)}
+  .welcome-botanical{width:65%;opacity:.28}
+  .admin-footer{grid-template-columns:1fr;text-align:center}
+  .admin-footer div{justify-content:center}.admin-footer em{justify-self:center}
+}
+@media(max-width:460px){
+  .admin-welcome-panel{padding:22px 18px;min-height:155px}
+  .admin-welcome-panel h1{font-size:2.25rem}
+  .admin-overview{gap:7px}
+  .overview-stat{min-height:92px}
+}

@@ -47,6 +47,13 @@ const show = (el, msg, ok = false) => {
   showAllNotifications?.addEventListener('click', openActivityDrawer);
   closeActivityDrawer?.addEventListener('click', closeActivityDrawerPanel);
   document.querySelectorAll('[data-close-activity]').forEach(el=>el.addEventListener('click', closeActivityDrawerPanel));
+  document.querySelectorAll('.sidebar-link').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.sidebar-link').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.target)?.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
 
   await loadClients();
 })();
