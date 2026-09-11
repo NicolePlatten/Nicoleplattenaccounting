@@ -822,3 +822,34 @@ details[open]>.dropdown-chevron,details[open]>summary .dropdown-chevron{transfor
   .communication-dropdown-body{grid-template-columns:1fr}
   .communication-divider{height:1px;width:100%}
 }
+
+
+/* ===== V10 client lifecycle ===== */
+.workspace-actions{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.portal-btn.danger-outline{
+  background:transparent;
+  color:#9b4e45;
+  border:1px solid rgba(155,78,69,.32);
+  box-shadow:none;
+}
+.portal-btn.danger-outline:hover{
+  background:#fff6f4;
+  border-color:rgba(155,78,69,.52);
+  box-shadow:none;
+}
+#newPassword[readonly]{
+  background:#f5eee7;
+  color:#5f4b3d;
+  font-weight:700;
+  letter-spacing:.035em;
+}
+@media(max-width:650px){
+  .workspace-head{align-items:flex-start}
+  .workspace-actions{width:100%;justify-content:flex-start}
+}

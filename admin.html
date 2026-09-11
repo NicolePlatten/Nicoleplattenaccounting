@@ -142,7 +142,10 @@
       <div id="clientWorkspace" class="hidden">
         <div class="workspace-head">
           <div><span class="portal-kicker">Client</span><h1 id="clientHeading">Client</h1><p id="clientSub" class="portal-muted"></p></div>
-          <button id="newWorkBtn" class="portal-btn">+ Add new work</button>
+          <div class="workspace-actions">
+            <button id="newWorkBtn" class="portal-btn">+ Add new work</button>
+            <button id="deleteClientBtn" class="portal-btn danger-outline" type="button">Delete client</button>
+          </div>
         </div>
         <div id="clientMessage" hidden></div>
         <div id="workList" class="work-list"></div>
@@ -241,11 +244,18 @@
 
       <form id="newClientForm" class="portal-form hidden">
         <span class="portal-kicker">New client</span><h1>Create client login</h1>
-        <p class="portal-muted">Give the client a temporary password. They will be forced to create their own password the first time they sign in.</p>
+        <p class="portal-muted">The client will automatically receive a welcome email with the portal link and temporary password. They must change it the first time they sign in.</p>
         <div class="row2"><div><label>Name</label><input id="newName" required></div><div><label>Email</label><input id="newEmail" type="email" required></div></div>
-        <div class="row2"><div><label>Temporary password</label><input id="newPassword" type="password" minlength="10" required></div><div><label>Initial service</label><input id="newService" required placeholder="Annual Accounts"></div></div>
+        <div class="row2">
+          <div>
+            <label>Temporary password</label>
+            <input id="newPassword" value="Password1*" readonly aria-readonly="true">
+            <small class="portal-muted">This is automatically emailed to the client and must be changed on first login.</small>
+          </div>
+          <div><label>Initial service</label><input id="newService" required placeholder="Annual Accounts"></div>
+        </div>
         <div id="newClientMessage" hidden></div>
-        <button class="portal-btn" type="submit">Create client</button><button id="cancelNewClient" class="portal-btn secondary" type="button">Cancel</button>
+        <button class="portal-btn" type="submit">Create client & send welcome email</button><button id="cancelNewClient" class="portal-btn secondary" type="button">Cancel</button>
       </form>
     </section>
     </div>

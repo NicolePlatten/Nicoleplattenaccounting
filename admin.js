@@ -37,6 +37,7 @@ const show = (el, msg, ok = false) => {
   cancelNewClient.onclick = () => { newClientForm.classList.add('hidden'); adminEmpty.classList.remove('hidden'); };
   newClientForm.addEventListener('submit', createClient);
   newWorkBtn.onclick = showNewWork;
+  deleteClientBtn?.addEventListener('click', deleteCurrentClient);
   cancelNewWork.onclick = () => newWorkForm.classList.add('hidden');
   newWorkForm.addEventListener('submit', createWork);
   workEditor.addEventListener('submit', saveWork);
@@ -573,15 +574,62 @@ async function sendMessage() {
   if (!error) newMessage.value = '';
 }
 
+
+async function deleteCurrentClient(){
+  if(!currentClientId) return;
+
+  const client=clientGroups.find(c=>c.id===currentClientId);
+  if(!client) return;
+
+  const name=client.full_name || 'this client';
+  const typed=prompt(
+    `Delete ${name}?\n\nThis permanently removes their login, work, notes, messages and portal history.\n\nType DELETE to confirm.`
+  );
+
+  if(typed!=='DELETE') return;
+
+  deleteClientBtn.disabled=true;
+  deleteClientBtn.textContent='Deleting…';
+
+  const {data,error}=await sb.functions.invoke('delete-client',{
+    body:{clientId:currentClientId}
+  });
+
+  const failed=error||data?.error;
+
+  if(failed){
+    show(clientMessage,data?.error||error?.message||'Could not delete client.');
+    deleteClientBtn.disabled=false;
+    deleteClientBtn.textContent='Delete client';
+    return;
+  }
+
+  currentClientId=null;
+  currentWorkId=null;
+  clientWorkspace.classList.add('hidden');
+  adminEmpty.classList.remove('hidden');
+  clientMessage.hidden=true;
+  deleteClientBtn.disabled=false;
+  deleteClientBtn.textContent='Delete client';
+
+  await loadClients();
+}
+
 async function createClient(e) {
   e.preventDefault();
   const btn = e.currentTarget.querySelector('button[type=submit]');
   btn.disabled = true; btn.textContent = 'Creating…';
   const { data, error } = await sb.functions.invoke('create-client', { body: {
-    name: newName.value.trim(), email: newEmail.value.trim(), password: newPassword.value, service: newService.value.trim()
+    name: newName.value.trim(),
+    email: newEmail.value.trim(),
+    service: newService.value.trim()
   }});
   const detail = data?.error || error?.message;
-  show(newClientMessage, error || data?.error ? (detail || 'Could not create client.') : 'Client login created. They must change the temporary password on first sign in ✓', !(error || data?.error));
+  const failed = error || data?.error;
+  const successText = data?.warning
+    ? `Client created, but the welcome email could not be delivered: ${data.warning}`
+    : 'Client login created and welcome email sent ✓';
+  show(newClientMessage, failed ? (detail || 'Could not create client.') : successText, !failed);
   btn.disabled = false; btn.textContent = 'Create client';
   if (!(error || data?.error)) { e.currentTarget.reset(); await loadClients(); setTimeout(() => { newClientForm.classList.add('hidden'); adminEmpty.classList.remove('hidden'); }, 800); }
 }
