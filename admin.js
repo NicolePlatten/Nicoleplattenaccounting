@@ -6,6 +6,7 @@ let currentWorkId = null;
 let currentAdminId = null;
 let currentNotes = [];
 let unreadByClient = {};
+let dashboardActivity = [];
 
 const WORKFLOWS = {
   annual_accounts: ['Information received','Accounts preparation','Accounts review','Tax return preparation','Client approval','Submitted to HMRC','Completed'],
@@ -43,6 +44,9 @@ const show = (el, msg, ok = false) => {
   sendMessageBtn.onclick = sendMessage;
   editWorkflow.addEventListener('change', () => renderStageChecklist(null));
   markAllNotificationsRead?.addEventListener('click', markAllActivityRead);
+  showAllNotifications?.addEventListener('click', openActivityDrawer);
+  closeActivityDrawer?.addEventListener('click', closeActivityDrawerPanel);
+  document.querySelectorAll('[data-close-activity]').forEach(el=>el.addEventListener('click', closeActivityDrawerPanel));
 
   await loadClients();
 })();
@@ -118,22 +122,94 @@ function openClient(clientId, scroll = true) {
 
 async function refreshDashboardOverview(){
   const active=clientGroups.reduce((n,c)=>n+c.works.filter(w=>w.is_active!==false).length,0);
-  const [nr,dr]=await Promise.all([
+
+  const [unreadNotes,unreadDocs,recentNotes,recentDocs]=await Promise.all([
     sb.from('client_notes').select('client_id,note,service_name,created_at').is('admin_seen_at',null).order('created_at',{ascending:false}).limit(25),
-    sb.from('document_submissions').select('client_id,file_name,file_count,service_name,client_note,sent_at').is('admin_seen_at',null).order('sent_at',{ascending:false}).limit(25)
+    sb.from('document_submissions').select('client_id,file_name,file_count,service_name,client_note,sent_at').is('admin_seen_at',null).order('sent_at',{ascending:false}).limit(25),
+    sb.from('client_notes').select('client_id,note,service_name,created_at,admin_seen_at').order('created_at',{ascending:false}).limit(30),
+    sb.from('document_submissions').select('client_id,file_name,file_count,service_name,client_note,sent_at,admin_seen_at').order('sent_at',{ascending:false}).limit(30)
   ]);
-  const rows=[
-    ...(nr.data||[]).map(x=>({kind:'note',client_id:x.client_id,title:'New client note',detail:x.note,service:x.service_name,created_at:x.created_at})),
-    ...(dr.data||[]).map(x=>({kind:'document',client_id:x.client_id,title:'Documents received',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at}))
+
+  const unreadRows=[
+    ...(unreadNotes.data||[]).map(x=>({kind:'note',client_id:x.client_id,title:'New note',detail:x.note,service:x.service_name,created_at:x.created_at,unread:true})),
+    ...(unreadDocs.data||[]).map(x=>({kind:'document',client_id:x.client_id,title:'Documents uploaded',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at,unread:true}))
   ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
-  statClients.textContent=clientGroups.length; statActiveWork.textContent=active; statNewActivity.textContent=rows.length;
-  markAllNotificationsRead.disabled=!rows.length;
-  notificationCentre.innerHTML=rows.length?rows.map(x=>{
-    const c=clientGroups.find(v=>v.id===x.client_id);
-    return `<button class="notification-item" type="button" data-client="${escAttr(x.client_id)}"><span class="notification-type ${x.kind}">${x.kind==='document'?'DOC':'NOTE'}</span><span class="notification-copy"><span class="notification-topline"><strong>${esc(c?.full_name||'Client')}</strong><time>${formatStamp(x.created_at)}</time></span><b>${esc(x.title)}</b>${x.service?`<small>${esc(x.service)}</small>`:''}<p>${esc(x.detail||'')}</p></span><span class="notification-arrow">›</span></button>`;
-  }).join(''):`<div class="notification-empty"><span>NP</span><div><strong>You're all caught up</strong><p>No new client updates right now.</p></div></div>`;
+
+  dashboardActivity=[
+    ...(recentNotes.data||[]).map(x=>({kind:'note',client_id:x.client_id,title:'Client note',detail:x.note,service:x.service_name,created_at:x.created_at,unread:!x.admin_seen_at})),
+    ...(recentDocs.data||[]).map(x=>({kind:'document',client_id:x.client_id,title:'Document upload',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at,unread:!x.admin_seen_at}))
+  ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,40);
+
+  statClients.textContent=clientGroups.length;
+  statActiveWork.textContent=active;
+  statNewActivity.textContent=unreadRows.length;
+
+  markAllNotificationsRead.disabled=!unreadRows.length;
+
+  const visible=unreadRows.slice(0,3);
+
+  notificationCentre.innerHTML=visible.length
+    ? visible.map(x=>renderCompactNotification(x)).join('')
+    : `<div class="notification-empty">
+         <span class="notification-empty-icon">✓</span>
+         <div><strong>You're all caught up</strong><p>No new client updates right now.</p></div>
+       </div>`;
+
   notificationCentre.querySelectorAll('.notification-item').forEach(b=>b.onclick=()=>openClient(b.dataset.client));
 }
+
+function renderCompactNotification(x){
+  const client=clientGroups.find(v=>v.id===x.client_id);
+  const icon=x.kind==='document'?'↥':'✎';
+  const label=x.kind==='document'?'Document upload':'Client note';
+  return `<button class="notification-item compact-notification ${x.unread?'is-unread':''}" type="button" data-client="${escAttr(x.client_id)}">
+    <span class="notification-icon-wrap"><span class="unread-dot"></span><span class="notification-icon">${icon}</span></span>
+    <span class="notification-copy">
+      <span class="notification-topline">
+        <strong>${esc(client?.full_name||'Client')}</strong>
+        <time>${formatStamp(x.created_at)}</time>
+      </span>
+      <span class="notification-meta">${label}${x.service?` · ${esc(x.service)}`:''}</span>
+      <p>${esc(x.detail||'')}</p>
+    </span>
+    <span class="notification-arrow">›</span>
+  </button>`;
+}
+
+function openActivityDrawer(){
+  activityDrawer.classList.remove('hidden');
+  activityDrawer.setAttribute('aria-hidden','false');
+  document.body.classList.add('drawer-open');
+
+  activityDrawerList.innerHTML=dashboardActivity.length
+    ? dashboardActivity.map(x=>{
+        const client=clientGroups.find(v=>v.id===x.client_id);
+        return `<button class="drawer-activity-item ${x.unread?'is-unread':''}" type="button" data-client="${escAttr(x.client_id)}">
+          <span class="drawer-activity-icon">${x.kind==='document'?'↥':'✎'}</span>
+          <span class="drawer-activity-copy">
+            <span><strong>${esc(client?.full_name||'Client')}</strong><time>${formatStamp(x.created_at)}</time></span>
+            <b>${x.kind==='document'?'Document upload':'Client note'}</b>
+            ${x.service?`<small>${esc(x.service)}</small>`:''}
+            <p>${esc(x.detail||'')}</p>
+          </span>
+        </button>`;
+      }).join('')
+    : '<p class="portal-muted">No activity to show.</p>';
+
+  activityDrawerList.querySelectorAll('.drawer-activity-item').forEach(btn=>{
+    btn.onclick=()=>{
+      closeActivityDrawerPanel();
+      openClient(btn.dataset.client);
+    };
+  });
+}
+
+function closeActivityDrawerPanel(){
+  activityDrawer.classList.add('hidden');
+  activityDrawer.setAttribute('aria-hidden','true');
+  document.body.classList.remove('drawer-open');
+}
+
 async function markAllActivityRead(){
   const now=new Date().toISOString();
   markAllNotificationsRead.disabled=true; markAllNotificationsRead.textContent='Updating…';

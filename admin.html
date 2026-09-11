@@ -12,25 +12,70 @@
 </head>
 <body class="portal-body">
 <div class="portal-shell">
-  <header class="portal-topbar">
-    <a href="index.html"><img class="portal-logo" src="assets/logo.png" alt="Nicole Platten Accounting"></a>
-    <div class="portal-actions"><span class="status-pill">Nicole Admin</span><button id="logoutBtn" class="portal-btn secondary">Sign out</button></div>
+  <header class="portal-topbar admin-topbar">
+    <div class="admin-header-inner">
+      <a class="portal-brand admin-brand" href="index.html">
+        <img class="portal-logo" src="assets/logo.png" alt="Nicole Platten Accounting">
+        <span class="admin-brand-copy">
+          <strong>Nicole Platten Accounting</strong>
+          <small>Client management</small>
+        </span>
+      </a>
+
+      <div class="admin-header-actions">
+        <div class="admin-profile-chip">
+          <span class="admin-avatar">NP</span>
+          <span><strong>Nicole</strong><small>Administrator</small></span>
+        </div>
+        <button id="logoutBtn" class="admin-signout" type="button">Sign out</button>
+      </div>
+    </div>
   </header>
   <main>
-    <section class="portal-card pad admin-welcome">
-      <div><span class="portal-kicker">Nicole Platten Accounting</span><h1>Good to see you, Nicole.</h1><p class="portal-muted">Your clients, work and new updates — all in one place.</p></div>
+    <section class="admin-dashboard-head">
+      <div class="admin-welcome-panel">
+        <span class="portal-kicker">Practice overview</span>
+        <h1>Good to see you, Nicole.</h1>
+        <p>Here’s what’s happening across your clients today.</p>
+      </div>
+
       <div class="admin-overview">
-        <div class="overview-stat"><strong id="statClients">0</strong><small>Clients</small></div>
-        <div class="overview-stat"><strong id="statActiveWork">0</strong><small>Active work</small></div>
-        <div class="overview-stat attention"><strong id="statNewActivity">0</strong><small>New updates</small></div>
+        <div class="overview-stat">
+          <span class="overview-label">Clients</span>
+          <strong id="statClients">0</strong>
+          <small>Total client accounts</small>
+        </div>
+        <div class="overview-stat">
+          <span class="overview-label">Active work</span>
+          <strong id="statActiveWork">0</strong>
+          <small>Open pieces of work</small>
+        </div>
+        <div class="overview-stat attention">
+          <span class="overview-label">Needs attention</span>
+          <strong id="statNewActivity">0</strong>
+          <small>Unread client updates</small>
+        </div>
       </div>
     </section>
-    <section class="portal-card pad notification-centre">
+
+    <section class="notification-centre compact-centre">
       <div class="notification-centre-head">
-        <div><span class="portal-kicker">Notification centre</span><h2>What needs your attention</h2><p class="portal-muted">New client notes and document uploads appear here.</p></div>
-        <button id="markAllNotificationsRead" class="portal-btn secondary compact" type="button">Mark all read</button>
+        <div>
+          <span class="portal-kicker">Recent activity</span>
+          <h2>Latest client updates</h2>
+        </div>
+        <div class="notification-actions">
+          <button id="showAllNotifications" class="text-action" type="button">View all activity</button>
+          <button id="markAllNotificationsRead" class="text-action muted-action" type="button">Mark all read</button>
+        </div>
       </div>
-      <div id="notificationCentre" class="notification-list"><div class="notification-empty"><span>NP</span><div><strong>You're all caught up</strong><p>No new client updates right now.</p></div></div></div>
+
+      <div id="notificationCentre" class="notification-list compact-list">
+        <div class="notification-empty">
+          <span class="notification-empty-icon">✓</span>
+          <div><strong>You're all caught up</strong><p>No new client updates right now.</p></div>
+        </div>
+      </div>
     </section>
     <div class="admin-layout">
     <aside class="portal-card pad">
@@ -101,4 +146,21 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="portal-config.js"></script>
 <script src="admin.js"></script>
+
+  <div id="activityDrawer" class="activity-drawer hidden" aria-hidden="true">
+    <div class="activity-drawer-backdrop" data-close-activity></div>
+    <aside class="activity-drawer-panel">
+      <div class="activity-drawer-head">
+        <div>
+          <span class="portal-kicker">Activity history</span>
+          <h2>Client updates</h2>
+        </div>
+        <button id="closeActivityDrawer" class="drawer-close" type="button" aria-label="Close">×</button>
+      </div>
+      <div id="activityDrawerList" class="activity-drawer-list">
+        <p class="portal-muted">No activity to show.</p>
+      </div>
+    </aside>
+  </div>
+
 </body></html>
