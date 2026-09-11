@@ -16,9 +16,25 @@
     <a href="index.html"><img class="portal-logo" src="assets/logo.png" alt="Nicole Platten Accounting"></a>
     <div class="portal-actions"><span class="status-pill">Nicole Admin</span><button id="logoutBtn" class="portal-btn secondary">Sign out</button></div>
   </header>
-  <main class="admin-layout">
+  <main>
+    <section class="portal-card pad admin-welcome">
+      <div><span class="portal-kicker">Nicole Platten Accounting</span><h1>Good to see you, Nicole.</h1><p class="portal-muted">Your clients, work and new updates — all in one place.</p></div>
+      <div class="admin-overview">
+        <div class="overview-stat"><strong id="statClients">0</strong><small>Clients</small></div>
+        <div class="overview-stat"><strong id="statActiveWork">0</strong><small>Active work</small></div>
+        <div class="overview-stat attention"><strong id="statNewActivity">0</strong><small>New updates</small></div>
+      </div>
+    </section>
+    <section class="portal-card pad notification-centre">
+      <div class="notification-centre-head">
+        <div><span class="portal-kicker">Notification centre</span><h2>What needs your attention</h2><p class="portal-muted">New client notes and document uploads appear here.</p></div>
+        <button id="markAllNotificationsRead" class="portal-btn secondary compact" type="button">Mark all read</button>
+      </div>
+      <div id="notificationCentre" class="notification-list"><div class="notification-empty"><span>NP</span><div><strong>You're all caught up</strong><p>No new client updates right now.</p></div></div></div>
+    </section>
+    <div class="admin-layout">
     <aside class="portal-card pad">
-      <span class="portal-kicker">Clients</span><h2>Client list</h2>
+      <span class="portal-kicker">Client directory</span><h2>Your clients</h2>
       <button id="newClientBtn" class="portal-btn">+ Add client</button>
       <div id="clientList" class="client-list"></div>
     </aside>
@@ -79,6 +95,7 @@
         <button class="portal-btn" type="submit">Create client</button><button id="cancelNewClient" class="portal-btn secondary" type="button">Cancel</button>
       </form>
     </section>
+    </div>
   </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
