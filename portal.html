@@ -7,7 +7,7 @@
   <link rel="icon" href="assets/logo.png">
   <link rel="stylesheet" href="portal.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <title>Your Dashboard | Nicole Platten Accounting</title>
 </head>
 <body class="portal-body">
@@ -22,7 +22,26 @@
     </div>
     <aside class="portal-side">
       <section class="portal-card pad"><span class="portal-kicker">Next action</span><h2 id="nextAction">Nothing needed right now</h2><p id="nextActionDetail" class="portal-muted">Nicole will update this if anything is required from you.</p></section>
-      <section class="portal-card pad"><span class="portal-kicker">Documents</span><h2>Send a document</h2><p class="portal-muted">Your selected file is emailed directly to Nicole. It is not stored in your portal.</p><form id="documentForm" class="portal-form upload-box"><label>Which work is this for?</label><select id="documentWork"></select><input id="documentFile" type="file" required><textarea id="documentNote" placeholder="Optional note for Nicole"></textarea><div id="documentMessage" hidden></div><button class="portal-btn" type="submit">Email document to Nicole</button></form></section>
+
+      <section class="portal-card pad client-note-card">
+        <span class="portal-kicker">Contact Nicole</span>
+        <h2>Send Nicole a note</h2>
+        <p class="portal-muted">Ask a question, add an update or explain something relating to your accounts. Nicole is notified when you send it.</p>
+        <form id="clientNoteForm" class="portal-form">
+          <label for="clientNoteWork">Which work is this about?</label>
+          <select id="clientNoteWork"></select>
+          <label for="clientNoteText">Your note</label>
+          <textarea id="clientNoteText" maxlength="5000" required placeholder="Write your note to Nicole…"></textarea>
+          <div id="clientNoteMessage" hidden></div>
+          <button class="portal-btn" type="submit">Send note to Nicole</button>
+        </form>
+        <div class="client-note-history">
+          <h3>Your recent notes</h3>
+          <div id="clientNoteHistory"><p class="portal-muted">No notes sent yet.</p></div>
+        </div>
+      </section>
+
+      <section class="portal-card pad"><span class="portal-kicker">Documents</span><h2>Send documents</h2><p class="portal-muted">Your files are emailed directly to Nicole and are not stored in your portal. You can send up to 5 files at once.</p><form id="documentForm" class="portal-form upload-box"><label>Which work is this for?</label><select id="documentWork"></select><label for="documentFile">Choose files</label><input id="documentFile" type="file" multiple required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.heic,.webp"><small class="portal-muted">PDF, Word, Excel, CSV or image files. Maximum 8 MB per file and 20 MB total.</small><textarea id="documentNote" maxlength="2000" placeholder="Optional note for Nicole"></textarea><div id="documentMessage" hidden></div><button class="portal-btn" type="submit">Email documents to Nicole</button></form><div class="document-history"><h3>Recently sent</h3><div id="documentHistory"><p class="portal-muted">No documents sent yet.</p></div></div></section>
     </aside>
   </main>
 </div>

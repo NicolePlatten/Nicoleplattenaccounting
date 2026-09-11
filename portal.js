@@ -88,12 +88,19 @@ async function loadPortal(user){
   nextAction.textContent=priority?.next_action||'Nothing needed right now';
   nextActionDetail.textContent=priority?.next_action_detail||'Nicole will update this if anything is required from you.';
 
-  documentWork.innerHTML=active.length?active.map(w=>`<option value="${escAttr(w.service_name||'Accounting')}">${esc(w.service_name||'Accounting')}${w.period_label?` — ${esc(w.period_label)}`:''}</option>`).join(''):'<option value="General documents">General documents</option>';
+  const activeOptions=active.length
+    ? active.map(w=>`<option value="${escAttr(w.id)}">${esc(w.service_name||'Accounting')}${w.period_label?` — ${esc(w.period_label)}`:''}</option>`).join('')
+    : '';
+
+  documentWork.innerHTML=activeOptions || '<option value="">General documents</option>';
+  clientNoteWork.innerHTML='<option value="">General note</option>'+activeOptions;
 
   const {data:msgs}=await sb.from('messages').select('*').eq('client_id',user.id).order('created_at',{ascending:false});
   if(msgs?.length)messages.innerHTML=msgs.map(m=>`<div class="message"><p>${esc(m.message)}</p><time>${formatStamp(m.created_at)}</time></div>`).join('');
 
-  documentForm.addEventListener('submit',e=>sendDocument(e,profile));
+  await Promise.all([loadDocumentHistory(user.id),loadClientNoteHistory(user.id)]);
+  documentForm.addEventListener('submit',e=>sendDocuments(e,profile,user.id));
+  clientNoteForm.addEventListener('submit',e=>sendClientNote(e,user.id));
 }
 
 function stageData(work){
@@ -124,12 +131,116 @@ function renderHistoryCard(work,notes){
   return `<details class="history-details"><summary><span><strong>${esc(work.service_name||'Accounting work')}</strong><small>${esc(work.period_label||'Completed work')}</small></span><span class="history-complete">✓ Completed</span></summary><div class="history-stage-list">${stages.map((s,i)=>renderClientStage({...s,completed:true},i,stages.map(x=>({...x,completed:true})),notes)).join('')}</div></details>`;
 }
 
-async function sendDocument(e,profile){
-  e.preventDefault();const file=documentFile.files[0];if(!file)return;
-  if(file.size>8*1024*1024){show(documentMessage,'Please keep each file under 8 MB.');return;}
-  const btn=e.currentTarget.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Sending…';
-  const form=new FormData();form.append('file',file);form.append('note',documentNote.value);form.append('clientName',profile?.full_name||'Client');form.append('service',documentWork.value||'Accounting');
-  const {error}=await sb.functions.invoke('email-document',{body:form});show(documentMessage,error?'The document could not be emailed. Please try again.':'Sent securely to Nicole ✓',!error);if(!error)e.currentTarget.reset();btn.disabled=false;btn.textContent='Email document to Nicole';
+
+async function loadClientNoteHistory(clientId){
+  const el=document.getElementById('clientNoteHistory');
+  if(!el)return;
+
+  const {data,error}=await sb.from('client_notes')
+    .select('id,note,service_name,created_at')
+    .eq('client_id',clientId)
+    .order('created_at',{ascending:false})
+    .limit(10);
+
+  if(error||!data?.length){
+    el.innerHTML='<p class="portal-muted">No notes sent yet.</p>';
+    return;
+  }
+
+  el.innerHTML=data.map(n=>`<div class="client-own-note">
+    <div class="client-own-note-meta">
+      <strong>${esc(n.service_name||'General note')}</strong>
+      <time>${formatStamp(n.created_at)}</time>
+    </div>
+    <p>${esc(n.note)}</p>
+  </div>`).join('');
+}
+
+async function sendClientNote(e,clientId){
+  e.preventDefault();
+  const note=clientNoteText.value.trim();
+  if(!note)return show(clientNoteMessage,'Write a note first.');
+
+  const btn=e.currentTarget.querySelector('button[type=submit]');
+  btn.disabled=true;
+  btn.textContent='Sending…';
+
+  const {data,error}=await sb.functions.invoke('notify-client-note',{
+    body:{
+      note,
+      workId:clientNoteWork.value||null
+    }
+  });
+
+  const failed=error||data?.error;
+  const warning=data?.warning;
+
+  show(
+    clientNoteMessage,
+    failed
+      ? (data?.error||error?.message||'Your note could not be sent.')
+      : warning
+        ? 'Your note was saved, but the email notification could not be sent. Nicole can still see it in the admin portal.'
+        : 'Note sent to Nicole ✓',
+    !failed
+  );
+
+  if(!failed){
+    clientNoteText.value='';
+    await loadClientNoteHistory(clientId);
+  }
+
+  btn.disabled=false;
+  btn.textContent='Send note to Nicole';
+}
+
+async function loadDocumentHistory(clientId){
+  const el=document.getElementById('documentHistory');
+  if(!el)return;
+  const {data,error}=await sb.from('document_submissions')
+    .select('id,file_name,file_count,service_name,sent_at')
+    .eq('client_id',clientId)
+    .order('sent_at',{ascending:false})
+    .limit(8);
+  if(error||!data?.length){
+    el.innerHTML='<p class="portal-muted">No documents sent yet.</p>';
+    return;
+  }
+  el.innerHTML=data.map(d=>`<div class="document-history-row"><div><strong>${esc(d.file_name||'Document')}</strong>${d.service_name?`<small>${esc(d.service_name)}</small>`:''}</div><time>${formatStamp(d.sent_at)}</time></div>`).join('');
+}
+
+async function sendDocuments(e,profile,clientId){
+  e.preventDefault();
+  const files=[...documentFile.files];
+  if(!files.length)return show(documentMessage,'Choose at least one file.');
+
+  const allowedExt=/\.(pdf|doc|docx|xls|xlsx|csv|jpg|jpeg|png|heic|webp)$/i;
+  if(files.length>5)return show(documentMessage,'Please send no more than 5 files at once.');
+  if(files.some(f=>!allowedExt.test(f.name)))return show(documentMessage,'One of those file types is not supported.');
+  if(files.some(f=>f.size>8*1024*1024))return show(documentMessage,'Each file must be 8 MB or smaller.');
+  const total=files.reduce((sum,f)=>sum+f.size,0);
+  if(total>20*1024*1024)return show(documentMessage,'Please keep the total upload under 20 MB.');
+
+  const btn=e.currentTarget.querySelector('button[type=submit]');
+  btn.disabled=true; btn.textContent='Sending…';
+
+  const form=new FormData();
+  files.forEach(file=>form.append('files',file,file.name));
+  form.append('note',documentNote.value.trim());
+  form.append('workId',documentWork.value||'');
+
+  const {data,error}=await sb.functions.invoke('email-document',{body:form});
+  const detail=data?.error||error?.message;
+
+  show(documentMessage,(error||data?.error)
+    ? (detail||'The documents could not be emailed. Please try again.')
+    : 'Documents sent securely to Nicole ✓',!(error||data?.error));
+
+  if(!(error||data?.error)){
+    e.currentTarget.reset();
+    await loadDocumentHistory(clientId);
+  }
+  btn.disabled=false; btn.textContent='Email documents to Nicole';
 }
 function formatStamp(value){try{return new Date(value).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})}catch{return''}}
 function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}

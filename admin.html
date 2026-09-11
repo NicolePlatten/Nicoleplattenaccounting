@@ -7,7 +7,7 @@
   <link rel="icon" href="assets/logo.png">
   <link rel="stylesheet" href="portal.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <title>Admin Portal | Nicole Platten Accounting</title>
 </head>
 <body class="portal-body">
@@ -34,6 +34,18 @@
         </div>
         <div id="clientMessage" hidden></div>
         <div id="workList" class="work-list"></div>
+
+        <div class="subpanel client-activity-panel">
+          <div class="activity-heading">
+            <div>
+              <span class="portal-kicker">Client activity</span>
+              <h2>Notes & uploads from this client</h2>
+            </div>
+            <span id="clientUnreadPill" class="status-pill hidden">New activity</span>
+          </div>
+          <p class="portal-muted compact-copy">Anything the client sends through their portal appears here. New activity is also highlighted in the client list.</p>
+          <div id="clientActivity"><p class="portal-muted">No client activity yet.</p></div>
+        </div>
 
         <form id="newWorkForm" class="portal-form subpanel hidden">
           <h2>Add new work</h2>

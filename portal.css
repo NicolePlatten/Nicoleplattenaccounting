@@ -10,3 +10,182 @@
 .history-details{border-bottom:1px solid var(--line)}.history-details:last-child{border-bottom:0}.history-details summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:15px;align-items:center;padding:14px 0}.history-details summary::-webkit-details-marker{display:none}.history-details summary strong,.history-details summary small{display:block}.history-details summary small{color:var(--muted);margin-top:4px}.history-complete{font-size:.78rem;color:var(--ok);font-weight:700}.history-stage-list{padding:4px 0 4px}.history-stage-list .step{padding-bottom:14px}
 
 @media(max-width:820px){.portal-welcome,.work-card-head,.workspace-head,.work-progress-line{display:block}.portal-welcome .status-pill,.work-card-head .status-pill{margin-top:10px}.steps.compact{grid-template-columns:1fr}.workspace-head .portal-btn{margin-top:12px;width:100%}.stage-note-compose{grid-template-columns:1fr}.stage-note-compose .portal-btn{width:100%}.stage-note-meta{display:block}.stage-note-meta span{display:block;margin-top:3px}.history-details summary{align-items:flex-start}.portal-welcome h1{font-size:clamp(1.9rem,10vw,2.7rem);overflow-wrap:anywhere}}
+
+/* V4 document submission history */
+.document-history{margin-top:22px;border-top:1px solid var(--line,#eaded2);padding-top:18px}
+.document-history h3{margin:0 0 10px;font-size:1rem}
+.document-history-row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line,#eaded2)}
+.document-history-row:last-child{border-bottom:0}
+.document-history-row strong,.document-history-row small{display:block}
+.document-history-row small,.document-history-row time{font-size:.78rem;color:var(--muted,#6e6258)}
+.document-history-row time{white-space:nowrap}
+
+
+/* ===== V5: closer website branding + client activity ===== */
+.portal-body{
+  background:
+    radial-gradient(circle at 85% 0%,rgba(184,148,120,.15),transparent 30rem),
+    linear-gradient(145deg,#fffaf4 0%,#f5eee7 100%);
+}
+
+.portal-topbar{
+  border-bottom:1px solid rgba(111,89,71,.12);
+}
+
+.portal-card h1,
+.portal-card h2,
+.section-heading h2,
+.empty-work h2,
+.document-history h3,
+.client-note-history h3{
+  font-family:'Playfair Display',Georgia,'Times New Roman',serif;
+}
+
+.portal-card{
+  box-shadow:0 18px 55px rgba(51,41,31,.075);
+  backdrop-filter:blur(10px);
+}
+
+.portal-btn{
+  box-shadow:0 8px 20px rgba(111,89,71,.14);
+}
+
+.portal-btn.secondary{
+  box-shadow:none;
+}
+
+.portal-kicker{
+  color:#80634e;
+}
+
+.client-note-card{
+  border-top:3px solid rgba(184,148,120,.55);
+}
+
+.client-note-history{
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+}
+
+.client-note-history h3{
+  margin:0 0 8px;
+  color:var(--dark);
+  font-size:1.05rem;
+}
+
+.client-own-note{
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
+}
+
+.client-own-note:last-child{
+  border-bottom:0;
+}
+
+.client-own-note-meta{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-size:.75rem;
+}
+
+.client-own-note-meta strong{
+  color:var(--brown);
+}
+
+.client-own-note-meta time{
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.client-own-note p{
+  margin:.45rem 0 0;
+  white-space:pre-wrap;
+  line-height:1.55;
+  font-size:.87rem;
+}
+
+.client-item-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.activity-badge{
+  min-width:25px;
+  height:25px;
+  padding:0 7px;
+  border-radius:999px;
+  background:var(--brown);
+  color:#fff;
+  display:inline-grid;
+  place-items:center;
+  font-size:.72rem;
+  font-weight:700;
+}
+
+.activity-heading{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+
+.activity-heading h2{
+  margin:.3rem 0 .3rem;
+}
+
+.activity-row{
+  padding:14px 0;
+  border-bottom:1px solid var(--line);
+}
+
+.activity-row:last-child{
+  border-bottom:0;
+}
+
+.activity-row.unread{
+  margin:0 -10px;
+  padding:14px 10px;
+  border-radius:12px;
+  background:rgba(184,148,120,.10);
+}
+
+.activity-row-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.activity-row-head strong{
+  color:var(--dark);
+}
+
+.activity-row-head time,
+.activity-row small{
+  color:var(--muted);
+  font-size:.72rem;
+}
+
+.activity-row p{
+  margin:.45rem 0 0;
+  white-space:pre-wrap;
+  line-height:1.5;
+  font-size:.9rem;
+}
+
+@media(max-width:820px){
+  .activity-heading,
+  .activity-row-head,
+  .client-own-note-meta{
+    display:block;
+  }
+  .activity-row-head time,
+  .client-own-note-meta time{
+    display:block;
+    margin-top:3px;
+  }
+}

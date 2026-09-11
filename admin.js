@@ -5,6 +5,7 @@ let currentClientId = null;
 let currentWorkId = null;
 let currentAdminId = null;
 let currentNotes = [];
+let unreadByClient = {};
 
 const WORKFLOWS = {
   annual_accounts: ['Information received','Accounts preparation','Accounts review','Tax return preparation','Client approval','Submitted to HMRC','Completed'],
@@ -46,6 +47,15 @@ const show = (el, msg, ok = false) => {
 })();
 
 async function loadClients() {
+  unreadByClient = {};
+  const [unreadNotesResult, unreadDocsResult] = await Promise.all([
+    sb.from('client_notes').select('client_id').is('admin_seen_at', null),
+    sb.from('document_submissions').select('client_id').is('admin_seen_at', null)
+  ]);
+  [...(unreadNotesResult.data || []), ...(unreadDocsResult.data || [])].forEach(r => {
+    unreadByClient[r.client_id] = (unreadByClient[r.client_id] || 0) + 1;
+  });
+
   const { data: rows, error } = await sb.from('client_work').select('*').order('updated_at', { ascending: false });
   if (error) {
     clientList.innerHTML = `<p class="portal-error">Could not load clients: ${esc(error.message)}</p>`;
@@ -64,7 +74,11 @@ async function loadClients() {
   clientGroups = Object.values(map).sort((a,b) => (a.full_name || '').localeCompare(b.full_name || ''));
   clientList.innerHTML = clientGroups.length ? clientGroups.map(c => {
     const active = c.works.filter(w => w.is_active !== false).length;
-    return `<button class="client-item" data-id="${c.id}"><strong>${esc(c.full_name || 'Client')}</strong><small>${active} active item${active === 1 ? '' : 's'} · ${c.works.length} total</small></button>`;
+    const unread=unreadByClient[c.id]||0;
+    return `<button class="client-item" data-id="${c.id}">
+      <span class="client-item-row"><strong>${esc(c.full_name || 'Client')}</strong>${unread?`<span class="activity-badge">${unread}</span>`:''}</span>
+      <small>${active} active item${active === 1 ? '' : 's'} · ${c.works.length} total${unread?` · ${unread} new`:''}</small>
+    </button>`;
   }).join('') : '<p class="portal-muted">No clients yet.</p>';
 
   clientList.querySelectorAll('button').forEach(btn => btn.onclick = () => openClient(btn.dataset.id));
@@ -94,7 +108,77 @@ function openClient(clientId, scroll = true) {
   clientHeading.textContent = client.full_name || 'Client';
   clientSub.textContent = client.business_name || 'Manage ongoing and one-off work';
   renderWorkList(client);
+  loadClientActivity(clientId);
   if (scroll && innerWidth < 820) clientWorkspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+
+async function loadClientActivity(clientId){
+  const [notesResult, docsResult]=await Promise.all([
+    sb.from('client_notes')
+      .select('id,note,service_name,created_at,admin_seen_at')
+      .eq('client_id',clientId)
+      .order('created_at',{ascending:false})
+      .limit(30),
+    sb.from('document_submissions')
+      .select('id,file_name,file_count,service_name,client_note,sent_at,admin_seen_at')
+      .eq('client_id',clientId)
+      .order('sent_at',{ascending:false})
+      .limit(30)
+  ]);
+
+  const notes=(notesResult.data||[]).map(n=>({
+    kind:'note',
+    id:n.id,
+    title:'Client note',
+    service_name:n.service_name,
+    summary:n.note,
+    created_at:n.created_at,
+    seen:n.admin_seen_at
+  }));
+
+  const docs=(docsResult.data||[]).map(d=>({
+    kind:'document',
+    id:d.id,
+    title:'Document upload',
+    service_name:d.service_name,
+    summary:`${d.file_name||'Document'}${d.client_note?` — ${d.client_note}`:''}`,
+    created_at:d.sent_at,
+    seen:d.admin_seen_at
+  }));
+
+  const rows=[...notes,...docs]
+    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
+    .slice(0,40);
+
+  const hasUnread=rows.some(r=>!r.seen);
+  clientUnreadPill.classList.toggle('hidden',!hasUnread);
+
+  if(!rows.length){
+    clientActivity.innerHTML='<p class="portal-muted">No client activity yet.</p>';
+  } else {
+    clientActivity.innerHTML=rows.map(r=>`
+      <div class="activity-row ${r.seen?'':'unread'}">
+        <div class="activity-row-head">
+          <strong>${esc(r.title)}</strong>
+          <time>${formatStamp(r.created_at)}</time>
+        </div>
+        ${r.service_name?`<small>${esc(r.service_name)}</small>`:''}
+        <p>${esc(r.summary||'')}</p>
+      </div>
+    `).join('');
+  }
+
+  // Opening the client records the activity as reviewed by Nicole.
+  await Promise.all([
+    sb.from('client_notes').update({admin_seen_at:new Date().toISOString()}).eq('client_id',clientId).is('admin_seen_at',null),
+    sb.from('document_submissions').update({admin_seen_at:new Date().toISOString()}).eq('client_id',clientId).is('admin_seen_at',null)
+  ]);
+
+  unreadByClient[clientId]=0;
+  const badge=document.querySelector(`.client-item[data-id="${clientId}"] .activity-badge`);
+  if(badge)badge.remove();
+  clientUnreadPill.classList.add('hidden');
 }
 
 function renderWorkList(client) {
