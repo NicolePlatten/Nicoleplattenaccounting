@@ -64,7 +64,14 @@ const websiteFormError = document.getElementById('formError');
 
 if (websiteForm) {
   websiteForm.addEventListener('submit', async (event) => {
-    if (!websiteForm.checkValidity()) return;
+    // Always keep the enquiry inside the website. We intentionally prevent the
+    // browser's default form/mail-client behaviour and submit to Formspree here.
+    event.preventDefault();
+
+    if (!websiteForm.checkValidity()) {
+      websiteForm.reportValidity();
+      return;
+    }
 
     const promoCodeInput = websiteForm.querySelector('#promoCode');
     if (promoCodeInput) {
@@ -81,9 +88,14 @@ if (websiteForm) {
       }
     }
 
-    if (!window.fetch || !window.FormData) return; // native Formspree fallback
+    if (!window.fetch || !window.FormData) {
+      if (websiteFormError) {
+        websiteFormError.textContent = 'Your browser cannot send the form securely right now. Please try another browser or use WhatsApp.';
+        websiteFormError.hidden = false;
+      }
+      return;
+    }
 
-    event.preventDefault();
     if (websiteFormError) websiteFormError.hidden = true;
     if (formSubmitButton) {
       formSubmitButton.disabled = true;
