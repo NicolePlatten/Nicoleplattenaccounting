@@ -105,7 +105,7 @@ async function loadPortal(user){
 
 function stageData(work){
   if(Array.isArray(work.stages)&&work.stages.length)return work.stages;
-  const defaults=['Information received','Accounts preparation','Accounts review','Tax return preparation','Client approval','Submitted to HMRC','Completed'];
+  const defaults=["Package and fee agreed", "Onboarding documentation and invoice sent to client", "Documents received back from client", "Client/business information received", "Invoice paid", "Work in progress", "Work completed awaiting approval", "Approval from client", "Work submitted"];
   const ix=Math.max(0,defaults.indexOf(work.current_stage));
   return defaults.map((name,i)=>({name,completed:(work.progress||0)>=100||i<ix}));
 }

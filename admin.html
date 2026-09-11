@@ -171,7 +171,35 @@
           <span class="portal-kicker">Selected work</span>
           <div class="row2"><div><label>Service</label><input id="editService" required></div><div><label>Period / label</label><input id="editPeriod" placeholder="October 2026"></div></div>
           <div class="row2"><div><label>Workflow</label><select id="editWorkflow"><option value="annual_accounts">Annual accounts</option><option value="bookkeeping">Monthly bookkeeping</option><option value="vat">VAT return</option><option value="payroll">Payroll</option><option value="self_assessment">Self Assessment</option><option value="custom">Custom</option></select></div><div><label>Status</label><input id="editStatus" placeholder="In progress"></div></div>
-          <div><label>Progress stages</label><p class="portal-muted compact-copy">Tick a stage when complete. Add notes beneath any stage; notes remain visible to the client with a date and time.</p><div id="stageChecklist" class="stage-checklist"></div></div>
+          <div>
+            <label>Client progress</label>
+            <p class="portal-muted compact-copy">Tick each stage as it is completed. The client sees the same progress checklist in their portal.</p>
+            <div id="stageChecklist" class="stage-checklist"></div>
+          </div>
+
+          <details class="admin-notes-dropdown">
+            <summary>
+              <span><strong>Client-visible notes</strong><small>Keep notes separate from the progress checklist</small></span>
+              <span class="dropdown-chevron">⌄</span>
+            </summary>
+            <div class="admin-notes-dropdown-body">
+              <div id="adminNotesHistory" class="admin-notes-history">
+                <p class="portal-muted">No notes added yet.</p>
+              </div>
+              <div class="notes-compose-grid">
+                <div>
+                  <label for="noteStageSelect">Attach note to stage</label>
+                  <select id="noteStageSelect"></select>
+                </div>
+                <div class="notes-textarea-wrap">
+                  <label for="adminNoteText">Note visible to client</label>
+                  <textarea id="adminNoteText" maxlength="5000" placeholder="e.g. Awaiting your signed engagement letter."></textarea>
+                </div>
+              </div>
+              <div id="adminNoteMessage" hidden></div>
+              <button id="addAdminNoteBtn" class="portal-btn secondary" type="button">Add note</button>
+            </div>
+          </details>
           <div><label>Next action</label><input id="editAction" placeholder="Nothing needed right now"></div>
           <div><label>Next action detail</label><textarea id="editActionDetail"></textarea></div>
           <div id="workMessage" hidden></div>
@@ -179,7 +207,36 @@
           <button id="deleteWorkBtn" class="portal-btn secondary" type="button">Mark work complete / archive</button>
         </form>
 
-        <div class="subpanel"><h2>General message to client</h2><p class="portal-muted compact-copy">Use this for an update that does not belong to one particular progress stage.</p><textarea id="newMessage" placeholder="Write an update the client will see…"></textarea><button id="sendMessageBtn" class="portal-btn secondary" type="button">Add message</button></div>
+        <details class="communication-dropdown subpanel">
+          <summary>
+            <span><span class="portal-kicker">Communication</span><strong>Messages & documents</strong><small>Send portal updates or email documents to this client</small></span>
+            <span class="dropdown-chevron">⌄</span>
+          </summary>
+          <div class="communication-dropdown-body">
+            <div class="communication-section">
+              <h3>Portal message</h3>
+              <p class="portal-muted compact-copy">A simple update that appears when the client logs in.</p>
+              <textarea id="newMessage" placeholder="Write an update the client will see…"></textarea>
+              <button id="sendMessageBtn" class="portal-btn secondary" type="button">Add portal message</button>
+            </div>
+
+            <div class="communication-divider"></div>
+
+            <div class="communication-section">
+              <h3>Email client / send documents</h3>
+              <p class="portal-muted compact-copy">Send an email directly to the client's login email. You can attach up to 5 documents; files are emailed and are not stored in the portal.</p>
+              <label for="clientEmailSubject">Subject</label>
+              <input id="clientEmailSubject" placeholder="e.g. Your accounts are ready for approval">
+              <label for="clientEmailBody">Message</label>
+              <textarea id="clientEmailBody" maxlength="5000" placeholder="Write your email to the client…"></textarea>
+              <label for="clientEmailFiles">Documents (optional)</label>
+              <input id="clientEmailFiles" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.heic,.webp">
+              <small class="portal-muted">Maximum 5 files, 8 MB each, 20 MB total.</small>
+              <div id="clientEmailMessage" hidden></div>
+              <button id="sendClientEmailBtn" class="portal-btn" type="button">Send email / documents</button>
+            </div>
+          </div>
+        </details>
       </div>
 
       <form id="newClientForm" class="portal-form hidden">

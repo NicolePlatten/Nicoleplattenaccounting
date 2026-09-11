@@ -9,12 +9,12 @@ let unreadByClient = {};
 let dashboardActivity = [];
 
 const WORKFLOWS = {
-  annual_accounts: ['Information received','Accounts preparation','Accounts review','Tax return preparation','Client approval','Submitted to HMRC','Completed'],
-  bookkeeping: ['Documents received','Transactions reconciled','Queries raised','Queries resolved','Bookkeeping reviewed','Month completed'],
-  vat: ['Records received','VAT reconciled','Review complete','Client approval','VAT return submitted','Completed'],
-  payroll: ['Payroll information received','Payroll prepared','Client review','Payslips issued','RTI submitted','Completed'],
-  self_assessment: ['Information received','Return prepared','Review complete','Client approval','Submitted to HMRC','Completed'],
-  custom: []
+  annual_accounts: ["Package and fee agreed", "Onboarding documentation and invoice sent to client", "Documents received back from client", "Client/business information received", "Invoice paid", "Work in progress", "Work completed awaiting approval", "Approval from client", "Work submitted"],
+  bookkeeping: ["Package and fee agreed", "Onboarding documentation and invoice sent to client", "Documents received back from client", "Client/business information received", "Invoice paid", "Work in progress", "Work completed awaiting approval", "Approval from client", "Work submitted"],
+  vat: ["Package and fee agreed", "Onboarding documentation and invoice sent to client", "Documents received back from client", "Client/business information received", "Invoice paid", "Work in progress", "Work completed awaiting approval", "Approval from client", "Work submitted"],
+  payroll: ["Package and fee agreed", "Onboarding documentation and invoice sent to client", "Documents received back from client", "Client/business information received", "Invoice paid", "Work in progress", "Work completed awaiting approval", "Approval from client", "Work submitted"],
+  self_assessment: ["Package and fee agreed", "Onboarding documentation and invoice sent to client", "Documents received back from client", "Client/business information received", "Invoice paid", "Work in progress", "Work completed awaiting approval", "Approval from client", "Work submitted"],
+  custom: ["Package and fee agreed", "Onboarding documentation and invoice sent to client", "Documents received back from client", "Client/business information received", "Invoice paid", "Work in progress", "Work completed awaiting approval", "Approval from client", "Work submitted"]
 };
 
 const show = (el, msg, ok = false) => {
@@ -42,7 +42,9 @@ const show = (el, msg, ok = false) => {
   workEditor.addEventListener('submit', saveWork);
   deleteWorkBtn.onclick = archiveWork;
   sendMessageBtn.onclick = sendMessage;
-  editWorkflow.addEventListener('change', () => renderStageChecklist(null));
+  sendClientEmailBtn?.addEventListener('click', sendClientEmail);
+  addAdminNoteBtn?.addEventListener('click', addSelectedStageNote);
+  editWorkflow.addEventListener('change', () => { renderStageChecklist(null); renderNotesPanel(); });
   markAllNotificationsRead?.addEventListener('click', markAllActivityRead);
   showAllNotifications?.addEventListener('click', openActivityDrawer);
   closeActivityDrawer?.addEventListener('click', closeActivityDrawerPanel);
@@ -334,6 +336,7 @@ async function openWork(id) {
   const { data: notes, error } = await sb.from('work_notes').select('*').eq('work_id', id).order('created_at', { ascending: true });
   currentNotes = error ? [] : (notes || []);
   renderStageChecklist(work);
+  renderNotesPanel();
 }
 
 function defaultStageState(workflow) {
@@ -354,57 +357,78 @@ function parseStages(work) {
 
 function renderStageChecklist(work) {
   let stages = work && editWorkflow.value === work.workflow_type ? parseStages(work) : defaultStageState(editWorkflow.value);
-  if (!stages.length) stages = [{ name: 'Work completed', completed: false }];
+  if (!stages.length) stages = defaultStageState('annual_accounts');
+
   stageChecklist.innerHTML = stages.map((s,i) => `
-    <div class="stage-admin-card" data-stage-index="${i}">
-      <label class="stage-check">
-        <input type="checkbox" ${s.completed ? 'checked' : ''}>
-        <input class="stage-name" value="${escAttr(s.name)}" aria-label="Stage name">
-      </label>
-      <div class="stage-note-history" id="stageNotes${i}">${renderAdminNotes(i)}</div>
-      <div class="stage-note-compose">
-        <textarea id="stageNoteInput${i}" maxlength="5000" placeholder="Add a note the client will see for this stage…"></textarea>
-        <button type="button" class="portal-btn secondary add-stage-note" data-stage-index="${i}">Add note</button>
+    <label class="stage-admin-card simple-stage" data-stage-index="${i}">
+      <span class="stage-number">${i + 1}</span>
+      <input type="checkbox" ${s.completed ? 'checked' : ''}>
+      <input class="stage-name" value="${escAttr(s.name)}" aria-label="Stage name">
+    </label>
+  `).join('');
+}
+
+function renderNotesPanel(){
+  if (!window.noteStageSelect || !window.adminNotesHistory) return;
+  const rows=[...stageChecklist.querySelectorAll('.stage-admin-card')];
+  noteStageSelect.innerHTML=rows.map((row,i)=>{
+    const name=row.querySelector('.stage-name')?.value.trim() || `Stage ${i+1}`;
+    return `<option value="${i}">${i+1}. ${esc(name)}</option>`;
+  }).join('');
+
+  if(!currentNotes.length){
+    adminNotesHistory.innerHTML='<p class="portal-muted">No client-visible notes have been added to this work yet.</p>';
+    return;
+  }
+
+  adminNotesHistory.innerHTML=currentNotes.map(n=>`
+    <div class="admin-note-history-item">
+      <div class="admin-note-history-head">
+        <span><strong>${Number(n.stage_index)+1}. ${esc(n.stage_name || 'Progress stage')}</strong><small>${esc(n.author_name || 'Nicole')} · ${formatStamp(n.created_at)}</small></span>
+        <button type="button" class="note-delete" data-note-id="${escAttr(n.id)}">Delete</button>
       </div>
-      <div id="stageNoteMessage${i}" hidden></div>
+      <p>${esc(n.note)}</p>
     </div>
   `).join('');
-  stageChecklist.querySelectorAll('.add-stage-note').forEach(btn => btn.onclick = () => addStageNote(Number(btn.dataset.stageIndex)));
+
+  bindDeleteNoteButtons();
 }
 
-function renderAdminNotes(stageIndex) {
-  const notes = currentNotes.filter(n => Number(n.stage_index) === stageIndex);
-  if (!notes.length) return '<p class="portal-muted no-stage-notes">No notes added yet.</p>';
-  return notes.map(n => `<div class="stage-note"><div class="stage-note-meta"><strong>${esc(n.author_name || 'Nicole')}</strong><span>${formatStamp(n.created_at)}</span></div><p>${esc(n.note)}</p><button type="button" class="note-delete" data-note-id="${n.id}" aria-label="Delete note">Delete</button></div>`).join('');
-}
-
-async function addStageNote(stageIndex) {
+async function addSelectedStageNote(){
   if (!currentWorkId) return;
-  const input = document.getElementById(`stageNoteInput${stageIndex}`);
-  const msg = document.getElementById(`stageNoteMessage${stageIndex}`);
-  const note = input?.value.trim();
-  if (!note) { show(msg, 'Write a note first.'); return; }
-  const row = stageChecklist.querySelector(`[data-stage-index="${stageIndex}"]`);
-  const stageName = row?.querySelector('.stage-name')?.value.trim() || `Stage ${stageIndex + 1}`;
-  const { data, error } = await sb.from('work_notes').insert({
-    work_id: currentWorkId,
-    stage_index: stageIndex,
-    stage_name: stageName,
-    author_id: currentAdminId,
-    author_name: 'Nicole',
+  const note=adminNoteText.value.trim();
+  if(!note){ show(adminNoteMessage,'Write a note first.'); return; }
+
+  const stageIndex=Number(noteStageSelect.value || 0);
+  const row=stageChecklist.querySelector(`[data-stage-index="${stageIndex}"]`);
+  const stageName=row?.querySelector('.stage-name')?.value.trim() || `Stage ${stageIndex+1}`;
+
+  addAdminNoteBtn.disabled=true;
+  addAdminNoteBtn.textContent='Adding…';
+
+  const {data,error}=await sb.from('work_notes').insert({
+    work_id:currentWorkId,
+    stage_index:stageIndex,
+    stage_name:stageName,
+    author_id:currentAdminId,
+    author_name:'Nicole',
     note
   }).select().single();
-  show(msg, error ? `Could not add note: ${error.message}` : 'Note added to client portal ✓', !error);
-  if (!error && data) {
+
+  show(adminNoteMessage,error?`Could not add note: ${error.message}`:'Note added to client portal ✓',!error);
+
+  if(!error && data){
     currentNotes.push(data);
-    input.value = '';
-    document.getElementById(`stageNotes${stageIndex}`).innerHTML = renderAdminNotes(stageIndex);
-    bindDeleteNoteButtons();
+    adminNoteText.value='';
+    renderNotesPanel();
   }
+
+  addAdminNoteBtn.disabled=false;
+  addAdminNoteBtn.textContent='Add note';
 }
 
 function bindDeleteNoteButtons() {
-  stageChecklist.querySelectorAll('.note-delete').forEach(btn => btn.onclick = () => deleteStageNote(btn.dataset.noteId));
+  adminNotesHistory?.querySelectorAll('.note-delete').forEach(btn => btn.onclick = () => deleteStageNote(btn.dataset.noteId));
 }
 
 async function deleteStageNote(noteId) {
@@ -412,10 +436,7 @@ async function deleteStageNote(noteId) {
   const { error } = await sb.from('work_notes').delete().eq('id', noteId);
   if (!error) {
     currentNotes = currentNotes.filter(n => n.id !== noteId);
-    const client = clientGroups.find(c => c.id === currentClientId);
-    const work = client?.works.find(w => w.id === currentWorkId);
-    renderStageChecklist(work);
-    bindDeleteNoteButtons();
+    renderNotesPanel();
   }
 }
 
@@ -501,6 +522,47 @@ async function archiveWork() {
   const { error } = await sb.from('client_work').update({ stages, is_active: false, status: 'Completed', progress: 100, current_stage: 'Completed', completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', currentWorkId);
   show(workMessage, error ? `Could not complete item: ${error.message}` : 'Moved to completed history ✓', !error);
   if (!error) { await loadClients(); workEditor.classList.add('hidden'); }
+}
+
+
+async function sendClientEmail(){
+  if(!currentClientId) return;
+  const subject=clientEmailSubject.value.trim();
+  const message=clientEmailBody.value.trim();
+  const files=[...(clientEmailFiles.files||[])];
+
+  if(!subject) return show(clientEmailMessage,'Add an email subject.');
+  if(!message && !files.length) return show(clientEmailMessage,'Write a message or attach a document.');
+
+  if(files.length>5) return show(clientEmailMessage,'Please send no more than 5 files at once.');
+  const maxEach=8*1024*1024, maxTotal=20*1024*1024;
+  if(files.some(f=>f.size>maxEach)) return show(clientEmailMessage,'Each file must be 8 MB or smaller.');
+  if(files.reduce((n,f)=>n+f.size,0)>maxTotal) return show(clientEmailMessage,'Files must total 20 MB or less.');
+
+  sendClientEmailBtn.disabled=true;
+  sendClientEmailBtn.textContent='Sending…';
+
+  const form=new FormData();
+  form.append('clientId',currentClientId);
+  form.append('subject',subject);
+  form.append('message',message);
+  files.forEach(f=>form.append('files',f,f.name));
+
+  const {data,error}=await sb.functions.invoke('email-client',{
+    body:form
+  });
+
+  const failed=error||data?.error;
+  show(clientEmailMessage,failed?(data?.error||error?.message||'Could not send email.'):'Email sent to client ✓',!failed);
+
+  if(!failed){
+    clientEmailSubject.value='';
+    clientEmailBody.value='';
+    clientEmailFiles.value='';
+  }
+
+  sendClientEmailBtn.disabled=false;
+  sendClientEmailBtn.textContent='Send email / documents';
 }
 
 async function sendMessage() {
