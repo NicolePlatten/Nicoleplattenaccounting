@@ -233,13 +233,36 @@ if (websiteForm) {
     document.addEventListener('keydown', escHandler);
 
     backdrop.querySelector('.web5-copy-code')?.addEventListener('click', async e => {
+      const button = e.currentTarget;
+      let copied = false;
       try {
-        await navigator.clipboard.writeText(DISCOUNT_CODE);
-        e.currentTarget.textContent = 'Copied';
-      } catch (_) {
-        e.currentTarget.textContent = DISCOUNT_CODE;
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(DISCOUNT_CODE);
+          copied = true;
+        }
+      } catch (_) {}
+      if (!copied) {
+        const helper = document.createElement('textarea');
+        helper.value = DISCOUNT_CODE;
+        helper.setAttribute('readonly', '');
+        helper.style.position = 'fixed';
+        helper.style.opacity = '0';
+        document.body.appendChild(helper);
+        helper.select();
+        helper.setSelectionRange(0, helper.value.length);
+        try { copied = document.execCommand('copy'); } catch (_) {}
+        helper.remove();
       }
-      track('discount_code_copy', {page_path: location.pathname});
+      button.textContent = copied ? 'Copied ✓' : 'Select code';
+      if (!copied) {
+        const code = backdrop.querySelector('.web5-code-row strong');
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        const selection = window.getSelection();
+        selection.removeAllRanges(); selection.addRange(range);
+      }
+      setTimeout(() => { if (document.body.contains(button)) button.textContent = 'Copy code'; }, 2200);
+      track('discount_code_copy', {page_path: location.pathname, success: copied});
     });
 
     form.addEventListener('submit', async e => {
