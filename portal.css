@@ -951,3 +951,43 @@ details[open]>.dropdown-chevron,details[open]>summary .dropdown-chevron{transfor
 @media(max-width:650px){
   .email-reply-top,.email-reply-foot{flex-direction:column}
 }
+
+
+/* ===== V14 calendar & recurring dates ===== */
+.practice-calendar-section{margin:20px 0;padding:24px;border:1px solid rgba(111,89,71,.15);border-radius:24px;background:rgba(255,255,255,.88);box-shadow:0 20px 60px rgba(51,41,31,.07)}
+.calendar-section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:22px;margin-bottom:20px}
+.calendar-section-head h2{font-family:Georgia,'Times New Roman',serif;font-weight:500;color:var(--dark);font-size:2rem;margin:.25rem 0 .35rem}
+.calendar-section-head p{margin:0;color:var(--muted)}
+.calendar-summary-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.calendar-chip{padding:7px 10px;border-radius:999px;background:#f5eee7;color:#6f5947;font-size:12px;font-weight:700}
+.calendar-chip.strong{background:#e8ddd1;color:#5e4837}.calendar-chip.overdue{background:#fff0ed;color:#9a4f43}
+.calendar-shell{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px}
+.calendar-main,.calendar-day-panel{border:1px solid var(--line);border-radius:18px;background:#fffdf9}
+.calendar-main{padding:18px}.calendar-day-panel{padding:20px}
+.calendar-day-panel h3{font-family:Georgia,'Times New Roman',serif;margin:.35rem 0 16px;color:var(--dark)}
+.calendar-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.calendar-toolbar h3{margin:0;font-family:Georgia,'Times New Roman',serif;font-size:1.5rem;font-weight:500}
+.calendar-nav-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--brown);font-size:24px;cursor:pointer}
+.calendar-weekdays,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.calendar-weekdays span{text-align:center;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8d7f73;font-weight:800;padding:8px 2px}
+.calendar-day{min-height:78px;border:1px solid #f0e7df;background:#fff;padding:8px;text-align:left;cursor:pointer;color:var(--ink)}
+.calendar-day:hover{background:#fbf7f2}.calendar-day.outside{opacity:.35}.calendar-day.selected{outline:2px solid rgba(111,89,71,.36);outline-offset:-2px;background:#fbf5ef}.calendar-day.has-overdue{background:#fff8f6}
+.calendar-day.today .calendar-day-number{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:var(--brown);color:#fff}
+.calendar-day-number{font-size:12px;font-weight:700}.calendar-dots{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:13px}
+.calendar-dot,.calendar-due-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#a88a73}
+.calendar-dot.cadence-monthly,.calendar-due-dot.cadence-monthly{background:#8f765f}.calendar-dot.cadence-quarterly,.calendar-due-dot.cadence-quarterly{background:#6f806c}
+.calendar-dot.cadence-annual,.calendar-due-dot.cadence-annual{background:#8b6f88}.calendar-dot.cadence-one_off,.calendar-due-dot.cadence-one_off{background:#b38461}
+.calendar-dots b{font-size:9px;color:var(--muted)}
+.calendar-due-item{width:100%;display:grid;grid-template-columns:10px 1fr 14px;gap:10px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px;text-align:left;margin-bottom:8px;cursor:pointer}
+.calendar-due-item:hover{background:#f9f4ee}.calendar-due-item.overdue{border-color:#edd0ca}.calendar-due-item strong,.calendar-due-item small{display:block}.calendar-due-item small{margin-top:3px;color:var(--muted);font-size:11px}
+.client-schedule-panel{margin-top:18px}.schedule-form{padding:18px;margin:14px 0;border-radius:16px;background:#faf6f1;border:1px solid var(--line)}
+.schedule-reminders{display:flex;flex-wrap:wrap;gap:16px;padding:4px 0}.schedule-reminders label{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}.schedule-reminders input{width:auto}
+.client-schedules-list{display:grid;gap:9px;margin-top:14px}.client-schedule-row{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:13px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff}.client-schedule-row.inactive{opacity:.55}
+.schedule-date-badge{width:48px;height:48px;border-radius:12px;background:#f5eee7;color:#6f5947;display:grid;place-items:center;align-content:center;line-height:1}.schedule-date-badge strong{font-size:18px}.schedule-date-badge small{font-size:9px;margin-top:3px;font-weight:800}
+.schedule-row-copy strong,.schedule-row-copy small{display:block}.schedule-row-copy small{color:var(--muted);margin-top:4px;font-size:11px}
+.schedule-row-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.schedule-row-actions button{border:1px solid var(--line);background:#fff;color:var(--brown);padding:7px 10px;border-radius:999px;font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.schedule-row-actions .schedule-complete{background:#eef5ef;color:#4d6d54;border-color:#d7e8da}.schedule-row-actions .schedule-delete{color:#99564c}
+.client-due-card{overflow:hidden;position:relative}.client-due-card:after{content:"";position:absolute;right:-25px;top:-35px;width:120px;height:120px;border-radius:50%;background:rgba(168,138,115,.08)}
+.client-due-card h2{position:relative;z-index:1}.client-due-card.overdue{border-color:#e8c9c2}.client-due-card.overdue h2{color:#954f45}.due-date-text{font-weight:700;color:#6f5947;margin:.35rem 0}
+@media(max-width:900px){.calendar-shell{grid-template-columns:1fr}}
+@media(max-width:650px){.calendar-section-head{display:block}.calendar-summary-chips{justify-content:flex-start;margin-top:12px}.practice-calendar-section{padding:15px}.calendar-main{padding:10px}.calendar-day{min-height:58px;padding:5px}.calendar-weekdays span{font-size:8px}.calendar-dots{margin-top:7px}.client-schedule-row{grid-template-columns:48px 1fr}.schedule-row-actions{grid-column:1/-1;justify-content:flex-start}}

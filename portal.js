@@ -129,6 +129,8 @@ async function loadPortal(user){
   if(profile?.must_change_password) return location.href='change-password.html';
   welcomeName.textContent=`Welcome, ${profile?.full_name||'there'}`;
 
+  await loadClientNextDue(user.id);
+
   const {data:works,error}=await sb.from('client_work').select('*').eq('client_id',user.id).order('updated_at',{ascending:false});
   if(error){activeWork.innerHTML='<p class="portal-error">We could not load your work right now.</p>';return;}
 
@@ -175,6 +177,46 @@ function stageData(work){
   return defaults.map((name,i)=>({name,completed:(work.progress||0)>=100||i<ix}));
 }
 function progress(work){const s=stageData(work);return s.length?Math.round(s.filter(x=>x.completed).length/s.length*100):(work.progress||0)}
+
+
+async function loadClientNextDue(clientId){
+  const card=document.getElementById('clientDueCard');
+  if(!card)return;
+
+  const {data,error}=await sb.from('client_schedules')
+    .select('title,client_label,cadence,next_due_date')
+    .eq('client_id',clientId)
+    .eq('is_active',true)
+    .order('next_due_date',{ascending:true})
+    .limit(1);
+
+  if(error || !data?.length){
+    clientDueHeadline.textContent='Nothing due yet';
+    clientDueDate.textContent='Nicole will add your next date when required.';
+    clientDueService.textContent='';
+    return;
+  }
+
+  const item=data[0];
+  const today=localDateOnly(new Date());
+  const due=new Date(`${item.next_due_date}T12:00:00`);
+  const start=new Date(`${today}T12:00:00`);
+  const days=Math.round((due-start)/86400000);
+  const label=item.client_label||'Next due date';
+
+  if(days>1) clientDueHeadline.textContent=`${label} due in ${days} days`;
+  else if(days===1) clientDueHeadline.textContent=`${label} due tomorrow`;
+  else if(days===0) clientDueHeadline.textContent=`${label} due today`;
+  else clientDueHeadline.textContent=`${label} is ${Math.abs(days)} day${Math.abs(days)===1?'':'s'} overdue`;
+
+  clientDueDate.textContent=due.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  clientDueService.textContent=item.title||'';
+  card.classList.toggle('overdue',days<0);
+}
+function localDateOnly(d){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
 
 function renderWorkCard(work,notes){
   const pct=progress(work), stages=stageData(work), current=stages.find(s=>!s.completed);

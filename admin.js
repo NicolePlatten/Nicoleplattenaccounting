@@ -4,6 +4,9 @@ let clientGroups = [];
 let currentClientId = null;
 let currentWorkId = null;
 let currentAdminId = null;
+let allSchedules = [];
+let calendarCursor = new Date();
+let selectedCalendarDate = null;
 let currentNotes = [];
 let unreadByClient = {};
 let dashboardActivity = [];
@@ -38,6 +41,15 @@ const show = (el, msg, ok = false) => {
   newClientForm.addEventListener('submit', createClient);
   newWorkBtn.onclick = showNewWork;
   deleteClientBtn?.addEventListener('click', deleteCurrentClient);
+  addScheduleBtn?.addEventListener('click', ()=>{
+    scheduleForm.classList.remove('hidden');
+    if(!scheduleDueDate.value) scheduleDueDate.value=formatDateInput(new Date());
+    scheduleTitle.focus();
+  });
+  cancelScheduleBtn?.addEventListener('click', ()=>scheduleForm.classList.add('hidden'));
+  scheduleForm?.addEventListener('submit', saveClientSchedule);
+  calendarPrev?.addEventListener('click', ()=>{calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()-1,1);renderCalendar();});
+  calendarNext?.addEventListener('click', ()=>{calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+1,1);renderCalendar();});
   cancelNewWork.onclick = () => newWorkForm.classList.add('hidden');
   newWorkForm.addEventListener('submit', createWork);
   workEditor.addEventListener('submit', saveWork);
@@ -59,6 +71,7 @@ const show = (el, msg, ok = false) => {
   });
 
   await loadClients();
+  await loadAllSchedules();
 })();
 
 async function loadClients() {
@@ -127,6 +140,7 @@ function openClient(clientId, scroll = true) {
   renderWorkList(client);
   loadClientActivity(clientId);
   loadClientEmailReplies(clientId);
+  loadClientSchedules(clientId);
   if (scroll && innerWidth < 820) clientWorkspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -372,6 +386,204 @@ async function loadClientEmailReplies(clientId){
       .is('admin_seen_at',null);
     emailReplyCount?.classList.add('hidden');
   }
+}
+
+
+async function loadAllSchedules(){
+  const {data,error}=await sb.from('client_schedules')
+    .select('id,client_id,title,client_label,cadence,next_due_date,remind_14_days,remind_7_days,is_active,profiles!client_schedules_client_id_fkey(full_name)')
+    .eq('is_active',true)
+    .order('next_due_date',{ascending:true});
+
+  if(error){console.error('Could not load schedules',error);return;}
+  allSchedules=data||[];
+  updateScheduleStats();
+  renderCalendar();
+}
+
+function updateScheduleStats(){
+  const today=dateOnly(new Date());
+  const seven=addDays(today,7);
+  const fourteen=addDays(today,14);
+  const overdue=allSchedules.filter(s=>s.next_due_date<today).length;
+  const due7=allSchedules.filter(s=>s.next_due_date>=today && s.next_due_date<=seven).length;
+  const due14=allSchedules.filter(s=>s.next_due_date>=today && s.next_due_date<=fourteen).length;
+  if(window.statUpcoming) statUpcoming.textContent=due7;
+  if(window.calendarOverdueChip) calendarOverdueChip.textContent=`${overdue} overdue`;
+  if(window.calendar7Chip) calendar7Chip.textContent=`${due7} this week`;
+  if(window.calendar14Chip) calendar14Chip.textContent=`${due14} in 14 days`;
+}
+
+function renderCalendar(){
+  if(!window.calendarGrid)return;
+  const year=calendarCursor.getFullYear(),month=calendarCursor.getMonth();
+  calendarMonthLabel.textContent=new Date(year,month,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+
+  const first=new Date(year,month,1);
+  const firstMon=(first.getDay()+6)%7;
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const prevDays=new Date(year,month,0).getDate();
+  const today=dateOnly(new Date());
+  const cells=[];
+
+  for(let i=0;i<42;i++){
+    let dnum,cellDate,outside=false;
+    if(i<firstMon){dnum=prevDays-firstMon+i+1;cellDate=dateOnly(new Date(year,month-1,dnum));outside=true;}
+    else if(i>=firstMon+daysInMonth){dnum=i-(firstMon+daysInMonth)+1;cellDate=dateOnly(new Date(year,month+1,dnum));outside=true;}
+    else {dnum=i-firstMon+1;cellDate=dateOnly(new Date(year,month,dnum));}
+
+    const due=allSchedules.filter(s=>s.next_due_date===cellDate);
+    const overdue=cellDate<today && due.length;
+    cells.push(`<button class="calendar-day ${outside?'outside':''} ${cellDate===today?'today':''} ${selectedCalendarDate===cellDate?'selected':''} ${overdue?'has-overdue':''}" type="button" data-date="${cellDate}">
+      <span class="calendar-day-number">${dnum}</span>
+      <span class="calendar-dots">
+        ${due.slice(0,4).map(s=>`<i class="calendar-dot cadence-${s.cadence}"></i>`).join('')}
+        ${due.length>4?`<b>+${due.length-4}</b>`:''}
+      </span>
+    </button>`);
+  }
+
+  calendarGrid.innerHTML=cells.join('');
+  calendarGrid.querySelectorAll('.calendar-day').forEach(btn=>btn.addEventListener('click',()=>{
+    selectedCalendarDate=btn.dataset.date;
+    renderCalendar();
+    renderCalendarDay(selectedCalendarDate);
+  }));
+
+  if(!selectedCalendarDate){
+    const firstUpcoming=allSchedules.find(s=>s.next_due_date>=today);
+    selectedCalendarDate=firstUpcoming?.next_due_date||today;
+  }
+  renderCalendarDay(selectedCalendarDate);
+}
+
+function renderCalendarDay(date){
+  if(!window.calendarDayItems)return;
+  const d=new Date(`${date}T12:00:00`);
+  calendarSelectedDate.textContent=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const rows=allSchedules.filter(s=>s.next_due_date===date);
+  calendarDayItems.innerHTML=rows.length?rows.map(s=>`
+    <button class="calendar-due-item ${date<dateOnly(new Date())?'overdue':''}" type="button" data-client="${s.client_id}">
+      <span class="calendar-due-dot cadence-${s.cadence}"></span>
+      <span><strong>${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${cadenceLabel(s.cadence)}</small></span>
+      <b>›</b>
+    </button>`).join(''):'<p class="portal-muted">Nothing due on this date.</p>';
+
+  calendarDayItems.querySelectorAll('[data-client]').forEach(btn=>btn.addEventListener('click',()=>{
+    document.querySelector(`.client-item[data-id="${btn.dataset.client}"]`)?.click();
+    document.getElementById('clientDirectory')?.scrollIntoView({behavior:'smooth',block:'start'});
+  }));
+}
+
+async function loadClientSchedules(clientId){
+  if(!window.clientSchedules)return;
+  const {data,error}=await sb.from('client_schedules').select('*').eq('client_id',clientId)
+    .order('is_active',{ascending:false}).order('next_due_date',{ascending:true});
+
+  if(error){clientSchedules.innerHTML=`<p class="portal-error">Could not load calendar dates: ${esc(error.message)}</p>`;return;}
+
+  const rows=data||[];
+  clientSchedules.innerHTML=rows.length?rows.map(s=>`
+    <article class="client-schedule-row ${s.is_active?'':'inactive'}">
+      <div class="schedule-date-badge">
+        <strong>${new Date(`${s.next_due_date}T12:00:00`).getDate()}</strong>
+        <small>${new Date(`${s.next_due_date}T12:00:00`).toLocaleDateString('en-GB',{month:'short'}).toUpperCase()}</small>
+      </div>
+      <div class="schedule-row-copy">
+        <strong>${esc(s.title)}</strong>
+        <small>${esc(s.client_label)} · ${cadenceLabel(s.cadence)} · ${esc(dueRelativeText(s.next_due_date))}</small>
+      </div>
+      <div class="schedule-row-actions">
+        ${s.is_active?`<button class="schedule-complete" data-complete-schedule="${s.id}" type="button">✓ Complete</button>`:''}
+        <button class="schedule-delete" data-delete-schedule="${s.id}" type="button">Delete</button>
+      </div>
+    </article>`).join(''):'<p class="portal-muted">No recurring dates added yet.</p>';
+
+  clientSchedules.querySelectorAll('[data-complete-schedule]').forEach(btn=>btn.addEventListener('click',()=>completeSchedule(btn.dataset.completeSchedule,rows.find(x=>x.id===btn.dataset.completeSchedule))));
+  clientSchedules.querySelectorAll('[data-delete-schedule]').forEach(btn=>btn.addEventListener('click',()=>deleteSchedule(btn.dataset.deleteSchedule)));
+}
+
+async function saveClientSchedule(e){
+  e.preventDefault();
+  if(!currentClientId)return;
+  const payload={
+    client_id:currentClientId,
+    title:scheduleTitle.value.trim(),
+    client_label:scheduleClientLabel.value.trim()||'Next invoice',
+    cadence:scheduleCadence.value,
+    next_due_date:scheduleDueDate.value,
+    remind_14_days:scheduleRemind14.checked,
+    remind_7_days:scheduleRemind7.checked,
+    is_active:true
+  };
+  if(!payload.title||!payload.next_due_date)return show(scheduleMessage,'Add a title and next due date.');
+
+  const btn=e.currentTarget.querySelector('button[type=submit]');
+  btn.disabled=true;btn.textContent='Saving…';
+  const {error}=await sb.from('client_schedules').insert(payload);
+  show(scheduleMessage,error?(error.message||'Could not save schedule.'):'Schedule added ✓',!error);
+
+  if(!error){
+    scheduleForm.reset();
+    scheduleClientLabel.value='Next invoice';
+    scheduleRemind14.checked=true;scheduleRemind7.checked=true;
+    scheduleForm.classList.add('hidden');
+    await loadClientSchedules(currentClientId);
+    await loadAllSchedules();
+  }
+  btn.disabled=false;btn.textContent='Save schedule';
+}
+
+async function completeSchedule(id,schedule){
+  if(!schedule)return;
+  const next=nextScheduleDate(schedule.next_due_date,schedule.cadence);
+  const patch=schedule.cadence==='one_off'
+    ? {is_active:false,updated_at:new Date().toISOString()}
+    : {next_due_date:next,reminder_14_sent_for:null,reminder_7_sent_for:null,updated_at:new Date().toISOString()};
+
+  const {error}=await sb.from('client_schedules').update(patch).eq('id',id);
+  if(error)return show(scheduleMessage,error.message||'Could not complete this date.');
+
+  show(scheduleMessage,schedule.cadence==='one_off'?'One-off date completed ✓':`Completed ✓ Next date moved to ${formatFriendlyDate(next)}`,true);
+  await loadClientSchedules(currentClientId);
+  await loadAllSchedules();
+}
+
+async function deleteSchedule(id){
+  if(!confirm('Delete this calendar schedule?'))return;
+  const {error}=await sb.from('client_schedules').delete().eq('id',id);
+  if(error)return show(scheduleMessage,error.message||'Could not delete schedule.');
+  await loadClientSchedules(currentClientId);
+  await loadAllSchedules();
+}
+
+function nextScheduleDate(value,cadence){
+  const [y,m,d]=value.split('-').map(Number);
+  const months=cadence==='monthly'?1:cadence==='quarterly'?3:cadence==='annual'?12:0;
+  if(!months)return value;
+  const target=(m-1)+months;
+  const year=y+Math.floor(target/12);
+  const month=((target%12)+12)%12;
+  const last=new Date(year,month+1,0).getDate();
+  return dateOnly(new Date(year,month,Math.min(d,last)));
+}
+function cadenceLabel(v){return ({monthly:'Monthly',quarterly:'Quarterly',annual:'Annual',one_off:'One-off'})[v]||v;}
+function dueRelativeText(value){
+  const today=dateOnly(new Date());
+  const days=Math.round((new Date(`${value}T12:00:00`)-new Date(`${today}T12:00:00`))/86400000);
+  if(days>1)return `due in ${days} days`;
+  if(days===1)return 'due tomorrow';
+  if(days===0)return 'due today';
+  return `${Math.abs(days)} day${Math.abs(days)===1?'':'s'} overdue`;
+}
+function formatFriendlyDate(value){return new Date(`${value}T12:00:00`).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});}
+function formatDateInput(d){return dateOnly(d);}
+function dateOnly(d){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function addDays(value,days){
+  const d=new Date(`${value}T12:00:00`);d.setDate(d.getDate()+days);return dateOnly(d);
 }
 
 function renderWorkList(client) {

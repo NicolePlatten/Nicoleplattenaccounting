@@ -18,6 +18,7 @@
     <nav class="sidebar-nav" aria-label="Admin navigation">
       <button class="sidebar-link active" data-target="dashboardTop" type="button"><span>⌂</span>Dashboard</button>
       <button class="sidebar-link" data-target="clientDirectory" type="button"><span>♙</span>Clients</button>
+      <button class="sidebar-link" data-target="calendarSection" type="button"><span>◫</span>Calendar</button>
       <button class="sidebar-link" data-target="notificationSection" type="button"><span>◌</span>Activity <b id="sidebarActivityBadge">0</b></button>
       <button class="sidebar-link" data-target="clientDirectory" type="button"><span>▤</span>Documents</button>
     </nav>
@@ -104,7 +105,7 @@
       <div class="overview-stat upcoming-stat">
           <span class="overview-label">Upcoming</span>
           <strong id="statUpcoming">0</strong>
-          <small>Deadlines in next 7 days</small>
+          <small>Due in the next 7 days</small>
         </div>
       </div>
     </section>
@@ -128,6 +129,41 @@
         </div>
       </div>
     </section>
+
+    <section id="calendarSection" class="practice-calendar-section">
+      <div class="calendar-section-head">
+        <div>
+          <span class="portal-kicker">Client calendar</span>
+          <h2>Upcoming work & reminders</h2>
+          <p>Monthly, quarterly, annual and one-off client dates in one place.</p>
+        </div>
+        <div class="calendar-summary-chips">
+          <span id="calendarOverdueChip" class="calendar-chip overdue">0 overdue</span>
+          <span id="calendar14Chip" class="calendar-chip">0 in 14 days</span>
+          <span id="calendar7Chip" class="calendar-chip strong">0 this week</span>
+        </div>
+      </div>
+
+      <div class="calendar-shell">
+        <div class="calendar-main">
+          <div class="calendar-toolbar">
+            <button id="calendarPrev" class="calendar-nav-btn" type="button">‹</button>
+            <h3 id="calendarMonthLabel">Month</h3>
+            <button id="calendarNext" class="calendar-nav-btn" type="button">›</button>
+          </div>
+          <div class="calendar-weekdays">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+        </div>
+        <aside class="calendar-day-panel">
+          <span class="portal-kicker">Selected date</span>
+          <h3 id="calendarSelectedDate">Select a date</h3>
+          <div id="calendarDayItems"><p class="portal-muted">Click a date to see what is due.</p></div>
+        </aside>
+      </div>
+    </section>
+
     <div id="clientDirectory" class="admin-layout">
     <aside class="portal-card pad">
       <span class="portal-kicker">Client directory</span><h2>Your clients</h2>
@@ -149,6 +185,57 @@
         </div>
         <div id="clientMessage" hidden></div>
         <div id="workList" class="work-list"></div>
+        <div class="subpanel client-schedule-panel">
+          <div class="activity-heading">
+            <div>
+              <span class="portal-kicker">Calendar & recurring work</span>
+              <h2>Client schedule</h2>
+            </div>
+            <button id="addScheduleBtn" class="portal-btn secondary" type="button">+ Add due date</button>
+          </div>
+
+          <form id="scheduleForm" class="schedule-form hidden">
+            <div class="row2">
+              <div>
+                <label for="scheduleTitle">What is due?</label>
+                <input id="scheduleTitle" required placeholder="e.g. Monthly bookkeeping">
+              </div>
+              <div>
+                <label for="scheduleClientLabel">Client portal wording</label>
+                <input id="scheduleClientLabel" required value="Next invoice" placeholder="e.g. Next invoice">
+              </div>
+            </div>
+            <div class="row2">
+              <div>
+                <label for="scheduleCadence">Repeat</label>
+                <select id="scheduleCadence">
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="annual">Annual</option>
+                  <option value="one_off">One-off</option>
+                </select>
+              </div>
+              <div>
+                <label for="scheduleDueDate">Next due date</label>
+                <input id="scheduleDueDate" type="date" required>
+              </div>
+            </div>
+            <div class="schedule-reminders">
+              <label><input id="scheduleRemind14" type="checkbox" checked> Email Nicole 2 weeks before</label>
+              <label><input id="scheduleRemind7" type="checkbox" checked> Email Nicole 1 week before</label>
+            </div>
+            <div id="scheduleMessage" hidden></div>
+            <div class="portal-actions">
+              <button class="portal-btn" type="submit">Save schedule</button>
+              <button id="cancelScheduleBtn" class="portal-btn secondary" type="button">Cancel</button>
+            </div>
+          </form>
+
+          <div id="clientSchedules" class="client-schedules-list">
+            <p class="portal-muted">No recurring dates added yet.</p>
+          </div>
+        </div>
+
 
         <div class="subpanel client-activity-panel">
           <div class="activity-heading">
