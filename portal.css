@@ -991,3 +991,45 @@ details[open]>.dropdown-chevron,details[open]>summary .dropdown-chevron{transfor
 .client-due-card h2{position:relative;z-index:1}.client-due-card.overdue{border-color:#e8c9c2}.client-due-card.overdue h2{color:#954f45}.due-date-text{font-weight:700;color:#6f5947;margin:.35rem 0}
 @media(max-width:900px){.calendar-shell{grid-template-columns:1fr}}
 @media(max-width:650px){.calendar-section-head{display:block}.calendar-summary-chips{justify-content:flex-start;margin-top:12px}.practice-calendar-section{padding:15px}.calendar-main{padding:10px}.calendar-day{min-height:58px;padding:5px}.calendar-weekdays span{font-size:8px}.calendar-dots{margin-top:7px}.client-schedule-row{grid-template-columns:48px 1fr}.schedule-row-actions{grid-column:1/-1;justify-content:flex-start}}
+
+
+/* ===== V15 service calendar + dashboard polish ===== */
+/* Remove decorative lines from the very top of the portal. */
+.portal-topbar,.admin-topbar{border-top:0!important;border-bottom:0!important;box-shadow:none!important}
+
+/* Refined navigation icons */
+.sidebar-link{align-items:center}
+.sidebar-link .nav-icon{width:19px;height:19px;display:grid;place-items:center;color:#755f4f}
+.sidebar-link .nav-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sidebar-link:hover .nav-icon,.sidebar-link.active .nav-icon{color:#4f3d30}
+
+/* More personal but still restrained sidebar note */
+.motivation-note{font-family:'Playfair Display',Georgia,serif!important;font-style:italic;line-height:1.45!important;font-size:.9rem!important;letter-spacing:0!important;text-transform:none!important;color:#665044!important}
+.motivation-note span{font-family:Georgia,serif;color:#9c6870;font-style:normal}
+
+.calendar-filter-bar{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.calendar-filter{border:1px solid var(--line);background:#fffdf9;color:#6e6258;padding:8px 11px;border-radius:999px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:.18s ease}
+.calendar-filter:hover{border-color:#bca996;color:#4f3d30}
+.calendar-filter.active{background:#6f5947;color:#fff;border-color:#6f5947;box-shadow:0 7px 18px rgba(78,59,45,.12)}
+.calendar-service-summary{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 16px;color:var(--muted);font-size:11px}
+.calendar-service-summary>span{font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:9px;margin-right:2px}
+.service-summary-pill{font-weight:700;padding:5px 8px;border-radius:999px;background:#f5eee7;color:#5d4a3d}
+.service-summary-empty{font-weight:600;color:var(--muted)}
+
+/* Service colours are deliberately muted so the practice palette stays premium. */
+.calendar-dot.service-bookkeeping,.calendar-due-dot.service-bookkeeping,.service-summary-pill.service-bookkeeping{background:#8f765f;color:#fff}
+.calendar-dot.service-vat,.calendar-due-dot.service-vat,.service-summary-pill.service-vat{background:#6f806c;color:#fff}
+.calendar-dot.service-payroll,.calendar-due-dot.service-payroll,.service-summary-pill.service-payroll{background:#8b778d;color:#fff}
+.calendar-dot.service-annual_accounts,.calendar-due-dot.service-annual_accounts,.service-summary-pill.service-annual_accounts{background:#b08a61;color:#fff}
+.calendar-dot.service-self_assessment,.calendar-due-dot.service-self_assessment,.service-summary-pill.service-self_assessment{background:#9c6f64;color:#fff}
+.calendar-dot.service-corporation_tax,.calendar-due-dot.service-corporation_tax,.service-summary-pill.service-corporation_tax{background:#756a78;color:#fff}
+.calendar-dot.service-quarterly_review,.calendar-due-dot.service-quarterly_review,.service-summary-pill.service-quarterly_review{background:#7d8f88;color:#fff}
+.calendar-dot.service-other,.calendar-due-dot.service-other,.service-summary-pill.service-other{background:#9a9188;color:#fff}
+.calendar-dot,.calendar-due-dot{color:transparent}
+
+@media(max-width:650px){
+  .calendar-filter-bar{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .calendar-filter-bar::-webkit-scrollbar{display:none}
+  .calendar-filter{white-space:nowrap}
+  .motivation-note{font-size:.78rem!important}
+}

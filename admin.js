@@ -7,6 +7,7 @@ let currentAdminId = null;
 let allSchedules = [];
 let calendarCursor = new Date();
 let selectedCalendarDate = null;
+let activeServiceFilter = 'all';
 let currentNotes = [];
 let unreadByClient = {};
 let dashboardActivity = [];
@@ -50,6 +51,7 @@ const show = (el, msg, ok = false) => {
   scheduleForm?.addEventListener('submit', saveClientSchedule);
   calendarPrev?.addEventListener('click', ()=>{calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()-1,1);renderCalendar();});
   calendarNext?.addEventListener('click', ()=>{calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+1,1);renderCalendar();});
+  document.querySelectorAll('[data-service-filter]').forEach(btn=>btn.addEventListener('click',()=>{ activeServiceFilter=btn.dataset.serviceFilter; document.querySelectorAll('[data-service-filter]').forEach(b=>b.classList.toggle('active',b===btn)); renderCalendar(); updateServiceSummary(); }));
   cancelNewWork.onclick = () => newWorkForm.classList.add('hidden');
   newWorkForm.addEventListener('submit', createWork);
   workEditor.addEventListener('submit', saveWork);
@@ -391,7 +393,7 @@ async function loadClientEmailReplies(clientId){
 
 async function loadAllSchedules(){
   const {data,error}=await sb.from('client_schedules')
-    .select('id,client_id,title,client_label,cadence,next_due_date,remind_14_days,remind_7_days,is_active,profiles!client_schedules_client_id_fkey(full_name)')
+    .select('id,client_id,title,client_label,service_type,cadence,next_due_date,remind_14_days,remind_7_days,is_active,profiles!client_schedules_client_id_fkey(full_name)')
     .eq('is_active',true)
     .order('next_due_date',{ascending:true});
 
@@ -399,6 +401,7 @@ async function loadAllSchedules(){
   allSchedules=data||[];
   updateScheduleStats();
   renderCalendar();
+  updateServiceSummary();
 }
 
 function updateScheduleStats(){
@@ -417,6 +420,7 @@ function updateScheduleStats(){
 function renderCalendar(){
   if(!window.calendarGrid)return;
   const year=calendarCursor.getFullYear(),month=calendarCursor.getMonth();
+  const calendarSchedules=activeServiceFilter==='all'?allSchedules:allSchedules.filter(s=>s.service_type===activeServiceFilter);
   calendarMonthLabel.textContent=new Date(year,month,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
 
   const first=new Date(year,month,1);
@@ -432,12 +436,12 @@ function renderCalendar(){
     else if(i>=firstMon+daysInMonth){dnum=i-(firstMon+daysInMonth)+1;cellDate=dateOnly(new Date(year,month+1,dnum));outside=true;}
     else {dnum=i-firstMon+1;cellDate=dateOnly(new Date(year,month,dnum));}
 
-    const due=allSchedules.filter(s=>s.next_due_date===cellDate);
+    const due=calendarSchedules.filter(s=>s.next_due_date===cellDate);
     const overdue=cellDate<today && due.length;
     cells.push(`<button class="calendar-day ${outside?'outside':''} ${cellDate===today?'today':''} ${selectedCalendarDate===cellDate?'selected':''} ${overdue?'has-overdue':''}" type="button" data-date="${cellDate}">
       <span class="calendar-day-number">${dnum}</span>
       <span class="calendar-dots">
-        ${due.slice(0,4).map(s=>`<i class="calendar-dot cadence-${s.cadence}"></i>`).join('')}
+        ${due.slice(0,4).map(s=>`<i class="calendar-dot service-${s.service_type||'other'}"></i>`).join('')}
         ${due.length>4?`<b>+${due.length-4}</b>`:''}
       </span>
     </button>`);
@@ -461,11 +465,12 @@ function renderCalendarDay(date){
   if(!window.calendarDayItems)return;
   const d=new Date(`${date}T12:00:00`);
   calendarSelectedDate.textContent=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const rows=allSchedules.filter(s=>s.next_due_date===date);
+  const source=activeServiceFilter==='all'?allSchedules:allSchedules.filter(s=>s.service_type===activeServiceFilter);
+  const rows=source.filter(s=>s.next_due_date===date);
   calendarDayItems.innerHTML=rows.length?rows.map(s=>`
     <button class="calendar-due-item ${date<dateOnly(new Date())?'overdue':''}" type="button" data-client="${s.client_id}">
-      <span class="calendar-due-dot cadence-${s.cadence}"></span>
-      <span><strong>${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${cadenceLabel(s.cadence)}</small></span>
+      <span class="calendar-due-dot service-${s.service_type||'other'}"></span>
+      <span><strong>${esc(s.profiles?.full_name||'Client')}</strong><small>${serviceTypeLabel(s.service_type)} · ${esc(s.title)} · ${cadenceLabel(s.cadence)}</small></span>
       <b>›</b>
     </button>`).join(''):'<p class="portal-muted">Nothing due on this date.</p>';
 
@@ -491,7 +496,7 @@ async function loadClientSchedules(clientId){
       </div>
       <div class="schedule-row-copy">
         <strong>${esc(s.title)}</strong>
-        <small>${esc(s.client_label)} · ${cadenceLabel(s.cadence)} · ${esc(dueRelativeText(s.next_due_date))}</small>
+        <small>${serviceTypeLabel(s.service_type)} · ${esc(s.client_label)} · ${cadenceLabel(s.cadence)} · ${esc(dueRelativeText(s.next_due_date))}</small>
       </div>
       <div class="schedule-row-actions">
         ${s.is_active?`<button class="schedule-complete" data-complete-schedule="${s.id}" type="button">✓ Complete</button>`:''}
@@ -508,6 +513,7 @@ async function saveClientSchedule(e){
   if(!currentClientId)return;
   const payload={
     client_id:currentClientId,
+    service_type:scheduleServiceType.value,
     title:scheduleTitle.value.trim(),
     client_label:scheduleClientLabel.value.trim()||'Next invoice',
     cadence:scheduleCadence.value,
@@ -567,6 +573,21 @@ function nextScheduleDate(value,cadence){
   const last=new Date(year,month+1,0).getDate();
   return dateOnly(new Date(year,month,Math.min(d,last)));
 }
+
+function serviceTypeLabel(v){
+  return ({bookkeeping:'Bookkeeping',vat:'VAT',payroll:'Payroll',annual_accounts:'Annual Accounts',self_assessment:'Self Assessment',corporation_tax:'Corporation Tax',quarterly_review:'Quarterly Review',other:'Other'})[v]||'Other';
+}
+function updateServiceSummary(){
+  if(!window.calendarServiceSummary)return;
+  const today=dateOnly(new Date()), seven=addDays(today,7);
+  const due=allSchedules.filter(s=>s.next_due_date>=today && s.next_due_date<=seven);
+  const order=['bookkeeping','vat','payroll','annual_accounts','self_assessment','corporation_tax','quarterly_review','other'];
+  const counts=order.map(type=>({type,count:due.filter(s=>s.service_type===type).length})).filter(x=>x.count);
+  calendarServiceSummary.innerHTML=counts.length
+    ? `<span>This week</span>${counts.map(x=>`<b class="service-summary-pill service-${x.type}">${x.count} ${serviceTypeLabel(x.type)}</b>`).join('')}`
+    : '<span>This week</span><b class="service-summary-empty">No scheduled work due</b>';
+}
+
 function cadenceLabel(v){return ({monthly:'Monthly',quarterly:'Quarterly',annual:'Annual',one_off:'One-off'})[v]||v;}
 function dueRelativeText(value){
   const today=dateOnly(new Date());
