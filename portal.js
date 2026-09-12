@@ -10,11 +10,27 @@ const show = (el,msg,ok=false)=>{ if(!el)return; el.hidden=false; el.className=o
     if(!configured){show(loginMessage,'Portal setup is not connected to Supabase yet.');return;}
     const {data:{session}}=await sb.auth.getSession(); if(session){await routeUser(session.user);return;}
     login.addEventListener('submit',async e=>{e.preventDefault();const btn=login.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Signing in…';const {data,error}=await sb.auth.signInWithPassword({email:email.value.trim(),password:password.value});if(error){show(loginMessage,'Email or password not recognised.');btn.disabled=false;btn.textContent='Sign in';return;}await routeUser(data.user)});
-    resetPassword.onclick=async()=>{if(!email.value){show(loginMessage,'Enter your email address first.');return;}const {error}=await sb.auth.resetPasswordForEmail(email.value.trim(),{redirectTo:new URL('client-login.html',location.href).href});show(loginMessage,error?'We could not send the reset email.':'Password reset email sent.',!error)};
+    resetPassword.onclick=async()=>{
+      if(!email.value){show(loginMessage,'Enter your email address first.');return;}
+      resetPassword.disabled=true;
+      resetPassword.textContent='Sending…';
+      const {error}=await sb.auth.resetPasswordForEmail(email.value.trim(),{
+        redirectTo:'https://nicoleplattenaccounting.co.uk/reset-password.html'
+      });
+      show(loginMessage,error?'We could not send the reset email.':'Password reset email sent. Please check your inbox and junk folder.',!error);
+      resetPassword.disabled=false;
+      resetPassword.textContent='Forgotten password?';
+    };
     return;
   }
 
   if(!configured)return location.href='client-login.html';
+
+  if(document.getElementById('resetPasswordForm')) {
+    await loadPasswordReset();
+    return;
+  }
+
   const {data:{session}}=await sb.auth.getSession(); if(!session)return location.href='client-login.html';
 
   if(document.getElementById('changePasswordForm')) {
@@ -25,6 +41,55 @@ const show = (el,msg,ok=false)=>{ if(!el)return; el.hidden=false; el.className=o
   logoutBtn?.addEventListener('click',async()=>{await sb.auth.signOut();location.href='client-login.html'});
   if(location.pathname.endsWith('portal.html'))await loadPortal(session.user);
 })();
+
+
+async function loadPasswordReset(){
+  const status = document.getElementById('resetPasswordStatus');
+  const form = document.getElementById('resetPasswordForm');
+  const button = form?.querySelector('button[type=submit]');
+
+  const {data:{session}} = await sb.auth.getSession();
+
+  if(!session){
+    form?.classList.add('hidden');
+    show(status,'This password reset link is invalid or has expired. Please request a new one from the login page.');
+    return;
+  }
+
+  form.addEventListener('submit', async e=>{
+    e.preventDefault();
+
+    const password = document.getElementById('resetNewPassword').value;
+    const confirm = document.getElementById('resetConfirmPassword').value;
+
+    if(password.length < 10){
+      show(status,'Please use at least 10 characters.');
+      return;
+    }
+
+    if(password !== confirm){
+      show(status,'The two passwords do not match.');
+      return;
+    }
+
+    button.disabled=true;
+    button.textContent='Saving…';
+
+    const {error}=await sb.auth.updateUser({password});
+
+    if(error){
+      show(status,error.message || 'We could not reset your password. Please request a new reset link.');
+      button.disabled=false;
+      button.textContent='Save new password';
+      return;
+    }
+
+    show(status,'Password changed successfully ✓ Redirecting you to sign in…',true);
+
+    await sb.auth.signOut();
+    setTimeout(()=>location.href='client-login.html',900);
+  });
+}
 
 async function routeUser(user){
   const {data}=await sb.from('profiles').select('role,must_change_password').eq('id',user.id).single();
