@@ -11,6 +11,9 @@ let activeServiceFilter = 'all';
 let currentNotes = [];
 let unreadByClient = {};
 let dashboardActivity = [];
+let clientStatusFilterValue = 'current';
+let globalSearchTerm = '';
+let calendarViewMode = 'month';
 
 const WORKFLOWS = {
   annual_accounts: ["Package and fee agreed", "Onboarding documentation and invoice sent to client", "Documents received back from client", "Client/business information received", "Invoice paid", "Work in progress", "Work completed awaiting approval", "Approval from client", "Work submitted"],
@@ -61,6 +64,12 @@ const show = (el, msg, ok = false) => {
   addAdminNoteBtn?.addEventListener('click', addSelectedStageNote);
   editWorkflow.addEventListener('change', () => { renderStageChecklist(null); renderNotesPanel(); });
   markAllNotificationsRead?.addEventListener('click', markAllActivityRead);
+  saveClientStatusBtn?.addEventListener('click', saveClientStatus);
+  exportClientsBtn?.addEventListener('click', exportClientDataCsv);
+  clientStatusFilter?.addEventListener('change', ()=>{ clientStatusFilterValue=clientStatusFilter.value; renderClientList(); });
+  globalClientSearch?.addEventListener('input', ()=>{ globalSearchTerm=globalClientSearch.value.trim().toLowerCase(); renderClientList(); });
+  calendarMonthViewBtn?.addEventListener('click', ()=>setCalendarView('month'));
+  calendarAgendaViewBtn?.addEventListener('click', ()=>setCalendarView('agenda'));
   showAllNotifications?.addEventListener('click', openActivityDrawer);
   closeActivityDrawer?.addEventListener('click', closeActivityDrawerPanel);
   document.querySelectorAll('[data-close-activity]').forEach(el=>el.addEventListener('click', closeActivityDrawerPanel));
@@ -94,7 +103,7 @@ async function loadClients() {
   }
 
   // Include profiles even if a newly created client has no work record yet.
-  const profileResult = await sb.from('profiles').select('id,full_name,business_name,role').eq('role', 'client');
+  const profileResult = await sb.from('profiles').select('id,full_name,business_name,role,client_status').eq('role', 'client');
   const profiles = profileResult.data || [];
   const map = Object.fromEntries(profiles.map(p => [p.id, { ...p, works: [] }]));
   (rows || []).forEach(r => {
@@ -103,20 +112,126 @@ async function loadClients() {
   });
 
   clientGroups = Object.values(map).sort((a,b) => (a.full_name || '').localeCompare(b.full_name || ''));
-  clientList.innerHTML = clientGroups.length ? clientGroups.map(c => {
-    const active = c.works.filter(w => w.is_active !== false).length;
-    const unread=unreadByClient[c.id]||0;
-    return `<button class="client-item" data-id="${c.id}">
-      <span class="client-item-row"><strong>${esc(c.full_name || 'Client')}</strong>${unread?`<span class="activity-badge">${unread}</span>`:''}</span>
-      <small>${active} active item${active === 1 ? '' : 's'} · ${c.works.length} total${unread?` · ${unread} new`:''}</small>
-    </button>`;
-  }).join('') : '<p class="portal-muted">No clients yet.</p>';
-
-  clientList.querySelectorAll('button').forEach(btn => btn.onclick = () => openClient(btn.dataset.id));
+  renderClientList();
   await refreshDashboardOverview();
   if (currentClientId && clientGroups.some(c => c.id === currentClientId)) openClient(currentClientId, false);
 }
 
+
+function renderClientList(){
+  const filtered=clientGroups.filter(c=>{
+    const status=c.client_status||'active';
+    const statusOk=clientStatusFilterValue==='all' || (clientStatusFilterValue==='current' && status!=='former') || status===clientStatusFilterValue;
+    if(!statusOk)return false;
+    if(!globalSearchTerm)return true;
+    const hay=[c.full_name,c.business_name,status,...(c.works||[]).flatMap(w=>[w.service_name,w.period_label,w.status,w.current_stage])].filter(Boolean).join(' ').toLowerCase();
+    return hay.includes(globalSearchTerm);
+  });
+  clientList.innerHTML=filtered.length?filtered.map(c=>{
+    const active=c.works.filter(w=>w.is_active!==false).length;
+    const unread=unreadByClient[c.id]||0;
+    const status=c.client_status||'active';
+    return `<button class="client-item" data-id="${c.id}">
+      <span class="client-item-row"><strong>${esc(c.full_name||'Client')}</strong>${unread?`<span class="activity-badge">${unread}</span>`:''}</span>
+      <small><span class="client-status-dot status-${status}"></span>${clientStatusLabel(status)} · ${active} active · ${c.works.length} total${unread?` · ${unread} unread`:''}</small>
+    </button>`;
+  }).join(''):'<p class="portal-muted">No clients match this view.</p>';
+  clientList.querySelectorAll('button[data-id]').forEach(btn=>btn.onclick=()=>openClient(btn.dataset.id));
+}
+function clientStatusLabel(v){return ({active:'Active',onboarding:'Onboarding',paused:'Paused',former:'Former'})[v]||'Active';}
+
+async function saveClientStatus(){
+  if(!currentClientId)return;
+  const value=clientStatusSelect.value;
+  const {error}=await sb.from('profiles').update({client_status:value}).eq('id',currentClientId);
+  show(clientMessage,error?`Could not update client status: ${error.message}`:`Client status changed to ${clientStatusLabel(value)} ✓`,!error);
+  if(!error){
+    const client=clientGroups.find(c=>c.id===currentClientId); if(client)client.client_status=value;
+    await logAudit(currentClientId,'client_status',`Client status changed to ${clientStatusLabel(value)}`,{status:value});
+    renderClientList(); await loadClientAuditLog(currentClientId);
+  }
+}
+
+function bindMarkReadButtons(root){
+  root?.querySelectorAll('[data-mark-read-id]').forEach(btn=>btn.addEventListener('click',async e=>{
+    e.preventDefault();e.stopPropagation();btn.disabled=true;btn.textContent='Updating…';
+    await markActivityItemRead(btn.dataset.markReadKind,btn.dataset.markReadId,btn.dataset.markReadClient);
+  }));
+}
+async function markActivityItemRead(kind,id,clientId){
+  const table=kind==='note'?'client_notes':kind==='document'?'document_submissions':kind==='email'?'client_email_replies':null;
+  if(!table||!id)return;
+  const {error}=await sb.from(table).update({admin_seen_at:new Date().toISOString()}).eq('id',id);
+  if(error){alert(`Could not mark as read: ${error.message}`);return;}
+  await logAudit(clientId,'activity_read',`${kind==='email'?'Email reply':kind==='document'?'Document upload':'Client note'} marked as read`,{source_id:id});
+  await loadClients();
+  if(currentClientId===clientId){await loadClientActivity(clientId);await loadClientEmailReplies(clientId);await loadClientAuditLog(clientId);}
+}
+
+async function logAudit(clientId,actionType,summary,metadata={}){
+  try{await sb.from('practice_audit_log').insert({client_id:clientId||null,actor_id:currentAdminId,actor_name:'Nicole',action_type:actionType,summary,metadata});}
+  catch(e){console.warn('Audit write failed',e);}
+}
+async function loadClientAuditLog(clientId){
+  if(!window.clientAuditLog)return;
+  const {data,error}=await sb.from('practice_audit_log').select('id,actor_name,summary,created_at').eq('client_id',clientId).order('created_at',{ascending:false}).limit(50);
+  if(error){clientAuditLog.innerHTML=`<p class="portal-error">Could not load audit trail: ${esc(error.message)}</p>`;return;}
+  clientAuditLog.innerHTML=(data||[]).length?(data||[]).map(r=>`<div class="audit-row"><span class="audit-marker"></span><div><strong>${esc(r.summary)}</strong><small>${esc(r.actor_name||'System')} · ${formatStamp(r.created_at)}</small></div></div>`).join(''):'<p class="portal-muted">No audit events yet.</p>';
+}
+
+function setCalendarView(mode){
+  calendarViewMode=mode;
+  calendarMonthViewBtn.classList.toggle('active',mode==='month');
+  calendarAgendaViewBtn.classList.toggle('active',mode==='agenda');
+  calendarGrid.classList.toggle('hidden',mode!=='month');
+  document.querySelector('.calendar-weekdays')?.classList.toggle('hidden',mode!=='month');
+  calendarAgenda.classList.toggle('hidden',mode!=='agenda');
+  if(mode==='agenda')renderAgenda();
+}
+function renderAgenda(){
+  const today=dateOnly(new Date()),cutoff=addDays(today,60);
+  const rows=(activeServiceFilter==='all'?allSchedules:allSchedules.filter(s=>s.service_type===activeServiceFilter))
+    .filter(s=>s.next_due_date>=today&&s.next_due_date<=cutoff).sort((a,b)=>a.next_due_date.localeCompare(b.next_due_date));
+  if(!rows.length){calendarAgenda.innerHTML='<p class="portal-muted">Nothing due in the next 60 days.</p>';return;}
+  const groups={}; rows.forEach(s=>(groups[s.next_due_date]??=[]).push(s));
+  calendarAgenda.innerHTML=Object.entries(groups).map(([date,items])=>`<section class="agenda-day"><h4>${formatFriendlyDate(date)}</h4>${items.map(s=>`<button type="button" class="agenda-item" data-agenda-client="${s.client_id}"><span class="calendar-due-dot service-${s.service_type||'other'}"></span><span><strong>${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${serviceLabel(s.service_type)}</small></span><b>${dueRelativeText(s.next_due_date)}</b></button>`).join('')}</section>`).join('');
+  calendarAgenda.querySelectorAll('[data-agenda-client]').forEach(btn=>btn.onclick=()=>{openClient(btn.dataset.agendaClient);document.getElementById('clientDirectory')?.scrollIntoView({behavior:'smooth',block:'start'});});
+}
+function renderTodayPanel(){
+  if(!window.todayItems)return;
+  const today=dateOnly(new Date());
+  const due=allSchedules.filter(s=>s.next_due_date<=today).sort((a,b)=>a.next_due_date.localeCompare(b.next_due_date));
+  const unread=dashboardActivity.filter(x=>x.unread);
+  const total=due.length+unread.length;
+  todayHeading.textContent=total?`${total} thing${total===1?'':'s'} need your attention`:'Nothing urgent right now';
+  todaySub.textContent=total?'Deadlines and unread client activity stay here until you deal with them.':'Your deadlines and unread client activity will appear here.';
+  const items=[
+    ...due.slice(0,5).map(s=>`<button class="today-item ${s.next_due_date<today?'overdue':'due-today'}" type="button" data-today-client="${s.client_id}"><span><strong>${s.next_due_date<today?'Overdue':'Due today'} · ${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${serviceLabel(s.service_type)}</small></span><b>${dueRelativeText(s.next_due_date)}</b></button>`),
+    ...unread.slice(0,5).map(x=>{const c=clientGroups.find(v=>v.id===x.client_id);return `<button class="today-item unread" type="button" data-today-client="${x.client_id}"><span><strong>Unread ${x.kind==='email'?'email reply':x.kind==='document'?'document':'client note'} · ${esc(c?.full_name||'Client')}</strong><small>${esc((x.detail||'').slice(0,120))}</small></span><b>Open</b></button>`})
+  ];
+  todayItems.innerHTML=items.length?items.join(''):'<div class="today-clear">All clear — nothing needs attention today.</div>';
+  todayItems.querySelectorAll('[data-today-client]').forEach(btn=>btn.onclick=()=>openClient(btn.dataset.todayClient));
+}
+
+async function advanceScheduleAfterWork(scheduleId,sourceDueDate){
+  const {data:schedule,error}=await sb.from('client_schedules').select('*').eq('id',scheduleId).single();
+  if(error||!schedule||schedule.next_due_date!==sourceDueDate)return;
+  const next=nextScheduleDate(schedule.next_due_date,schedule.cadence);
+  const patch=schedule.cadence==='one_off'?{is_active:false,last_completed_for:sourceDueDate,updated_at:new Date().toISOString()}:{next_due_date:next,last_completed_for:sourceDueDate,reminder_14_sent_for:null,reminder_7_sent_for:null,updated_at:new Date().toISOString()};
+  await sb.from('client_schedules').update(patch).eq('id',scheduleId).eq('next_due_date',sourceDueDate);
+  await logAudit(currentClientId,'schedule_advanced',schedule.cadence==='one_off'?`One-off schedule completed: ${schedule.title}`:`Schedule advanced: ${schedule.title} → ${formatFriendlyDate(next)}`,{schedule_id:scheduleId,completed_for:sourceDueDate});
+}
+function exportClientDataCsv(){
+  const rows=[['Client','Business','Status','Service','Period','Work status','Progress','Next due dates']];
+  clientGroups.forEach(c=>{
+    const dueText=allSchedules.filter(s=>s.client_id===c.id&&s.is_active).map(s=>`${s.title}: ${s.next_due_date}`).join(' | ');
+    if((c.works||[]).length)c.works.forEach(w=>rows.push([c.full_name||'',c.business_name||'',clientStatusLabel(c.client_status||'active'),w.service_name||'',w.period_label||'',w.status||'',w.progress??'',dueText]));
+    else rows.push([c.full_name||'',c.business_name||'',clientStatusLabel(c.client_status||'active'),'','','','',dueText]);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=`nicole-platten-client-export-${dateOnly(new Date())}.csv`;document.body.appendChild(a);a.click();a.remove();
+}
 function showNewClient() {
   adminEmpty.classList.add('hidden');
   clientWorkspace.classList.add('hidden');
@@ -139,10 +254,12 @@ function openClient(clientId, scroll = true) {
 
   clientHeading.textContent = client.full_name || 'Client';
   clientSub.textContent = client.business_name || 'Manage ongoing and one-off work';
+  clientStatusSelect.value = client.client_status || 'active';
   renderWorkList(client);
   loadClientActivity(clientId);
   loadClientEmailReplies(clientId);
   loadClientSchedules(clientId);
+  loadClientAuditLog(clientId);
   if (scroll && innerWidth < 820) clientWorkspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -152,24 +269,24 @@ async function refreshDashboardOverview(){
   const active=clientGroups.reduce((n,c)=>n+c.works.filter(w=>w.is_active!==false).length,0);
 
   const [unreadNotes,unreadDocs,unreadReplies,recentNotes,recentDocs,recentReplies]=await Promise.all([
-    sb.from('client_notes').select('client_id,note,service_name,created_at').is('admin_seen_at',null).order('created_at',{ascending:false}).limit(25),
-    sb.from('document_submissions').select('client_id,file_name,file_count,service_name,client_note,sent_at').is('admin_seen_at',null).order('sent_at',{ascending:false}).limit(25),
-    sb.from('client_email_replies').select('client_id,subject,body_text,attachment_names,received_at').is('admin_seen_at',null).order('received_at',{ascending:false}).limit(25),
-    sb.from('client_notes').select('client_id,note,service_name,created_at,admin_seen_at').order('created_at',{ascending:false}).limit(30),
-    sb.from('document_submissions').select('client_id,file_name,file_count,service_name,client_note,sent_at,admin_seen_at').order('sent_at',{ascending:false}).limit(30),
-    sb.from('client_email_replies').select('client_id,subject,body_text,attachment_names,received_at,admin_seen_at').order('received_at',{ascending:false}).limit(30)
+    sb.from('client_notes').select('id,client_id,note,service_name,created_at').is('admin_seen_at',null).order('created_at',{ascending:false}).limit(25),
+    sb.from('document_submissions').select('id,client_id,file_name,file_count,service_name,client_note,sent_at').is('admin_seen_at',null).order('sent_at',{ascending:false}).limit(25),
+    sb.from('client_email_replies').select('id,client_id,subject,body_text,attachment_names,received_at').is('admin_seen_at',null).order('received_at',{ascending:false}).limit(25),
+    sb.from('client_notes').select('id,client_id,note,service_name,created_at,admin_seen_at').order('created_at',{ascending:false}).limit(30),
+    sb.from('document_submissions').select('id,client_id,file_name,file_count,service_name,client_note,sent_at,admin_seen_at').order('sent_at',{ascending:false}).limit(30),
+    sb.from('client_email_replies').select('id,client_id,subject,body_text,attachment_names,received_at,admin_seen_at').order('received_at',{ascending:false}).limit(30)
   ]);
 
   const unreadRows=[
-    ...(unreadNotes.data||[]).map(x=>({kind:'note',client_id:x.client_id,title:'New note',detail:x.note,service:x.service_name,created_at:x.created_at,unread:true})),
-    ...(unreadDocs.data||[]).map(x=>({kind:'document',client_id:x.client_id,title:'Documents uploaded',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at,unread:true})),
-    ...(unreadReplies.data||[]).map(x=>({kind:'email',client_id:x.client_id,title:'Email reply',detail:`${x.subject||'Reply'} — ${x.body_text||''}`,created_at:x.received_at,unread:true}))
+    ...(unreadNotes.data||[]).map(x=>({kind:'note',id:x.id,client_id:x.client_id,title:'New note',detail:x.note,service:x.service_name,created_at:x.created_at,unread:true})),
+    ...(unreadDocs.data||[]).map(x=>({kind:'document',id:x.id,client_id:x.client_id,title:'Documents uploaded',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at,unread:true})),
+    ...(unreadReplies.data||[]).map(x=>({kind:'email',id:x.id,client_id:x.client_id,title:'Email reply',detail:`${x.subject||'Reply'} — ${x.body_text||''}`,created_at:x.received_at,unread:true}))
   ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
 
   dashboardActivity=[
-    ...(recentNotes.data||[]).map(x=>({kind:'note',client_id:x.client_id,title:'Client note',detail:x.note,service:x.service_name,created_at:x.created_at,unread:!x.admin_seen_at})),
-    ...(recentDocs.data||[]).map(x=>({kind:'document',client_id:x.client_id,title:'Document upload',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at,unread:!x.admin_seen_at})),
-    ...(recentReplies.data||[]).map(x=>({kind:'email',client_id:x.client_id,title:'Email reply',detail:`${x.subject||'Reply'} — ${x.body_text||''}`,created_at:x.received_at,unread:!x.admin_seen_at}))
+    ...(recentNotes.data||[]).map(x=>({kind:'note',id:x.id,client_id:x.client_id,title:'Client note',detail:x.note,service:x.service_name,created_at:x.created_at,unread:!x.admin_seen_at})),
+    ...(recentDocs.data||[]).map(x=>({kind:'document',id:x.id,client_id:x.client_id,title:'Document upload',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at,unread:!x.admin_seen_at})),
+    ...(recentReplies.data||[]).map(x=>({kind:'email',id:x.id,client_id:x.client_id,title:'Email reply',detail:`${x.subject||'Reply'} — ${x.body_text||''}`,created_at:x.received_at,unread:!x.admin_seen_at}))
   ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,40);
 
   statClients.textContent=clientGroups.length;
@@ -187,25 +304,30 @@ async function refreshDashboardOverview(){
          <div><strong>You're all caught up</strong><p>No new client updates right now.</p></div>
        </div>`;
 
-  notificationCentre.querySelectorAll('.notification-item').forEach(b=>b.onclick=()=>openClient(b.dataset.client));
+  notificationCentre.querySelectorAll('[data-open-client]').forEach(b=>b.onclick=()=>openClient(b.dataset.openClient));
+  bindMarkReadButtons(notificationCentre);
+  renderTodayPanel();
 }
 
 function renderCompactNotification(x){
   const client=clientGroups.find(v=>v.id===x.client_id);
   const icon=x.kind==='document'?'↥':x.kind==='email'?'✉':'✎';
   const label=x.kind==='document'?'Document upload':x.kind==='email'?'Email reply':'Client note';
-  return `<button class="notification-item compact-notification ${x.unread?'is-unread':''}" type="button" data-client="${escAttr(x.client_id)}">
-    <span class="notification-icon-wrap"><span class="unread-dot"></span><span class="notification-icon">${icon}</span></span>
-    <span class="notification-copy">
-      <span class="notification-topline">
-        <strong>${esc(client?.full_name||'Client')}</strong>
-        <time>${formatStamp(x.created_at)}</time>
+  return `<div class="notification-item compact-notification ${x.unread?'is-unread':''}" data-client="${escAttr(x.client_id)}">
+    <button class="notification-open" type="button" data-open-client="${escAttr(x.client_id)}">
+      <span class="notification-icon-wrap"><span class="unread-dot"></span><span class="notification-icon">${icon}</span></span>
+      <span class="notification-copy">
+        <span class="notification-topline">
+          <strong>${esc(client?.full_name||'Client')}</strong>
+          <time>${formatStamp(x.created_at)}</time>
+        </span>
+        <span class="notification-meta">${label}${x.service?` · ${esc(x.service)}`:''}</span>
+        <p>${esc(x.detail||'')}</p>
       </span>
-      <span class="notification-meta">${label}${x.service?` · ${esc(x.service)}`:''}</span>
-      <p>${esc(x.detail||'')}</p>
-    </span>
-    <span class="notification-arrow">›</span>
-  </button>`;
+      <span class="notification-arrow">›</span>
+    </button>
+    ${x.unread?`<button class="mark-read-btn" type="button" data-mark-read-kind="${x.kind}" data-mark-read-id="${x.id}" data-mark-read-client="${x.client_id}">Mark as read</button>`:''}
+  </div>`;
 }
 
 function openActivityDrawer(){
@@ -250,8 +372,11 @@ async function markAllActivityRead(){
     sb.from('document_submissions').update({admin_seen_at:now}).is('admin_seen_at',null),
     sb.from('client_email_replies').update({admin_seen_at:now}).is('admin_seen_at',null)
   ]);
-  unreadByClient={}; document.querySelectorAll('.activity-badge').forEach(b=>b.remove());
-  await refreshDashboardOverview(); markAllNotificationsRead.textContent='Mark all read';
+  await logAudit(null,'activity_read_all','All unread client activity marked as read',{});
+  unreadByClient={};
+  await loadClients();
+  if(currentClientId)await loadClientActivity(currentClientId);
+  markAllNotificationsRead.textContent='Mark all read';
 }
 
 async function loadClientActivity(clientId){
@@ -321,23 +446,12 @@ async function loadClientActivity(clientId){
         </div>
         ${r.service_name?`<small>${esc(r.service_name)}</small>`:''}
         <p>${esc(r.summary||'')}</p>
+        ${!r.seen?`<button class="mark-read-btn" type="button" data-mark-read-kind="${r.kind}" data-mark-read-id="${r.id}" data-mark-read-client="${clientId}">Mark as read</button>`:'<span class="read-status">Read</span>'}
       </div>
     `).join('');
+    bindMarkReadButtons(clientActivity);
   }
 
-  // Opening the client records the activity as reviewed by Nicole.
-  const seenAt=new Date().toISOString();
-  await Promise.all([
-    sb.from('client_notes').update({admin_seen_at:seenAt}).eq('client_id',clientId).is('admin_seen_at',null),
-    sb.from('document_submissions').update({admin_seen_at:seenAt}).eq('client_id',clientId).is('admin_seen_at',null),
-    sb.from('client_email_replies').update({admin_seen_at:seenAt}).eq('client_id',clientId).is('admin_seen_at',null)
-  ]);
-
-  unreadByClient[clientId]=0;
-  const badge=document.querySelector(`.client-item[data-id="${clientId}"] .activity-badge`);
-  if(badge)badge.remove();
-  clientUnreadPill.classList.add('hidden');
-  await refreshDashboardOverview();
 }
 
 
@@ -518,6 +632,7 @@ async function saveClientSchedule(e){
     client_label:scheduleClientLabel.value.trim()||'Next invoice',
     cadence:scheduleCadence.value,
     next_due_date:scheduleDueDate.value,
+    auto_create_work:scheduleAutoCreateWork.checked,
     remind_14_days:scheduleRemind14.checked,
     remind_7_days:scheduleRemind7.checked,
     is_active:true
@@ -532,10 +647,12 @@ async function saveClientSchedule(e){
   if(!error){
     scheduleForm.reset();
     scheduleClientLabel.value='Next invoice';
-    scheduleRemind14.checked=true;scheduleRemind7.checked=true;
+    scheduleAutoCreateWork.checked=true;scheduleRemind14.checked=true;scheduleRemind7.checked=true;
     scheduleForm.classList.add('hidden');
+    await logAudit(currentClientId,'schedule_created',`Schedule added: ${payload.title}`,payload);
     await loadClientSchedules(currentClientId);
     await loadAllSchedules();
+    await loadClientAuditLog(currentClientId);
   }
   btn.disabled=false;btn.textContent='Save schedule';
 }
@@ -787,8 +904,10 @@ async function createWork(e) {
   });
   show(newWorkMessage, error ? `Could not add work: ${error.message}` : 'New work added ✓', !error);
   if (!error) {
+    await logAudit(currentClientId,'work_created',`Work created: ${newWorkService.value.trim()||'Work item'}`,{workflow:newWorkWorkflow.value,period:newWorkPeriod.value.trim()||null});
     e.currentTarget.reset();
     await loadClients();
+    await loadClientAuditLog(currentClientId);
     newWorkForm.classList.add('hidden');
   }
 }
@@ -819,7 +938,13 @@ async function saveWork(e) {
 
   const { error } = await sb.from('client_work').update(payload).eq('id', currentWorkId);
   show(workMessage, error ? `Could not save: ${error.message}` : `Saved ✓ ${progress}% complete`, !error);
-  if (!error) await loadClients();
+  if (!error) {
+    const client=clientGroups.find(c=>c.id===currentClientId);
+    const originalWork=client?.works.find(w=>w.id===currentWorkId);
+    await logAudit(currentClientId,'work_updated',`${editService.value.trim()} updated to ${progress}%`,{progress,status:payload.status});
+    if(allDone&&originalWork?.source_schedule_id&&originalWork?.source_due_date)await advanceScheduleAfterWork(originalWork.source_schedule_id,originalWork.source_due_date);
+    await loadClients();await loadAllSchedules();await loadClientAuditLog(currentClientId);
+  }
 }
 
 async function archiveWork() {
@@ -829,7 +954,11 @@ async function archiveWork() {
   const stages = parseStages(work).map(s => ({ ...s, completed: true }));
   const { error } = await sb.from('client_work').update({ stages, is_active: false, status: 'Completed', progress: 100, current_stage: 'Completed', completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', currentWorkId);
   show(workMessage, error ? `Could not complete item: ${error.message}` : 'Moved to completed history ✓', !error);
-  if (!error) { await loadClients(); workEditor.classList.add('hidden'); }
+  if (!error) {
+    await logAudit(currentClientId,'work_completed',`Work completed: ${work?.service_name||'Work item'}`,{work_id:currentWorkId});
+    if(work?.source_schedule_id&&work?.source_due_date)await advanceScheduleAfterWork(work.source_schedule_id,work.source_due_date);
+    await loadClients();await loadAllSchedules();await loadClientAuditLog(currentClientId);workEditor.classList.add('hidden');
+  }
 }
 
 

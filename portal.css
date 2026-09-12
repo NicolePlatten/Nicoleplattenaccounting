@@ -1033,3 +1033,22 @@ details[open]>.dropdown-chevron,details[open]>summary .dropdown-chevron{transfor
   .calendar-filter{white-space:nowrap}
   .motivation-note{font-size:.78rem!important}
 }
+
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.admin-global-search{flex:1;max-width:430px;margin:0 20px}.admin-global-search input{width:100%;border:1px solid var(--line);background:#fffdf9;border-radius:999px;padding:11px 16px;font:inherit;color:var(--ink)}
+.today-panel{margin:20px 0;padding:22px;border:1px solid rgba(111,89,71,.15);border-radius:22px;background:linear-gradient(135deg,#fffdf9,#f8f1ea)}
+.today-panel-head h2{font-family:Georgia,serif;font-weight:500;margin:.25rem 0}.today-items{display:grid;gap:8px;margin-top:15px}
+.today-item{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:13px;padding:11px 13px;cursor:pointer;color:var(--ink)}
+.today-item span strong,.today-item span small{display:block}.today-item span small{color:var(--muted);margin-top:3px}.today-item b{white-space:nowrap;font-size:11px;color:var(--brown)}
+.today-item.overdue{border-color:#e7c2ba;background:#fff9f7}.today-item.unread{border-left:4px solid var(--accent)}.today-clear{color:var(--muted)}
+.notification-item{display:flex!important;align-items:center!important}.notification-open{appearance:none;border:0;background:transparent;color:inherit;font:inherit;text-align:left;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;flex:1;padding:0;cursor:pointer}
+.mark-read-btn{border:1px solid #d7c7ba;background:#fff;color:#6f5947;border-radius:999px;padding:7px 11px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}.read-status{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#8c8178;font-weight:700}
+.client-directory-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.client-status-filter{width:100%;margin-bottom:12px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fffdf9}
+.client-status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.status-active{background:#68806e}.status-onboarding{background:#a88a73}.status-paused{background:#bd965c}.status-former{background:#9e9690}
+.client-status-control{display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid var(--line);border-radius:14px;background:#faf6f1}.client-status-control label{font-size:10px;text-transform:uppercase;color:var(--muted);font-weight:700}.client-status-control select{border:0;background:transparent;font:inherit}
+.calendar-toolbar-actions{display:flex;align-items:center;gap:10px}.view-toggle{display:flex;padding:3px;border:1px solid var(--line);border-radius:999px;background:#faf6f1}.view-toggle button{border:0;background:transparent;color:var(--muted);padding:6px 10px;border-radius:999px;font:inherit;font-size:11px;font-weight:700}.view-toggle button.active{background:#fff;color:var(--brown)}
+.calendar-agenda{display:grid;gap:18px}.agenda-day h4{font-family:Georgia,serif;font-weight:500}.agenda-item{width:100%;display:grid;grid-template-columns:9px 1fr auto;gap:11px;align-items:center;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px;margin:6px 0;cursor:pointer}.agenda-item span strong,.agenda-item span small{display:block}.agenda-item span small{color:var(--muted)}
+.audit-panel-body{padding-top:14px}.audit-row{display:grid;grid-template-columns:10px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid #eee4db}.audit-marker{width:7px;height:7px;border-radius:50%;background:#a88a73;margin-top:6px}.audit-row strong,.audit-row small{display:block}.audit-row small{color:var(--muted);font-size:10px}
+.activity-row .mark-read-btn{margin-top:8px}
+@media(max-width:900px){.admin-global-search{max-width:none;margin:8px 0;width:100%}.admin-header-inner{flex-wrap:wrap}.client-status-control{width:100%;flex-wrap:wrap}}
+@media(max-width:650px){.today-item{align-items:flex-start;flex-direction:column}.notification-item{align-items:flex-start!important;flex-direction:column}}

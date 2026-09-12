@@ -52,6 +52,11 @@
         </span>
       </a>
 
+      <div class="admin-global-search">
+        <label class="sr-only" for="globalClientSearch">Search clients or services</label>
+        <input id="globalClientSearch" type="search" placeholder="Search clients or services…" autocomplete="off">
+      </div>
+
       <div class="admin-header-actions">
         <div class="admin-profile-chip">
           <span class="admin-avatar">NP</span>
@@ -110,11 +115,22 @@
       </div>
     </section>
 
+    <section id="todayPanel" class="today-panel">
+      <div class="today-panel-head">
+        <div>
+          <span class="portal-kicker">Today</span>
+          <h2 id="todayHeading">Nothing urgent right now</h2>
+          <p id="todaySub" class="portal-muted">Your deadlines and unread client activity will appear here.</p>
+        </div>
+      </div>
+      <div id="todayItems" class="today-items"></div>
+    </section>
+
     <section id="notificationSection" class="notification-centre compact-centre">
       <div class="notification-centre-head">
         <div>
           <span class="portal-kicker">Recent activity</span>
-          <h2>Latest client updates</h2>
+          <h2>Needs your attention</h2>
         </div>
         <div class="notification-actions">
           <button id="showAllNotifications" class="text-action" type="button">View all activity</button>
@@ -125,7 +141,7 @@
       <div id="notificationCentre" class="notification-list compact-list">
         <div class="notification-empty">
           <span class="notification-empty-icon">✓</span>
-          <div><strong>You're all caught up</strong><p>No new client updates right now.</p></div>
+          <div><strong>You're all caught up</strong><p>No unread client updates right now.</p></div>
         </div>
       </div>
     </section>
@@ -160,14 +176,21 @@
       <div class="calendar-shell">
         <div class="calendar-main">
           <div class="calendar-toolbar">
-            <button id="calendarPrev" class="calendar-nav-btn" type="button">‹</button>
+            <button id="calendarPrev" class="calendar-nav-btn" type="button" aria-label="Previous month">‹</button>
             <h3 id="calendarMonthLabel">Month</h3>
-            <button id="calendarNext" class="calendar-nav-btn" type="button">›</button>
+            <div class="calendar-toolbar-actions">
+              <div class="view-toggle" aria-label="Calendar view">
+                <button id="calendarMonthViewBtn" class="active" type="button">Month</button>
+                <button id="calendarAgendaViewBtn" type="button">Agenda</button>
+              </div>
+              <button id="calendarNext" class="calendar-nav-btn" type="button" aria-label="Next month">›</button>
+            </div>
           </div>
           <div class="calendar-weekdays">
             <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
           </div>
           <div id="calendarGrid" class="calendar-grid"></div>
+          <div id="calendarAgenda" class="calendar-agenda hidden"></div>
         </div>
         <aside class="calendar-day-panel">
           <span class="portal-kicker">Selected date</span>
@@ -180,7 +203,19 @@
     <div id="clientDirectory" class="admin-layout">
     <aside class="portal-card pad">
       <span class="portal-kicker">Client directory</span><h2>Your clients</h2>
-      <button id="newClientBtn" class="portal-btn">+ Add client</button>
+      <div class="client-directory-actions">
+        <button id="newClientBtn" class="portal-btn">+ Add client</button>
+        <button id="exportClientsBtn" class="portal-btn secondary" type="button">Export CSV</button>
+      </div>
+      <label class="sr-only" for="clientStatusFilter">Filter client status</label>
+      <select id="clientStatusFilter" class="client-status-filter">
+        <option value="current">Current clients</option>
+        <option value="active">Active</option>
+        <option value="onboarding">Onboarding</option>
+        <option value="paused">Paused</option>
+        <option value="former">Former clients</option>
+        <option value="all">All clients</option>
+      </select>
       <div id="clientList" class="client-list"></div>
     </aside>
     <section class="portal-card pad">
@@ -192,6 +227,16 @@
         <div class="workspace-head">
           <div><span class="portal-kicker">Client</span><h1 id="clientHeading">Client</h1><p id="clientSub" class="portal-muted"></p></div>
           <div class="workspace-actions">
+            <div class="client-status-control">
+              <label for="clientStatusSelect">Status</label>
+              <select id="clientStatusSelect">
+                <option value="active">Active</option>
+                <option value="onboarding">Onboarding</option>
+                <option value="paused">Paused</option>
+                <option value="former">Former client</option>
+              </select>
+              <button id="saveClientStatusBtn" class="portal-btn secondary" type="button">Save status</button>
+            </div>
             <button id="newWorkBtn" class="portal-btn">+ Add new work</button>
             <button id="deleteClientBtn" class="portal-btn danger-outline" type="button">Delete client</button>
           </div>
@@ -247,6 +292,7 @@
               </div>
             </div>
             <div class="schedule-reminders">
+              <label><input id="scheduleAutoCreateWork" type="checkbox" checked> Automatically create the work item when due</label>
               <label><input id="scheduleRemind14" type="checkbox" checked> Email Nicole 2 weeks before</label>
               <label><input id="scheduleRemind7" type="checkbox" checked> Email Nicole 1 week before</label>
             </div>
@@ -271,7 +317,7 @@
             </div>
             <span id="clientUnreadPill" class="status-pill hidden">New activity</span>
           </div>
-          <p class="portal-muted compact-copy">Anything the client sends through their portal appears here. New activity is also highlighted in the client list.</p>
+          <p class="portal-muted compact-copy">Opening an item does not clear it. Use <strong>Mark as read</strong> once you are happy it has been dealt with.</p>
           <div id="clientActivity"><p class="portal-muted">No client activity yet.</p></div>
         </div>
 
@@ -322,6 +368,16 @@
           <button class="portal-btn" type="submit">Save work progress</button>
           <button id="deleteWorkBtn" class="portal-btn secondary" type="button">Mark work complete / archive</button>
         </form>
+
+        <details class="audit-panel subpanel">
+          <summary>
+            <span><span class="portal-kicker">History</span><strong>Audit trail</strong><small>Important actions recorded against this client</small></span>
+            <span class="dropdown-chevron">⌄</span>
+          </summary>
+          <div class="audit-panel-body">
+            <div id="clientAuditLog"><p class="portal-muted">No audit events yet.</p></div>
+          </div>
+        </details>
 
         <details class="communication-dropdown subpanel">
           <summary>
