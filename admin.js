@@ -63,11 +63,12 @@ const show = (el, msg, ok = false) => {
 
 async function loadClients() {
   unreadByClient = {};
-  const [unreadNotesResult, unreadDocsResult] = await Promise.all([
+  const [unreadNotesResult, unreadDocsResult, unreadEmailRepliesResult] = await Promise.all([
     sb.from('client_notes').select('client_id').is('admin_seen_at', null),
-    sb.from('document_submissions').select('client_id').is('admin_seen_at', null)
+    sb.from('document_submissions').select('client_id').is('admin_seen_at', null),
+    sb.from('client_email_replies').select('client_id').is('admin_seen_at', null)
   ]);
-  [...(unreadNotesResult.data || []), ...(unreadDocsResult.data || [])].forEach(r => {
+  [...(unreadNotesResult.data || []), ...(unreadDocsResult.data || []), ...(unreadEmailRepliesResult.data || [])].forEach(r => {
     unreadByClient[r.client_id] = (unreadByClient[r.client_id] || 0) + 1;
   });
 
@@ -125,6 +126,7 @@ function openClient(clientId, scroll = true) {
   clientSub.textContent = client.business_name || 'Manage ongoing and one-off work';
   renderWorkList(client);
   loadClientActivity(clientId);
+  loadClientEmailReplies(clientId);
   if (scroll && innerWidth < 820) clientWorkspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -133,21 +135,25 @@ function openClient(clientId, scroll = true) {
 async function refreshDashboardOverview(){
   const active=clientGroups.reduce((n,c)=>n+c.works.filter(w=>w.is_active!==false).length,0);
 
-  const [unreadNotes,unreadDocs,recentNotes,recentDocs]=await Promise.all([
+  const [unreadNotes,unreadDocs,unreadReplies,recentNotes,recentDocs,recentReplies]=await Promise.all([
     sb.from('client_notes').select('client_id,note,service_name,created_at').is('admin_seen_at',null).order('created_at',{ascending:false}).limit(25),
     sb.from('document_submissions').select('client_id,file_name,file_count,service_name,client_note,sent_at').is('admin_seen_at',null).order('sent_at',{ascending:false}).limit(25),
+    sb.from('client_email_replies').select('client_id,subject,body_text,attachment_names,received_at').is('admin_seen_at',null).order('received_at',{ascending:false}).limit(25),
     sb.from('client_notes').select('client_id,note,service_name,created_at,admin_seen_at').order('created_at',{ascending:false}).limit(30),
-    sb.from('document_submissions').select('client_id,file_name,file_count,service_name,client_note,sent_at,admin_seen_at').order('sent_at',{ascending:false}).limit(30)
+    sb.from('document_submissions').select('client_id,file_name,file_count,service_name,client_note,sent_at,admin_seen_at').order('sent_at',{ascending:false}).limit(30),
+    sb.from('client_email_replies').select('client_id,subject,body_text,attachment_names,received_at,admin_seen_at').order('received_at',{ascending:false}).limit(30)
   ]);
 
   const unreadRows=[
     ...(unreadNotes.data||[]).map(x=>({kind:'note',client_id:x.client_id,title:'New note',detail:x.note,service:x.service_name,created_at:x.created_at,unread:true})),
-    ...(unreadDocs.data||[]).map(x=>({kind:'document',client_id:x.client_id,title:'Documents uploaded',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at,unread:true}))
+    ...(unreadDocs.data||[]).map(x=>({kind:'document',client_id:x.client_id,title:'Documents uploaded',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at,unread:true})),
+    ...(unreadReplies.data||[]).map(x=>({kind:'email',client_id:x.client_id,title:'Email reply',detail:`${x.subject||'Reply'} — ${x.body_text||''}`,created_at:x.received_at,unread:true}))
   ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
 
   dashboardActivity=[
     ...(recentNotes.data||[]).map(x=>({kind:'note',client_id:x.client_id,title:'Client note',detail:x.note,service:x.service_name,created_at:x.created_at,unread:!x.admin_seen_at})),
-    ...(recentDocs.data||[]).map(x=>({kind:'document',client_id:x.client_id,title:'Document upload',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at,unread:!x.admin_seen_at}))
+    ...(recentDocs.data||[]).map(x=>({kind:'document',client_id:x.client_id,title:'Document upload',detail:`${x.file_count||1} file${(x.file_count||1)===1?'':'s'}${x.file_name?` · ${x.file_name}`:''}${x.client_note?` — ${x.client_note}`:''}`,service:x.service_name,created_at:x.sent_at,unread:!x.admin_seen_at})),
+    ...(recentReplies.data||[]).map(x=>({kind:'email',client_id:x.client_id,title:'Email reply',detail:`${x.subject||'Reply'} — ${x.body_text||''}`,created_at:x.received_at,unread:!x.admin_seen_at}))
   ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,40);
 
   statClients.textContent=clientGroups.length;
@@ -170,8 +176,8 @@ async function refreshDashboardOverview(){
 
 function renderCompactNotification(x){
   const client=clientGroups.find(v=>v.id===x.client_id);
-  const icon=x.kind==='document'?'↥':'✎';
-  const label=x.kind==='document'?'Document upload':'Client note';
+  const icon=x.kind==='document'?'↥':x.kind==='email'?'✉':'✎';
+  const label=x.kind==='document'?'Document upload':x.kind==='email'?'Email reply':'Client note';
   return `<button class="notification-item compact-notification ${x.unread?'is-unread':''}" type="button" data-client="${escAttr(x.client_id)}">
     <span class="notification-icon-wrap"><span class="unread-dot"></span><span class="notification-icon">${icon}</span></span>
     <span class="notification-copy">
@@ -195,10 +201,10 @@ function openActivityDrawer(){
     ? dashboardActivity.map(x=>{
         const client=clientGroups.find(v=>v.id===x.client_id);
         return `<button class="drawer-activity-item ${x.unread?'is-unread':''}" type="button" data-client="${escAttr(x.client_id)}">
-          <span class="drawer-activity-icon">${x.kind==='document'?'↥':'✎'}</span>
+          <span class="drawer-activity-icon">${x.kind==='document'?'↥':x.kind==='email'?'✉':'✎'}</span>
           <span class="drawer-activity-copy">
             <span><strong>${esc(client?.full_name||'Client')}</strong><time>${formatStamp(x.created_at)}</time></span>
-            <b>${x.kind==='document'?'Document upload':'Client note'}</b>
+            <b>${x.kind==='document'?'Document upload':x.kind==='email'?'Email reply':'Client note'}</b>
             ${x.service?`<small>${esc(x.service)}</small>`:''}
             <p>${esc(x.detail||'')}</p>
           </span>
@@ -225,14 +231,15 @@ async function markAllActivityRead(){
   markAllNotificationsRead.disabled=true; markAllNotificationsRead.textContent='Updating…';
   await Promise.all([
     sb.from('client_notes').update({admin_seen_at:now}).is('admin_seen_at',null),
-    sb.from('document_submissions').update({admin_seen_at:now}).is('admin_seen_at',null)
+    sb.from('document_submissions').update({admin_seen_at:now}).is('admin_seen_at',null),
+    sb.from('client_email_replies').update({admin_seen_at:now}).is('admin_seen_at',null)
   ]);
   unreadByClient={}; document.querySelectorAll('.activity-badge').forEach(b=>b.remove());
   await refreshDashboardOverview(); markAllNotificationsRead.textContent='Mark all read';
 }
 
 async function loadClientActivity(clientId){
-  const [notesResult, docsResult]=await Promise.all([
+  const [notesResult, docsResult, repliesResult]=await Promise.all([
     sb.from('client_notes')
       .select('id,note,service_name,created_at,admin_seen_at')
       .eq('client_id',clientId)
@@ -242,6 +249,11 @@ async function loadClientActivity(clientId){
       .select('id,file_name,file_count,service_name,client_note,sent_at,admin_seen_at')
       .eq('client_id',clientId)
       .order('sent_at',{ascending:false})
+      .limit(30),
+    sb.from('client_email_replies')
+      .select('id,subject,body_text,attachment_names,received_at,admin_seen_at')
+      .eq('client_id',clientId)
+      .order('received_at',{ascending:false})
       .limit(30)
   ]);
 
@@ -265,7 +277,17 @@ async function loadClientActivity(clientId){
     seen:d.admin_seen_at
   }));
 
-  const rows=[...notes,...docs]
+  const replies=(repliesResult.data||[]).map(r=>({
+    kind:'email',
+    id:r.id,
+    title:'Email reply',
+    service_name:null,
+    summary:`${r.subject||'Reply'} — ${r.body_text||''}${(r.attachment_names||[]).length?` · Attachments: ${(r.attachment_names||[]).join(', ')}`:''}`,
+    created_at:r.received_at,
+    seen:r.admin_seen_at
+  }));
+
+  const rows=[...notes,...docs,...replies]
     .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
     .slice(0,40);
 
@@ -288,9 +310,11 @@ async function loadClientActivity(clientId){
   }
 
   // Opening the client records the activity as reviewed by Nicole.
+  const seenAt=new Date().toISOString();
   await Promise.all([
-    sb.from('client_notes').update({admin_seen_at:new Date().toISOString()}).eq('client_id',clientId).is('admin_seen_at',null),
-    sb.from('document_submissions').update({admin_seen_at:new Date().toISOString()}).eq('client_id',clientId).is('admin_seen_at',null)
+    sb.from('client_notes').update({admin_seen_at:seenAt}).eq('client_id',clientId).is('admin_seen_at',null),
+    sb.from('document_submissions').update({admin_seen_at:seenAt}).eq('client_id',clientId).is('admin_seen_at',null),
+    sb.from('client_email_replies').update({admin_seen_at:seenAt}).eq('client_id',clientId).is('admin_seen_at',null)
   ]);
 
   unreadByClient[clientId]=0;
@@ -298,6 +322,56 @@ async function loadClientActivity(clientId){
   if(badge)badge.remove();
   clientUnreadPill.classList.add('hidden');
   await refreshDashboardOverview();
+}
+
+
+async function loadClientEmailReplies(clientId){
+  if(!window.clientEmailReplies) return;
+
+  const {data,error}=await sb.from('client_email_replies')
+    .select('id,subject,body_text,from_email,attachment_names,received_at,admin_seen_at,forwarded_to_nicole')
+    .eq('client_id',clientId)
+    .order('received_at',{ascending:false})
+    .limit(50);
+
+  if(error){
+    clientEmailReplies.innerHTML=`<p class="portal-error">Could not load email replies: ${esc(error.message)}</p>`;
+    return;
+  }
+
+  const rows=data||[];
+  const unread=rows.filter(r=>!r.admin_seen_at).length;
+
+  if(window.emailReplyCount){
+    emailReplyCount.textContent=`${unread} new`;
+    emailReplyCount.classList.toggle('hidden',unread===0);
+  }
+
+  clientEmailReplies.innerHTML=rows.length ? rows.map(r=>`
+    <article class="email-reply-card ${r.admin_seen_at?'':'unread'}">
+      <div class="email-reply-top">
+        <div>
+          <span class="email-reply-label">Client reply</span>
+          <strong>${esc(r.subject||'Reply')}</strong>
+        </div>
+        <time>${formatStamp(r.received_at)}</time>
+      </div>
+      <p class="email-reply-body">${esc(r.body_text||'')}</p>
+      ${(r.attachment_names||[]).length ? `<div class="email-reply-files"><strong>Attachments</strong>${r.attachment_names.map(f=>`<span>📎 ${esc(f)}</span>`).join('')}</div>` : ''}
+      <div class="email-reply-foot">
+        <small>${r.from_email?`From ${esc(r.from_email)}`:'Received by email'}</small>
+        ${r.forwarded_to_nicole?'<small>✓ Copy forwarded to Nicole’s Outlook</small>':'<small>Saved in portal</small>'}
+      </div>
+    </article>
+  `).join('') : '<p class="portal-muted">No email replies yet.</p>';
+
+  if(unread){
+    await sb.from('client_email_replies')
+      .update({admin_seen_at:new Date().toISOString()})
+      .eq('client_id',clientId)
+      .is('admin_seen_at',null);
+    emailReplyCount?.classList.add('hidden');
+  }
 }
 
 function renderWorkList(client) {
@@ -554,7 +628,7 @@ async function sendClientEmail(){
   });
 
   const failed=error||data?.error;
-  show(clientEmailMessage,failed?(data?.error||error?.message||'Could not send email.'):'Email sent to client ✓',!failed);
+  show(clientEmailMessage,failed?(data?.error||error?.message||'Could not send email.'):'Email sent ✓ Any normal email reply will now return to this client record in the portal.',!failed);
 
   if(!failed){
     clientEmailSubject.value='';

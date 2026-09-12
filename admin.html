@@ -227,7 +227,7 @@
 
             <div class="communication-section">
               <h3>Email client / send documents</h3>
-              <p class="portal-muted compact-copy">Send an email directly to the client's login email. You can attach up to 5 documents; files are emailed and are not stored in the portal.</p>
+              <p class="portal-muted compact-copy">Send an email directly to the client's login email. If they press Reply in Outlook, Gmail or Apple Mail, their reply will automatically appear here in the portal too.</p>
               <label for="clientEmailSubject">Subject</label>
               <input id="clientEmailSubject" placeholder="e.g. Your accounts are ready for approval">
               <label for="clientEmailBody">Message</label>
@@ -237,6 +237,21 @@
               <small class="portal-muted">Maximum 5 files, 8 MB each, 20 MB total.</small>
               <div id="clientEmailMessage" hidden></div>
               <button id="sendClientEmailBtn" class="portal-btn" type="button">Send email / documents</button>
+            </div>
+
+            <div class="communication-divider"></div>
+
+            <div class="communication-section">
+              <div class="email-reply-heading">
+                <div>
+                  <h3>Email replies</h3>
+                  <p class="portal-muted compact-copy">Replies clients send from their normal email app appear here automatically.</p>
+                </div>
+                <span id="emailReplyCount" class="reply-count hidden">0 new</span>
+              </div>
+              <div id="clientEmailReplies" class="email-reply-list">
+                <p class="portal-muted">No email replies yet.</p>
+              </div>
             </div>
           </div>
         </details>
