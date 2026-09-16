@@ -1305,3 +1305,8 @@ body:not(.home-v4) .calc-panel{border-color:rgba(174,129,97,.14);box-shadow:0 10
 .mobile-nav.is-open{visibility:visible;}
 body.menu-open{overflow:hidden;}
 :focus-visible{outline:3px solid #714b32;outline-offset:4px;}
+
+/* Keep navigation and offers usable on short screens. */
+.mobile-nav{overflow-y:auto;overscroll-behavior:contain;}
+.web5-offer{max-height:calc(100vh - 44px);max-height:calc(100dvh - 44px);overflow-y:auto;overscroll-behavior:contain;}
+@media(max-width:600px){.web5-offer{max-height:calc(100vh - 28px);max-height:calc(100dvh - 28px);}}

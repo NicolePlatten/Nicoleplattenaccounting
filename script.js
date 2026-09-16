@@ -79,6 +79,14 @@ runCalc();
 document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date().getFullYear());
 
 
+// Bounded requests without requiring the newer AbortSignal.timeout API.
+async function fetchWithTimeout(url, options, timeoutMs = 20000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try { return await fetch(url, { ...options, signal: controller.signal }); }
+  finally { clearTimeout(timer); }
+}
+
 // ---------- contact form via Formspree ----------
 const websiteForm = document.getElementById('enquiry-form');
 const formSubmitButton = document.getElementById('formSubmit');
@@ -127,10 +135,9 @@ if (websiteForm) {
     }
 
     try {
-      const response = await fetch(websiteForm.action, {
+      const response = await fetchWithTimeout(websiteForm.action, {
         method: 'POST',
         body: new FormData(websiteForm),
-        signal: AbortSignal.timeout(20000),
         headers: { Accept: 'application/json' }
       });
 
@@ -149,7 +156,7 @@ if (websiteForm) {
       window.location.href = 'thank-you.html';
     } catch (error) {
       if (websiteFormError) {
-        websiteFormError.textContent = error.message || 'Sorry — your enquiry could not be sent. Please try again.';
+        websiteFormError.textContent = error.name === 'AbortError' ? 'The request took too long. Delivery could not be confirmed; please check with Nicole before sending again.' : error.message || 'Sorry — your enquiry could not be sent. Please try again.';
         websiteFormError.hidden = false;
       }
       if (formSubmitButton) {
@@ -176,7 +183,10 @@ if (websiteForm) {
   if (excludedPages.test(location.pathname)) return;
 
   function getState() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+    try {
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      return state && typeof state === 'object' && !Array.isArray(state) ? state : {};
+    }
     catch (_) { return {}; }
   }
   function saveState(patch) {
@@ -229,7 +239,7 @@ if (websiteForm) {
           </div>
           <input type="hidden" name="_subject" value="Website 5% offer claimed">
           <input type="hidden" name="offer" value="WEB5OFF — 5% off first package">
-          <input type="hidden" name="source" value="60-second website popup">
+          <input type="hidden" name="source" value="10-second website popup">
           <p class="web5-offer-fine">New clients only · first package only · one use per client. By submitting, you agree to our <a href="privacy.html">privacy policy</a>.</p>
           <p class="web5-offer-error" hidden></p>
         </form>
@@ -328,11 +338,10 @@ if (websiteForm) {
       data.append('page', location.href);
 
       try {
-        const response = await fetch(FORMSPREE_ENDPOINT, {
+        const response = await fetchWithTimeout(FORMSPREE_ENDPOINT, {
           method: 'POST',
           body: data,
-          signal: AbortSignal.timeout(20000),
-          headers: {Accept: 'application/json'}
+            headers: {Accept: 'application/json'}
         });
         if (!response.ok) throw new Error();
 
