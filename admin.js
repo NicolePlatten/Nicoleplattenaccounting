@@ -194,7 +194,7 @@ function renderAgenda(){
     .filter(s=>s.next_due_date>=today&&s.next_due_date<=cutoff).sort((a,b)=>a.next_due_date.localeCompare(b.next_due_date));
   if(!rows.length){calendarAgenda.innerHTML='<p class="portal-muted">Nothing due in the next 60 days.</p>';return;}
   const groups={}; rows.forEach(s=>(groups[s.next_due_date]??=[]).push(s));
-  calendarAgenda.innerHTML=Object.entries(groups).map(([date,items])=>`<section class="agenda-day"><h4>${formatFriendlyDate(date)}</h4>${items.map(s=>`<button type="button" class="agenda-item" data-agenda-client="${s.client_id}"><span class="calendar-due-dot service-${s.service_type||'other'}"></span><span><strong>${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${serviceLabel(s.service_type)}</small></span><b>${dueRelativeText(s.next_due_date)}</b></button>`).join('')}</section>`).join('');
+  calendarAgenda.innerHTML=Object.entries(groups).map(([date,items])=>`<section class="agenda-day"><h4>${formatFriendlyDate(date)}</h4>${items.map(s=>`<button type="button" class="agenda-item" data-agenda-client="${s.client_id}"><span class="calendar-due-dot service-${escAttr(s.service_type||'other')}"></span><span><strong>${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${serviceTypeLabel(s.service_type)}</small></span><b>${dueRelativeText(s.next_due_date)}</b></button>`).join('')}</section>`).join('');
   calendarAgenda.querySelectorAll('[data-agenda-client]').forEach(btn=>btn.onclick=()=>{openClient(btn.dataset.agendaClient);document.getElementById('clientDirectory')?.scrollIntoView({behavior:'smooth',block:'start'});});
 }
 function renderTodayPanel(){
@@ -206,7 +206,7 @@ function renderTodayPanel(){
   todayHeading.textContent=total?`${total} thing${total===1?'':'s'} need your attention`:'Nothing urgent right now';
   todaySub.textContent=total?'Deadlines and unread client activity stay here until you deal with them.':'Your deadlines and unread client activity will appear here.';
   const items=[
-    ...due.slice(0,5).map(s=>`<button class="today-item ${s.next_due_date<today?'overdue':'due-today'}" type="button" data-today-client="${s.client_id}"><span><strong>${s.next_due_date<today?'Overdue':'Due today'} · ${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${serviceLabel(s.service_type)}</small></span><b>${dueRelativeText(s.next_due_date)}</b></button>`),
+    ...due.slice(0,5).map(s=>`<button class="today-item ${s.next_due_date<today?'overdue':'due-today'}" type="button" data-today-client="${s.client_id}"><span><strong>${s.next_due_date<today?'Overdue':'Due today'} · ${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${serviceTypeLabel(s.service_type)}</small></span><b>${dueRelativeText(s.next_due_date)}</b></button>`),
     ...unread.slice(0,5).map(x=>{const c=clientGroups.find(v=>v.id===x.client_id);return `<button class="today-item unread" type="button" data-today-client="${x.client_id}"><span><strong>Unread ${x.kind==='email'?'email reply':x.kind==='document'?'document':'client note'} · ${esc(c?.full_name||'Client')}</strong><small>${esc((x.detail||'').slice(0,120))}</small></span><b>Open</b></button>`})
   ];
   todayItems.innerHTML=items.length?items.join(''):'<div class="today-clear">All clear — nothing needs attention today.</div>';
@@ -221,6 +221,10 @@ async function advanceScheduleAfterWork(scheduleId,sourceDueDate){
   await sb.from('client_schedules').update(patch).eq('id',scheduleId).eq('next_due_date',sourceDueDate);
   await logAudit(currentClientId,'schedule_advanced',schedule.cadence==='one_off'?`One-off schedule completed: ${schedule.title}`:`Schedule advanced: ${schedule.title} → ${formatFriendlyDate(next)}`,{schedule_id:scheduleId,completed_for:sourceDueDate});
 }
+function csvSafe(value){
+  const text=String(value??'');
+  return /^[\s]*[=+@-]|^[\t\r\n]/.test(text) ? "'"+text : text;
+}
 function exportClientDataCsv(){
   const rows=[['Client','Business','Status','Service','Period','Work status','Progress','Next due dates']];
   clientGroups.forEach(c=>{
@@ -228,7 +232,7 @@ function exportClientDataCsv(){
     if((c.works||[]).length)c.works.forEach(w=>rows.push([c.full_name||'',c.business_name||'',clientStatusLabel(c.client_status||'active'),w.service_name||'',w.period_label||'',w.status||'',w.progress??'',dueText]));
     else rows.push([c.full_name||'',c.business_name||'',clientStatusLabel(c.client_status||'active'),'','','','',dueText]);
   });
-  const csv=rows.map(r=>r.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\r\n');
+  const csv=rows.map(r=>r.map(v=>`"${csvSafe(v).replaceAll('"','""')}"`).join(',')).join('\r\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download=`nicole-platten-client-export-${dateOnly(new Date())}.csv`;document.body.appendChild(a);a.click();a.remove();
 }
@@ -555,7 +559,7 @@ function renderCalendar(){
     cells.push(`<button class="calendar-day ${outside?'outside':''} ${cellDate===today?'today':''} ${selectedCalendarDate===cellDate?'selected':''} ${overdue?'has-overdue':''}" type="button" data-date="${cellDate}">
       <span class="calendar-day-number">${dnum}</span>
       <span class="calendar-dots">
-        ${due.slice(0,4).map(s=>`<i class="calendar-dot service-${s.service_type||'other'}"></i>`).join('')}
+        ${due.slice(0,4).map(s=>`<i class="calendar-dot service-${escAttr(s.service_type||'other')}"></i>`).join('')}
         ${due.length>4?`<b>+${due.length-4}</b>`:''}
       </span>
     </button>`);
@@ -583,7 +587,7 @@ function renderCalendarDay(date){
   const rows=source.filter(s=>s.next_due_date===date);
   calendarDayItems.innerHTML=rows.length?rows.map(s=>`
     <button class="calendar-due-item ${date<dateOnly(new Date())?'overdue':''}" type="button" data-client="${s.client_id}">
-      <span class="calendar-due-dot service-${s.service_type||'other'}"></span>
+      <span class="calendar-due-dot service-${escAttr(s.service_type||'other')}"></span>
       <span><strong>${esc(s.profiles?.full_name||'Client')}</strong><small>${serviceTypeLabel(s.service_type)} · ${esc(s.title)} · ${cadenceLabel(s.cadence)}</small></span>
       <b>›</b>
     </button>`).join(''):'<p class="portal-muted">Nothing due on this date.</p>';
@@ -701,11 +705,11 @@ function updateServiceSummary(){
   const order=['bookkeeping','vat','payroll','annual_accounts','self_assessment','corporation_tax','quarterly_review','other'];
   const counts=order.map(type=>({type,count:due.filter(s=>s.service_type===type).length})).filter(x=>x.count);
   calendarServiceSummary.innerHTML=counts.length
-    ? `<span>This week</span>${counts.map(x=>`<b class="service-summary-pill service-${x.type}">${x.count} ${serviceTypeLabel(x.type)}</b>`).join('')}`
+    ? `<span>This week</span>${counts.map(x=>`<b class="service-summary-pill service-${escAttr(x.type)}">${x.count} ${serviceTypeLabel(x.type)}</b>`).join('')}`
     : '<span>This week</span><b class="service-summary-empty">No scheduled work due</b>';
 }
 
-function cadenceLabel(v){return ({monthly:'Monthly',quarterly:'Quarterly',annual:'Annual',one_off:'One-off'})[v]||v;}
+function cadenceLabel(v){return ({monthly:'Monthly',quarterly:'Quarterly',annual:'Annual',one_off:'One-off'})[v]||'Other';}
 function dueRelativeText(value){
   const today=dateOnly(new Date());
   const days=Math.round((new Date(`${value}T12:00:00`)-new Date(`${today}T12:00:00`))/86400000);
@@ -905,7 +909,7 @@ async function createWork(e) {
   show(newWorkMessage, error ? `Could not add work: ${error.message}` : 'New work added ✓', !error);
   if (!error) {
     await logAudit(currentClientId,'work_created',`Work created: ${newWorkService.value.trim()||'Work item'}`,{workflow:newWorkWorkflow.value,period:newWorkPeriod.value.trim()||null});
-    e.currentTarget.reset();
+    document.getElementById('newWorkForm').reset();
     await loadClients();
     await loadClientAuditLog(currentClientId);
     newWorkForm.classList.add('hidden');
@@ -1067,7 +1071,7 @@ async function createClient(e) {
     : 'Client login created and welcome email sent ✓';
   show(newClientMessage, failed ? (detail || 'Could not create client.') : successText, !failed);
   btn.disabled = false; btn.textContent = 'Create client';
-  if (!(error || data?.error)) { e.currentTarget.reset(); await loadClients(); setTimeout(() => { newClientForm.classList.add('hidden'); adminEmpty.classList.remove('hidden'); }, 800); }
+  if (!(error || data?.error)) { document.getElementById('newClientForm').reset(); await loadClients(); setTimeout(() => { newClientForm.classList.add('hidden'); adminEmpty.classList.remove('hidden'); }, 800); }
 }
 
 function formatStamp(value) {

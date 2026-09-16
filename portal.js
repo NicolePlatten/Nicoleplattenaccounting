@@ -344,7 +344,7 @@ async function sendDocuments(e,profile,clientId){
     : 'Documents sent securely to Nicole ✓',!(error||data?.error));
 
   if(!(error||data?.error)){
-    e.currentTarget.reset();
+    document.getElementById('documentForm').reset();
     await loadDocumentHistory(clientId);
   }
   btn.disabled=false; btn.textContent='Email documents to Nicole';
