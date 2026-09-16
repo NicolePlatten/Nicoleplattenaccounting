@@ -1299,3 +1299,9 @@ body:not(.home-v4) .calc-panel{border-color:rgba(174,129,97,.14);box-shadow:0 10
 .portal-feature-leaf{position:absolute;right:-65px;bottom:-30px;width:280px;opacity:.16;transform:rotate(-24deg)}
 @media(max-width:900px){.portal-feature-grid{grid-template-columns:1fr;gap:35px}.portal-feature-visual{min-height:360px}.portal-feature-points{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.portal-feature-points{grid-template-columns:1fr}.portal-feature-visual{min-height:320px}.portal-window-body{padding:20px}.portal-feature-copy h2{font-size:2.7rem}}
+
+/* Review: keep hidden overlays out of keyboard navigation. */
+.mobile-nav:not(.is-open){visibility:hidden;}
+.mobile-nav.is-open{visibility:visible;}
+body.menu-open{overflow:hidden;}
+:focus-visible{outline:3px solid #714b32;outline-offset:4px;}

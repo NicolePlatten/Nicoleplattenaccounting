@@ -14,6 +14,18 @@
   const validGA = /^G-[A-Z0-9]+$/i.test(CONFIG.ga4MeasurementId) && !CONFIG.ga4MeasurementId.includes('REPLACE');
   const validClarity = /^[a-z0-9]+$/i.test(CONFIG.clarityProjectId) && !CONFIG.clarityProjectId.includes('REPLACE');
   let analyticsLoaded = false;
+  let memoryConsent = null;
+  function readConsent() { try { return localStorage.getItem(CONFIG.consentStorageKey) || memoryConsent; } catch { return memoryConsent; } }
+  function writeConsent(value) { memoryConsent = value; try { localStorage.setItem(CONFIG.consentStorageKey, value); } catch {} }
+  function clearAnalyticsCookies() {
+    const domains = location.hostname.split('.');
+    document.cookie.split(';').forEach(entry => {
+      const name = entry.split('=')[0].trim();
+      if (!/^(_ga|_gid|_gat|_clck|_clsk)/.test(name)) return;
+      document.cookie = name + '=; Max-Age=0; path=/';
+      for(let i=0;i<domains.length-1;i++) document.cookie = name + '=; Max-Age=0; path=/; domain=.' + domains.slice(i).join('.');
+    });
+  }
 
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function(){ dataLayer.push(arguments); };
@@ -30,6 +42,7 @@
   function loadAnalytics() {
     if (analyticsLoaded) return;
     analyticsLoaded = true;
+    window['ga-disable-' + CONFIG.ga4MeasurementId] = false;
 
     if (validGA) {
       loadScript(`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(CONFIG.ga4MeasurementId)}`, 'npa-ga4');
@@ -52,21 +65,28 @@
   }
 
   function track(eventName, params = {}) {
-    if (!validGA || localStorage.getItem(CONFIG.consentStorageKey) !== 'accepted') return;
+    if (!validGA || readConsent() !== 'accepted') return;
     gtag('event', eventName, params);
   }
 
   window.npaTrack = track;
 
   function setConsent(value) {
-    localStorage.setItem(CONFIG.consentStorageKey, value);
+    writeConsent(value);
+    if (value === 'declined') {
+      window['ga-disable-' + CONFIG.ga4MeasurementId] = true;
+      window.gtag?.('consent', 'update', {analytics_storage:'denied'});
+      window.clarity?.('consent', false);
+      clearAnalyticsCookies();
+      if (analyticsLoaded) { location.reload(); return; }
+    }
     if (value === 'accepted') loadAnalytics();
     document.querySelector('.cookie-banner')?.remove();
   }
 
-  function showConsent() {
+  function showConsent(force = false) {
     if (!validGA && !validClarity) return;
-    if (localStorage.getItem(CONFIG.consentStorageKey)) return;
+    if (!force && readConsent()) return;
     if (document.querySelector('.cookie-banner')) return;
 
     const el = document.createElement('aside');
@@ -89,14 +109,13 @@
 
   function addCookieSettingsLink() {
     const footer = document.querySelector('.footer-legal, .footer-bottom, .site-footer');
-    if (!footer || document.querySelector('.cookie-settings-link')) return;
+    if ((!validGA && !validClarity) || !footer || document.querySelector('.cookie-settings-link')) return;
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'cookie-settings-link';
     button.textContent = 'Cookie settings';
     button.addEventListener('click', () => {
-      localStorage.removeItem(CONFIG.consentStorageKey);
-      showConsent();
+      showConsent(true);
       document.querySelector('.cookie-banner')?.scrollIntoView({behavior:'smooth', block:'end'});
     });
     footer.appendChild(button);
@@ -125,15 +144,17 @@
   }, {passive:true});
 
   document.addEventListener('DOMContentLoaded', () => {
-    const consent = localStorage.getItem(CONFIG.consentStorageKey);
+    const consent = readConsent();
     if (consent === 'accepted') loadAnalytics();
     else showConsent();
     addCookieSettingsLink();
 
     // Count only successful Formspree submissions, not direct visits to thank-you.html.
+    try {
     if (/thank-you\.html$/i.test(location.pathname) && sessionStorage.getItem('npa_form_success') === '1') {
       sessionStorage.removeItem('npa_form_success');
       track('generate_lead', { method: 'website_form', page_path: location.pathname });
     }
+    } catch {}
   });
 })();

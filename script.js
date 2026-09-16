@@ -1,6 +1,6 @@
 // ---------- header scroll state ----------
 const header = document.querySelector('.site-header');
-const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 8);
+const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 8);
 document.addEventListener('scroll', onScroll, { passive:true });
 onScroll();
 
@@ -9,9 +9,31 @@ const navToggle = document.querySelector('.nav-toggle');
 const mobileNav = document.querySelector('.mobile-nav');
 const mobileClose = document.querySelector('.mobile-nav-close');
 if (navToggle && mobileNav) {
-  navToggle.addEventListener('click', () => mobileNav.classList.add('is-open'));
-  mobileClose?.addEventListener('click', () => mobileNav.classList.remove('is-open'));
-  mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileNav.classList.remove('is-open')));
+  mobileNav.id ||= 'mobile-navigation';
+  navToggle.setAttribute('aria-controls', mobileNav.id);
+  mobileNav.inert = true;
+  const setMenu = open => {
+    mobileNav.classList.toggle('is-open', open);
+    mobileNav.setAttribute('aria-hidden', String(!open));
+    navToggle.setAttribute('aria-expanded', String(open));
+    mobileNav.inert = !open;
+    document.body.classList.toggle('menu-open', open);
+    if (open) mobileClose?.focus(); else navToggle.focus();
+  };
+  navToggle.addEventListener('click', () => setMenu(!mobileNav.classList.contains('is-open')));
+  mobileClose?.addEventListener('click', () => setMenu(false));
+  mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+  document.addEventListener('keydown', e => {
+    if (!mobileNav.classList.contains('is-open')) return;
+    if (e.key === 'Escape') setMenu(false);
+    if (e.key === 'Tab') {
+      const items = [...mobileNav.querySelectorAll('a[href],button:not([disabled])')];
+      const first = items[0], last = items.at(-1);
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+  matchMedia('(min-width: 901px)').addEventListener('change', e => { if(e.matches && mobileNav.classList.contains('is-open')) setMenu(false); });
 }
 
 // ---------- hero entrance (single orchestrated moment) ----------
@@ -108,6 +130,7 @@ if (websiteForm) {
       const response = await fetch(websiteForm.action, {
         method: 'POST',
         body: new FormData(websiteForm),
+        signal: AbortSignal.timeout(20000),
         headers: { Accept: 'application/json' }
       });
 
@@ -171,7 +194,11 @@ if (websiteForm) {
       window.npaTrack(name, {offer_code: DISCOUNT_CODE, ...params});
     }
   }
+  let offerPreviousFocus = null;
+  let offerKeyboardHandler = null;
   function removeOffer() {
+    document.removeEventListener('keydown', offerKeyboardHandler);
+    offerPreviousFocus?.focus();
     document.querySelector('.web5-offer-backdrop')?.remove();
     document.body.classList.remove('offer-modal-open');
   }
@@ -182,7 +209,7 @@ if (websiteForm) {
   }
 
   function showOffer() {
-    if (!shouldShow() || document.querySelector('.web5-offer-backdrop')) return;
+    if (!shouldShow() || document.querySelector('.web5-offer-backdrop, .mobile-nav.is-open, .cookie-banner') || document.activeElement?.matches('input,textarea,select')) return;
 
     const backdrop = document.createElement('div');
     backdrop.className = 'web5-offer-backdrop';
@@ -221,6 +248,7 @@ if (websiteForm) {
         <button class="web5-offer-later" type="button">Not right now</button>
       </section>`;
 
+    offerPreviousFocus = document.activeElement;
     document.body.appendChild(backdrop);
     document.body.classList.add('offer-modal-open');
     requestAnimationFrame(() => backdrop.classList.add('is-visible'));
@@ -237,11 +265,18 @@ if (websiteForm) {
     backdrop.addEventListener('click', e => { if (e.target === backdrop) dismissOffer(); });
 
     const escHandler = e => {
+      if (e.key === 'Tab') {
+        const items = [...backdrop.querySelectorAll('a[href],button:not([disabled]),input:not([type=hidden])')].filter(el => el.getClientRects().length);
+        const first = items[0], last = items.at(-1);
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
       if (e.key === 'Escape' && document.body.contains(backdrop)) {
         dismissOffer();
         document.removeEventListener('keydown', escHandler);
       }
     };
+    offerKeyboardHandler = escHandler;
     document.addEventListener('keydown', escHandler);
 
     backdrop.querySelector('.web5-copy-code')?.addEventListener('click', async e => {
@@ -296,6 +331,7 @@ if (websiteForm) {
         const response = await fetch(FORMSPREE_ENDPOINT, {
           method: 'POST',
           body: data,
+          signal: AbortSignal.timeout(20000),
           headers: {Accept: 'application/json'}
         });
         if (!response.ok) throw new Error();
@@ -305,6 +341,7 @@ if (websiteForm) {
 
         form.hidden = true;
         success.hidden = false;
+        success.querySelector('button')?.focus();
         backdrop.querySelector('.web5-offer-later').hidden = true;
         backdrop.querySelector('.web5-offer-copy').textContent = 'Thanks — your website offer is ready to use.';
       } catch (_) {
