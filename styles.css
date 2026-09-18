@@ -1310,3 +1310,13 @@ body.menu-open{overflow:hidden;}
 .mobile-nav{overflow-y:auto;overscroll-behavior:contain;}
 .web5-offer{max-height:calc(100vh - 44px);max-height:calc(100dvh - 44px);overflow-y:auto;overscroll-behavior:contain;}
 @media(max-width:600px){.web5-offer{max-height:calc(100vh - 28px);max-height:calc(100dvh - 28px);}}
+
+
+/* Portal USP — clearer value proposition */
+.portal-usp-badge{display:inline-flex;align-items:center;gap:8px;margin:.2rem 0 .8rem;padding:8px 12px;border:1px solid rgba(111,89,71,.18);border-radius:999px;background:rgba(255,255,255,.62);color:#6f5947;font-size:.7rem;font-weight:700;letter-spacing:.035em}
+.portal-usp-badge::before{content:"✓";width:18px;height:18px;display:grid;place-items:center;border-radius:50%;background:#e8eee4;color:#5f7058;font-size:.68rem}
+.portal-feature-lede{font-size:1.02rem}
+.portal-proof-line{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 22px}
+.portal-proof-line span{display:inline-flex;align-items:center;gap:7px;color:#6e6258;font-size:.74rem;font-weight:600}
+.portal-proof-line span::before{content:"";width:6px;height:6px;border-radius:50%;background:#a17b61}
+@media(max-width:600px){.portal-usp-badge{font-size:.66rem}.portal-proof-line{gap:7px 14px}.portal-proof-line span{font-size:.7rem}}

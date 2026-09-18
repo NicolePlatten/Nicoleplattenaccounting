@@ -1054,3 +1054,16 @@ details[open]>.dropdown-chevron,details[open]>summary .dropdown-chevron{transfor
 @media(max-width:650px){.today-item{align-items:flex-start;flex-direction:column}.notification-item{align-items:flex-start!important;flex-direction:column}}
 
 .client-last-login{margin-top:6px!important;font-size:.74rem;color:var(--brown)!important;font-weight:600}
+
+
+/* Admin hero polish — remove decorative coloured underlines/borders */
+.admin-welcome-panel,
+.admin-welcome-panel h1,
+.admin-welcome-panel .portal-kicker{border-bottom:0!important;text-decoration:none!important;box-shadow:none}
+.admin-welcome-panel::before,
+.admin-welcome-panel::after,
+.admin-welcome-panel h1::before,
+.admin-welcome-panel h1::after,
+.admin-welcome-panel .portal-kicker::before,
+.admin-welcome-panel .portal-kicker::after{content:none!important;display:none!important}
+.admin-topbar{border-top:0!important;border-bottom:1px solid rgba(111,89,71,.10)!important}
