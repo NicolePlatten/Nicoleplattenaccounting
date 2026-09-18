@@ -103,7 +103,7 @@ async function loadClients() {
   }
 
   // Include profiles even if a newly created client has no work record yet.
-  const profileResult = await sb.from('profiles').select('id,full_name,business_name,role,client_status').eq('role', 'client');
+  const profileResult = await sb.from('profiles').select('id,full_name,business_name,role,client_status,last_login_at').eq('role', 'client');
   const profiles = profileResult.data || [];
   const map = Object.fromEntries(profiles.map(p => [p.id, { ...p, works: [] }]));
   (rows || []).forEach(r => {
@@ -134,11 +134,28 @@ function renderClientList(){
     return `<button class="client-item" data-id="${c.id}">
       <span class="client-item-row"><strong>${esc(c.full_name||'Client')}</strong>${unread?`<span class="activity-badge">${unread}</span>`:''}</span>
       <small><span class="client-status-dot status-${status}"></span>${clientStatusLabel(status)} · ${active} active · ${c.works.length} total${unread?` · ${unread} unread`:''}</small>
+      <small class="client-last-login">Last login: ${formatLastLogin(c.last_login_at)}</small>
     </button>`;
   }).join(''):'<p class="portal-muted">No clients match this view.</p>';
   clientList.querySelectorAll('button[data-id]').forEach(btn=>btn.onclick=()=>openClient(btn.dataset.id));
 }
 function clientStatusLabel(v){return ({active:'Active',onboarding:'Onboarding',paused:'Paused',former:'Former'})[v]||'Active';}
+
+function formatLastLogin(value){
+  if(!value) return 'Never logged in';
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime())) return 'Unknown';
+  const diff=Math.max(0,Date.now()-date.getTime());
+  const mins=Math.floor(diff/60000);
+  const hours=Math.floor(diff/3600000);
+  const days=Math.floor(diff/86400000);
+  if(mins<1) return 'Just now';
+  if(mins<60) return `${mins} min${mins===1?'':'s'} ago`;
+  if(hours<24) return `${hours} hour${hours===1?'':'s'} ago`;
+  if(days===1) return 'Yesterday';
+  if(days<7) return `${days} days ago`;
+  return date.toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
 
 async function saveClientStatus(){
   if(!currentClientId)return;

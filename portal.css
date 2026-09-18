@@ -1052,3 +1052,5 @@ details[open]>.dropdown-chevron,details[open]>summary .dropdown-chevron{transfor
 .activity-row .mark-read-btn{margin-top:8px}
 @media(max-width:900px){.admin-global-search{max-width:none;margin:8px 0;width:100%}.admin-header-inner{flex-wrap:wrap}.client-status-control{width:100%;flex-wrap:wrap}}
 @media(max-width:650px){.today-item{align-items:flex-start;flex-direction:column}.notification-item{align-items:flex-start!important;flex-direction:column}}
+
+.client-last-login{margin-top:6px!important;font-size:.74rem;color:var(--brown)!important;font-weight:600}
