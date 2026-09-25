@@ -42,3 +42,19 @@ Before uploading the v10 admin files, run `SUPABASE-PRACTICE-UPGRADE.sql` once i
 
 ## V11 practice-management upgrade
 Run `SUPABASE-PRACTICE-V11.sql` once in the Supabase SQL Editor before using onboarding checklists, document requests, private notes or recurring work templates. The migration is additive and does not delete existing client data.
+
+## V12 potential-client preview access
+Run `SUPABASE-POTENTIAL-CLIENTS-V12.sql` once in Supabase SQL Editor.
+
+Deploy the new Edge Function:
+
+    supabase functions deploy create-potential-client
+
+The function uses the same `RESEND_API_KEY` already used by the portal. Optional secrets:
+
+    CLIENT_WELCOME_FROM_EMAIL=Nicole Platten Accounting <documents@nicoleplattenaccounting.co.uk>
+    PORTAL_LOGIN_URL=https://nicoleplattenaccounting.co.uk/client-login.html
+
+If those optional values are not set, the function falls back to the existing document sender and the live Nicole Platten Accounting login URL.
+
+Potential clients receive a generated temporary password and `must_change_password=true`, so the existing first-login password-change flow applies. Potential accounts only see the preview portal. Nicole can upgrade them from **Potential clients** in the admin portal; the same login then unlocks the full client portal. Deleting a potential client uses the existing `delete-client` Edge Function.

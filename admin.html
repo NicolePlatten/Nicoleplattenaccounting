@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <link rel="icon" href="assets/logo.png">
-  <link rel="stylesheet" href="portal.css?v=25">
+  <link rel="stylesheet" href="portal.css?v=26">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <title>Admin Portal | Nicole Platten Accounting</title>
@@ -18,6 +18,7 @@
     <nav class="sidebar-nav" aria-label="Admin navigation">
       <button class="sidebar-link active" data-target="dashboardTop" type="button"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>Dashboard</button>
       <button class="sidebar-link" data-target="clientDirectory" type="button"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c.5-3.2 2.4-5 5.5-5s5 1.8 5.5 5"/><circle cx="17" cy="9" r="2.3"/><path d="M15.5 14.8c2.7-.7 4.5.7 5 3.7"/></svg></span>Clients</button>
+      <button class="sidebar-link" data-target="potentialClientsSection" type="button"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="8" r="3"/><path d="M4 19c.6-3.2 2.6-5 6-5 2.1 0 3.7.7 4.8 2"/><path d="M18 12v6M15 15h6"/></svg></span>Potential clients</button>
       <button class="sidebar-link" data-target="calendarSection" type="button"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span>Calendar</button>
       <button class="sidebar-link" data-target="notificationSection" type="button"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span>Activity <b id="sidebarActivityBadge">0</b></button>
       <button class="sidebar-link" data-target="clientDirectory" type="button"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>Documents</button>
@@ -117,7 +118,30 @@
       <button type="button" data-shortcut="clientDirectory"><span class="shortcut-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c.5-3.2 2.4-5 5.5-5s5 1.8 5.5 5"/><circle cx="17" cy="9" r="2.3"/><path d="M15.5 14.8c2.7-.7 4.5.7 5 3.7"/></svg></span><strong>Clients</strong><small>Open the client directory</small></button>
       <button type="button" data-shortcut="calendarSection"><span class="shortcut-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span><strong>Deadline Centre</strong><small>Dates, reminders & recurring work</small></button>
       <button type="button" data-shortcut="notificationSection"><span class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><strong>Activity</strong><small>Unread notes & uploads</small></button>
+      <button type="button" data-shortcut="potentialClientsSection"><span class="shortcut-icon"><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="3"/><path d="M4 19c.6-3.2 2.6-5 6-5 2.1 0 3.7.7 4.8 2"/><path d="M18 12v6M15 15h6"/></svg></span><strong>Potential clients</strong><small>Preview portal prospects</small></button>
       <button type="button" id="shortcutAddClient"><span class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><strong>Add client</strong><small>Create a new portal login</small></button>
+    </section>
+
+    <section id="potentialClientsSection" class="potential-clients-section portal-card pad">
+      <div class="potential-section-head">
+        <div>
+          <span class="portal-kicker">Potential clients</span>
+          <h2>Portal preview prospects</h2>
+          <p class="portal-muted">Give a prospective client limited preview access before they agree a package. Upgrade them to a full client in one click when they are ready.</p>
+        </div>
+        <div class="potential-section-actions">
+          <span id="potentialClientCount" class="status-pill">0 potential</span>
+          <button id="showPotentialClientForm" class="portal-btn" type="button">+ Create potential client</button>
+        </div>
+      </div>
+      <form id="potentialClientForm" class="portal-form potential-client-form hidden">
+        <div class="row2"><div><label for="potentialName">Name</label><input id="potentialName" required autocomplete="off"></div><div><label for="potentialEmail">Email</label><input id="potentialEmail" type="email" required autocomplete="off"></div></div>
+        <div class="row2"><div><label for="potentialBusiness">Business name <span class="portal-muted">(optional)</span></label><input id="potentialBusiness" autocomplete="off"></div><div><label for="potentialDiscussion">What have you discussed?</label><input id="potentialDiscussion" placeholder="e.g. Ltd company accounts & VAT"></div></div>
+        <p class="potential-form-note">A secure temporary password is generated automatically and emailed to them. They must replace it the first time they sign in.</p>
+        <div id="potentialClientMessage" hidden></div>
+        <div class="portal-actions"><button class="portal-btn" type="submit">Create preview login & send email</button><button id="cancelPotentialClient" class="portal-btn secondary" type="button">Cancel</button></div>
+      </form>
+      <div id="potentialClientList" class="potential-client-list"><p class="portal-muted">Loading potential clients…</p></div>
     </section>
 
     <section id="notificationSection" class="notification-centre compact-centre">
@@ -543,7 +567,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="portal-config.js"></script>
-<script src="admin.js?v=25"></script>
+<script src="admin.js?v=26"></script>
 
   <div id="activityDrawer" class="activity-drawer hidden" aria-hidden="true">
     <div class="activity-drawer-backdrop" data-close-activity></div>

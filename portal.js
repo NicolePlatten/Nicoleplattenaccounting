@@ -152,6 +152,10 @@ async function loadPortal(user){
   const {data:profile}=await sb.from('profiles').select('*').eq('id',user.id).single();
   if(profile?.must_change_password) return location.href='change-password.html';
   welcomeName.textContent=`Welcome, ${profile?.full_name||'there'}`;
+  if((profile?.portal_tier||'full')==='potential'){
+    renderPotentialPortal(profile);
+    return;
+  }
 
   await loadClientNextDue(user.id);
   await loadClientActions(user.id);
@@ -194,6 +198,21 @@ async function loadPortal(user){
   documentForm.addEventListener('submit',e=>sendDocuments(e,profile,user.id));
   clientNoteForm.addEventListener('submit',e=>sendClientNote(e,user.id));
   bindPortalAutoReveal();
+}
+
+function renderPotentialPortal(profile){
+  document.getElementById('potentialPortalPreview')?.classList.remove('hidden');
+  document.querySelectorAll('.full-client-only').forEach(el=>el.classList.add('hidden'));
+  const count=document.getElementById('activeCount'); if(count)count.textContent='Preview access';
+  const copy=document.getElementById('welcomePortalCopy');
+  if(copy)copy.textContent='Your preview account is ready. Explore how the full Nicole Platten Accounting client portal will support you once your package is agreed.';
+  const preview=document.getElementById('potentialPortalPreview');
+  if(preview && profile?.potential_discussion){
+    const hero=preview.querySelector('.potential-preview-hero');
+    const note=document.createElement('div');note.className='potential-discussion-note';
+    note.innerHTML=`<span>Current discussion</span><strong>${esc(profile.potential_discussion)}</strong>`;
+    hero?.appendChild(note);
+  }
 }
 
 function bindPortalAutoReveal(){

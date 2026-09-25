@@ -23,6 +23,7 @@ function showAdminToast(title, message='', isError=false){
 const cfg = window.NPA_PORTAL_CONFIG || {};
 const sb = supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
 let clientGroups = [];
+let potentialClients = [];
 let currentClientId = null;
 let currentWorkId = null;
 let currentAdminId = null;
@@ -1193,20 +1194,22 @@ async function loadClients() {
     return;
   }
 
-  const profileResult = await sb.from('profiles').select('id,full_name,business_name,login_email,role,client_status,last_login_at,attention_status,attention_note,attention_updated_at').eq('role', 'client');
+  const profileResult = await sb.from('profiles').select('id,full_name,business_name,login_email,email,role,client_status,last_login_at,attention_status,attention_note,attention_updated_at,portal_tier,potential_discussion,created_at,converted_at').eq('role', 'client');
   if(profileResult.error){
     clientList.innerHTML=`<p class="portal-error">Could not load client flags. Run the supplied Supabase update first: ${esc(profileResult.error.message)}</p>`;
     return;
   }
   const profiles = profileResult.data || [];
-  const map = Object.fromEntries(profiles.map(p => [p.id, { ...p, works: [] }]));
+  potentialClients = profiles.filter(p => (p.portal_tier || 'full') === 'potential');
+  const fullProfiles = profiles.filter(p => (p.portal_tier || 'full') !== 'potential');
+  const map = Object.fromEntries(fullProfiles.map(p => [p.id, { ...p, works: [] }]));
   (rows || []).forEach(r => {
-    if (!map[r.client_id]) map[r.client_id] = { id: r.client_id, full_name: 'Client', attention_status:'none', works: [] };
-    map[r.client_id].works.push(r);
+    if (map[r.client_id]) map[r.client_id].works.push(r);
   });
 
   clientGroups = Object.values(map).sort((a,b) => (a.full_name || '').localeCompare(b.full_name || ''));
   renderClientList();
+  renderPotentialClients();
   await refreshDashboardOverview();
   if (currentClientId && clientGroups.some(c => c.id === currentClientId)) openClient(currentClientId, false);
 }
@@ -1606,4 +1609,91 @@ async function loadClientAuditLog(clientId){
   (requestsRes.data||[]).forEach(r=>events.push({id:`r-${r.id}`,category:'schedule',kind:'document',title:`Document ${r.status==='received'?'received':'requested'}: ${r.title}`,detail:r.status==='received'?'Client requirement completed':'Waiting for client document',at:r.status==='received'&&r.received_at?r.received_at:r.requested_at}));
   (privateRes.data||[]).forEach(r=>events.push({id:`p-${r.id}`,category:'admin',kind:'admin',title:'Private practice note',detail:r.note,at:r.created_at}));
   let rows=events.sort((a,b)=>new Date(b.at)-new Date(a.at));if(timelineFilter!=='all')rows=rows.filter(x=>x.category===timelineFilter);rows=rows.slice(0,100);const err=auditRes.error||notesRes.error||docsRes.error||repliesRes.error; if(err&&!rows.length){clientAuditLog.innerHTML=`<p class="portal-error">Could not load timeline: ${esc(err.message)}</p>`;return;} clientAuditLog.innerHTML=rows.length?rows.map(r=>`<article class="timeline-row ${escAttr(r.kind)}"><div class="timeline-marker">${timelineIcon(r.kind)}</div><div class="timeline-card"><div class="timeline-card-top"><strong>${esc(r.title||'Activity')}</strong><time>${formatStamp(r.at)}</time></div><p>${esc(r.detail||'')}</p></div></article>`).join(''):'<p class="portal-muted">No timeline events in this view yet.</p>';
+}
+
+
+/* =========================================================
+   V12 — Potential client preview portal
+   ========================================================= */
+const potentialForm = document.getElementById('potentialClientForm');
+const potentialList = document.getElementById('potentialClientList');
+const potentialCount = document.getElementById('potentialClientCount');
+const potentialMessage = document.getElementById('potentialClientMessage');
+
+document.getElementById('showPotentialClientForm')?.addEventListener('click',()=>{
+  potentialForm?.classList.remove('hidden');
+  bringIntoView(potentialForm,'#potentialName');
+});
+document.getElementById('cancelPotentialClient')?.addEventListener('click',()=>{
+  potentialForm?.classList.add('hidden');
+  if(potentialMessage) potentialMessage.hidden=true;
+});
+potentialForm?.addEventListener('submit',createPotentialClient);
+
+function renderPotentialClients(){
+  if(!potentialList)return;
+  const rows=[...potentialClients].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+  if(potentialCount) potentialCount.textContent=`${rows.length} potential`;
+  potentialList.innerHTML=rows.length?rows.map(c=>{
+    const email=c.login_email||c.email||'';
+    return `<article class="potential-client-row">
+      <div class="potential-avatar">${esc(initials(c.full_name||'P'))}</div>
+      <div class="potential-client-copy">
+        <div class="potential-client-title"><strong>${esc(c.full_name||'Potential client')}</strong><span class="potential-badge">Preview access</span></div>
+        ${c.business_name?`<small>${esc(c.business_name)}</small>`:''}
+        <small>${esc(email)}${c.last_login_at?` · Last login ${esc(formatLastLogin(c.last_login_at))}`:' · Not logged in yet'}</small>
+        ${c.potential_discussion?`<p>${esc(c.potential_discussion)}</p>`:''}
+      </div>
+      <div class="potential-client-actions">
+        <button class="portal-btn potential-upgrade" type="button" data-upgrade-potential="${escAttr(c.id)}">Upgrade to full client</button>
+        <button class="portal-btn danger-outline" type="button" data-delete-potential="${escAttr(c.id)}">Delete</button>
+      </div>
+    </article>`;
+  }).join(''):`<div class="potential-empty"><strong>No potential clients yet</strong><p>Create a preview login when someone is discussing services with Nicole but has not agreed a package yet.</p></div>`;
+  potentialList.querySelectorAll('[data-upgrade-potential]').forEach(btn=>btn.addEventListener('click',()=>upgradePotentialClient(btn.dataset.upgradePotential)));
+  potentialList.querySelectorAll('[data-delete-potential]').forEach(btn=>btn.addEventListener('click',()=>deletePotentialClient(btn.dataset.deletePotential)));
+}
+
+async function createPotentialClient(e){
+  e.preventDefault();
+  const btn=e.currentTarget.querySelector('button[type="submit"]');
+  const payload={
+    name:document.getElementById('potentialName')?.value.trim(),
+    email:document.getElementById('potentialEmail')?.value.trim(),
+    businessName:document.getElementById('potentialBusiness')?.value.trim(),
+    discussion:document.getElementById('potentialDiscussion')?.value.trim()
+  };
+  if(!payload.name||!payload.email)return;
+  btn.disabled=true;btn.textContent='Creating & emailing…';
+  const {data,error}=await sb.functions.invoke('create-potential-client',{body:payload});
+  const failed=error||data?.error;
+  show(potentialMessage,failed?(data?.error||error?.message||'Could not create the potential client.'):'Preview login created and welcome email sent ✓',!failed);
+  btn.disabled=false;btn.textContent='Create preview login & send email';
+  if(!failed){
+    e.currentTarget.reset();
+    showAdminToast('Potential client created',`${payload.name} has been emailed their preview login.`);
+    await loadClients();
+    window.setTimeout(()=>potentialForm?.classList.add('hidden'),900);
+  }
+}
+
+async function upgradePotentialClient(clientId){
+  const c=potentialClients.find(x=>x.id===clientId); if(!c)return;
+  if(!confirm(`Upgrade ${c.full_name||'this potential client'} to full client access?\n\nTheir existing login will immediately unlock the full client portal.`))return;
+  const {error}=await sb.from('profiles').update({portal_tier:'full',converted_at:new Date().toISOString(),client_status:'onboarding'}).eq('id',clientId);
+  if(error)return showAdminToast('Couldn’t upgrade client',error.message,true);
+  await logAudit(clientId,'potential_converted','Potential client upgraded to full portal access',{from:'potential',to:'full'});
+  showAdminToast('Full client access enabled',`${c.full_name||'Client'} can now use the complete portal.`);
+  await loadClients();
+  const upgraded=clientGroups.find(x=>x.id===clientId); if(upgraded) openClient(clientId);
+}
+
+async function deletePotentialClient(clientId){
+  const c=potentialClients.find(x=>x.id===clientId); if(!c)return;
+  const typed=prompt(`Delete potential client ${c.full_name||''}?\n\nThis permanently removes their preview login and portal record.\n\nType DELETE to confirm.`);
+  if(typed!=='DELETE')return;
+  const {data,error}=await sb.functions.invoke('delete-client',{body:{clientId}});
+  if(error||data?.error)return showAdminToast('Couldn’t delete potential client',data?.error||error?.message||'Delete failed.',true);
+  showAdminToast('Potential client deleted',`${c.full_name||'The preview account'} has been removed.`);
+  await loadClients();
 }

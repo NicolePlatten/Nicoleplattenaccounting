@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <link rel="icon" href="assets/logo.png">
-  <link rel="stylesheet" href="portal.css?v=25">
+  <link rel="stylesheet" href="portal.css?v=26">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <title>Your Dashboard | Nicole Platten Accounting</title>
@@ -13,12 +13,26 @@
 <body class="portal-body">
 <div class="portal-shell">
   <header class="portal-topbar"><a href="index.html"><img class="portal-logo" src="assets/logo.png" alt="Nicole Platten Accounting"></a><div class="portal-actions"><span id="userEmail" class="portal-muted"></span><button id="logoutBtn" class="portal-btn secondary">Sign out</button></div></header>
-  <section class="portal-card pad portal-welcome"><div><span class="portal-kicker">Your account</span><h1 id="welcomeName">Welcome</h1><p class="portal-muted">Track each piece of accounting work separately, including recurring monthly services.</p></div><span id="activeCount" class="status-pill">Loading</span></section>
-  <section id="clientActionsCard" class="portal-card pad client-actions-card">
+  <section class="portal-card pad portal-welcome"><div><span class="portal-kicker">Your account</span><h1 id="welcomeName">Welcome</h1><p id="welcomePortalCopy" class="portal-muted">Track each piece of accounting work separately, including recurring monthly services.</p></div><span id="activeCount" class="status-pill">Loading</span></section>
+  <section id="potentialPortalPreview" class="portal-card pad potential-portal-preview hidden">
+    <div class="potential-preview-hero">
+      <span class="portal-kicker">Preview access</span>
+      <h2>A look inside your future client portal</h2>
+      <p>Nicole has created this preview while you discuss your accountancy needs. Once you agree a package, your login can be upgraded to the full portal without creating a new account.</p>
+    </div>
+    <div class="potential-preview-grid">
+      <article><span class="preview-feature-icon">✓</span><strong>See work progress</strong><p>Full clients can follow each job and see exactly where their accounts, VAT, payroll or tax work has reached.</p></article>
+      <article><span class="preview-feature-icon">↥</span><strong>Secure document requests</strong><p>Nicole can request exactly what she needs and your dashboard keeps outstanding actions clear in one place.</p></article>
+      <article><span class="preview-feature-icon">◷</span><strong>Deadlines & reminders</strong><p>Upcoming dates, recurring work and important reminders are surfaced clearly so nothing gets lost.</p></article>
+      <article><span class="preview-feature-icon">✉</span><strong>Direct communication</strong><p>Messages, notes and accountancy updates stay connected to your client record rather than scattered across different places.</p></article>
+    </div>
+    <div class="potential-preview-next"><div><span class="portal-kicker">What happens next?</span><h3>Agree your package with Nicole</h3><p>When you are ready to proceed, Nicole will upgrade this same login to full client access and your live work, document requests, deadlines and progress will appear here.</p></div><a class="portal-btn" href="contact.html">Contact Nicole</a></div>
+  </section>
+  <section id="clientActionsCard" class="full-client-only portal-card pad client-actions-card">
     <div class="client-actions-heading"><div><span class="portal-kicker">What you need to do</span><h2 id="clientActionsTitle">You’re all caught up</h2><p id="clientActionsSub" class="portal-muted">Anything Nicole needs from you will appear here.</p></div><span id="clientActionsCount" class="client-action-count">0</span></div>
     <div id="clientActionsList" class="client-actions-list"><p class="portal-muted">Loading your actions…</p></div>
   </section>
-  <main class="portal-grid">
+  <main class="portal-grid full-client-only">
     <div class="portal-main">
       <section><div class="section-heading"><span class="portal-kicker">Active work</span><h2>What Nicole is working on</h2></div><div id="activeWork" class="work-cards"><p class="portal-muted">Loading your work…</p></div></section>
       <section class="portal-card pad"><span class="portal-kicker">Completed history</span><h2>Finished work</h2><div id="completedWork"></div></section>
@@ -57,5 +71,5 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="portal-config.js"></script>
-<script src="portal.js?v=25"></script>
+<script src="portal.js?v=26"></script>
 </body></html>
