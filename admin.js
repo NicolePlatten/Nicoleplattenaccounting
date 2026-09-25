@@ -1076,7 +1076,7 @@ async function sendMessage() {
   if(sendMessageBtn){sendMessageBtn.dataset.submitting='1';sendMessageBtn.disabled=true;sendMessageBtn.textContent='Sending…';}
   try{
     const { error } = await sb.from('messages').insert({ client_id: currentClientId, sender_id: currentAdminId, message: body });
-    show(clientMessage, error ? `Could not add message: ${error.message}` : 'Message added to client portal ✓', !error);
+    show(clientMessage, error ? `Could not add message: ${error.message}` : 'DONE — Message added to client portal ✓', !error);
     if (!error){
       newMessage.value = '';
       showAdminToast('DONE — Message sent','It is now visible in the client portal.');

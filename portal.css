@@ -1349,3 +1349,6 @@ details[open]>.dropdown-chevron,details[open]>summary .dropdown-chevron{transfor
 @keyframes portalToastOut{to{opacity:0;transform:translateY(8px) scale(.98)}}
 .portal-form button[disabled],.potential-message-compose button[disabled]{opacity:.62;cursor:wait;pointer-events:none}
 @media(max-width:640px){.portal-toast-region{left:14px;right:14px;bottom:14px;width:auto}.portal-toast{padding:13px 14px;border-radius:14px}}
+
+/* V13.3 — persistent confirmation emphasis */
+.portal-message.success,.message.success,[data-status="success"]{font-weight:700}.portal-message.success::before,.message.success::before{content:"✓ DONE — ";font-weight:800}

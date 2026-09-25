@@ -413,7 +413,7 @@ async function sendClientNote(e,clientId){
         ? (data?.error||error?.message||'Your note could not be sent.')
         : warning
           ? 'Your note was saved, but the email notification could not be sent. Nicole can still see it in the admin portal.'
-          : 'Note sent to Nicole ✓',
+          : 'DONE — Message sent to Nicole ✓',
       !failed
     );
 
@@ -476,7 +476,7 @@ async function sendDocuments(e,profile,clientId){
 
     show(documentMessage,failed
       ? (detail||'The documents could not be emailed. Please try again.')
-      : 'Documents sent securely to Nicole ✓',!failed);
+      : 'DONE — Documents sent securely to Nicole ✓',!failed);
 
     if(!failed){
       const sentCount=files.length;
