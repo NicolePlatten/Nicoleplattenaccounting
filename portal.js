@@ -2,7 +2,31 @@ const cfg = window.NPA_PORTAL_CONFIG || {};
 const configured = cfg.supabaseUrl && cfg.supabasePublishableKey;
 const sb = configured ? supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey) : null;
 
-const show = (el,msg,ok=false)=>{ if(!el)return; el.hidden=false; el.className=ok?'portal-success':'portal-error'; el.textContent=msg; };
+function bringIntoView(el, focusSelector = null){
+  if(!el)return;
+  window.requestAnimationFrame(()=>{
+    const rect=el.getBoundingClientRect();
+    const topSafe=92;
+    const bottomSafe=window.innerHeight-24;
+    if(rect.top<topSafe || rect.bottom>bottomSafe){
+      el.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+    if(focusSelector){
+      window.setTimeout(()=>{
+        const target=el.matches?.(focusSelector)?el:el.querySelector?.(focusSelector);
+        target?.focus?.({preventScroll:true});
+      },280);
+    }
+  });
+}
+
+const show = (el,msg,ok=false)=>{
+  if(!el)return;
+  el.hidden=false;
+  el.className=ok?'portal-success':'portal-error';
+  el.textContent=msg;
+  bringIntoView(el);
+};
 
 (async()=>{
   const login=document.getElementById('loginForm');
@@ -168,7 +192,19 @@ async function loadPortal(user){
   await Promise.all([loadDocumentHistory(user.id),loadClientNoteHistory(user.id)]);
   documentForm.addEventListener('submit',e=>sendDocuments(e,profile,user.id));
   clientNoteForm.addEventListener('submit',e=>sendClientNote(e,user.id));
+  bindPortalAutoReveal();
 }
+
+function bindPortalAutoReveal(){
+  document.querySelectorAll('details').forEach(details=>{
+    if(details.dataset.autoRevealBound==='true')return;
+    details.dataset.autoRevealBound='true';
+    details.addEventListener('toggle',()=>{
+      if(details.open) bringIntoView(details);
+    });
+  });
+}
+
 
 function stageData(work){
   if(Array.isArray(work.stages)&&work.stages.length)return work.stages;

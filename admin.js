@@ -46,11 +46,36 @@ const WORKFLOWS = {
   custom: ["Package and fee agreed", "Onboarding documentation and invoice sent to client", "Documents received back from client", "Client/business information received", "Invoice paid", "Work in progress", "Work completed awaiting approval", "Approval from client", "Work submitted"]
 };
 
+function bringIntoView(el, focusSelector = null) {
+  if (!el) return;
+  window.requestAnimationFrame(() => {
+    const rect = el.getBoundingClientRect();
+    const topSafe = 92;
+    const bottomSafe = window.innerHeight - 24;
+    if (rect.top < topSafe || rect.bottom > bottomSafe) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    if (focusSelector) {
+      window.setTimeout(() => {
+        const target = el.matches?.(focusSelector) ? el : el.querySelector?.(focusSelector);
+        target?.focus?.({ preventScroll: true });
+      }, 280);
+    }
+  });
+}
+
+function revealPanel(el, focusSelector = null) {
+  if (!el) return;
+  el.classList.remove('hidden');
+  bringIntoView(el, focusSelector);
+}
+
 const show = (el, msg, ok = false) => {
   if (!el) return;
   el.hidden = false;
   el.className = ok ? 'portal-success' : 'portal-error';
   el.textContent = msg;
+  bringIntoView(el);
 };
 
 (async () => {
@@ -68,9 +93,8 @@ const show = (el, msg, ok = false) => {
   newWorkBtn.onclick = showNewWork;
   deleteClientBtn?.addEventListener('click', deleteCurrentClient);
   addScheduleBtn?.addEventListener('click', ()=>{
-    scheduleForm.classList.remove('hidden');
     if(!scheduleDueDate.value) scheduleDueDate.value=formatDateInput(new Date());
-    scheduleTitle.focus();
+    revealPanel(scheduleForm, '#scheduleTitle, input, select, textarea');
   });
   cancelScheduleBtn?.addEventListener('click', ()=>scheduleForm.classList.add('hidden'));
   scheduleForm?.addEventListener('submit', saveClientSchedule);
@@ -274,7 +298,7 @@ function exportClientDataCsv(){
 function showNewClient() {
   adminEmpty.classList.add('hidden');
   clientWorkspace.classList.add('hidden');
-  newClientForm.classList.remove('hidden');
+  revealPanel(newClientForm, 'input, select, textarea');
 }
 
 function openClient(clientId, scroll = true) {
@@ -287,7 +311,7 @@ function openClient(clientId, scroll = true) {
   document.querySelectorAll('.client-item').forEach(x => x.classList.toggle('active', x.dataset.id === clientId));
   adminEmpty.classList.add('hidden');
   newClientForm.classList.add('hidden');
-  clientWorkspace.classList.remove('hidden');
+  revealPanel(clientWorkspace);
   workEditor.classList.add('hidden');
   newWorkForm.classList.add('hidden');
 
@@ -299,7 +323,7 @@ function openClient(clientId, scroll = true) {
   loadClientEmailReplies(clientId);
   loadClientSchedules(clientId);
   loadClientAuditLog(clientId);
-  if (scroll && innerWidth < 820) clientWorkspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (scroll) bringIntoView(clientWorkspace);
 }
 
 
@@ -790,7 +814,7 @@ async function openWork(id) {
   const work = client?.works.find(w => w.id === id);
   if (!work) return;
   currentWorkId = id;
-  workEditor.classList.remove('hidden');
+  revealPanel(workEditor, '#editService, input, select, textarea');
   newWorkForm.classList.add('hidden');
   editService.value = work.service_name || '';
   editPeriod.value = work.period_label || '';
@@ -924,7 +948,7 @@ function showNewWork() {
   if (!currentClientId) return;
   newWorkForm.reset();
   newWorkWorkflow.value = 'bookkeeping';
-  newWorkForm.classList.remove('hidden');
+  revealPanel(newWorkForm, '#newWorkService, input, select, textarea');
   workEditor.classList.add('hidden');
 }
 

@@ -1233,3 +1233,8 @@ details[open]>.dropdown-chevron,details[open]>summary .dropdown-chevron{transfor
   .audit-panel>summary>span:first-child,.communication-dropdown>summary>span:first-child,.admin-notes-dropdown>summary>span:first-child{display:block!important}
   .admin-toast-region{right:14px;bottom:14px}
 }
+
+
+/* Portal-wide reveal/scroll usability */
+#newClientForm,#newWorkForm,#workEditor,#scheduleForm,#clientWorkspace,.history-details,.portal-error,.portal-success{scroll-margin-top:96px}
+@media(max-width:820px){#newClientForm,#newWorkForm,#workEditor,#scheduleForm,#clientWorkspace,.history-details,.portal-error,.portal-success{scroll-margin-top:82px}}
