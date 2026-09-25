@@ -20,6 +20,28 @@ function bringIntoView(el, focusSelector = null){
   });
 }
 
+
+function showPortalToast(title, message='', isError=false){
+  let region=document.getElementById('portalToastRegion');
+  if(!region){
+    region=document.createElement('div');
+    region.id='portalToastRegion';
+    region.className='portal-toast-region';
+    region.setAttribute('aria-live','polite');
+    region.setAttribute('aria-atomic','true');
+    document.body.appendChild(region);
+  }
+  const toast=document.createElement('div');
+  toast.className=`portal-toast${isError?' error':''}`;
+  toast.setAttribute('role',isError?'alert':'status');
+  toast.innerHTML=`<span class="portal-toast-icon">${isError?'!':'✓'}</span><div><strong>${esc(title)}</strong>${message?`<span>${esc(message)}</span>`:''}</div>`;
+  region.appendChild(toast);
+  window.setTimeout(()=>{
+    toast.classList.add('is-leaving');
+    window.setTimeout(()=>toast.remove(),220);
+  },3600);
+}
+
 const show = (el,msg,ok=false)=>{
   if(!el)return;
   el.hidden=false;
@@ -364,40 +386,49 @@ async function loadClientNoteHistory(clientId){
 
 async function sendClientNote(e,clientId){
   e.preventDefault();
+  const formEl=e.currentTarget;
+  if(formEl.dataset.submitting==='1')return;
   const note=clientNoteText.value.trim();
   if(!note)return show(clientNoteMessage,'Write a note first.');
 
-  const btn=e.currentTarget.querySelector('button[type=submit]');
+  const btn=formEl.querySelector('button[type=submit]');
+  formEl.dataset.submitting='1';
   btn.disabled=true;
   btn.textContent='Sending…';
 
-  const {data,error}=await sb.functions.invoke('notify-client-note',{
-    body:{
-      note,
-      workId:clientNoteWork.value||null
+  try{
+    const {data,error}=await sb.functions.invoke('notify-client-note',{
+      body:{
+        note,
+        workId:clientNoteWork.value||null
+      }
+    });
+
+    const failed=error||data?.error;
+    const warning=data?.warning;
+
+    show(
+      clientNoteMessage,
+      failed
+        ? (data?.error||error?.message||'Your note could not be sent.')
+        : warning
+          ? 'Your note was saved, but the email notification could not be sent. Nicole can still see it in the admin portal.'
+          : 'Note sent to Nicole ✓',
+      !failed
+    );
+
+    if(!failed){
+      clientNoteText.value='';
+      showPortalToast('DONE — Message sent','Nicole can now see your message in her portal.');
+      await loadClientNoteHistory(clientId);
+    }else{
+      showPortalToast('Message not sent',data?.error||error?.message||'Please try again.',true);
     }
-  });
-
-  const failed=error||data?.error;
-  const warning=data?.warning;
-
-  show(
-    clientNoteMessage,
-    failed
-      ? (data?.error||error?.message||'Your note could not be sent.')
-      : warning
-        ? 'Your note was saved, but the email notification could not be sent. Nicole can still see it in the admin portal.'
-        : 'Note sent to Nicole ✓',
-    !failed
-  );
-
-  if(!failed){
-    clientNoteText.value='';
-    await loadClientNoteHistory(clientId);
+  }finally{
+    formEl.dataset.submitting='0';
+    btn.disabled=false;
+    btn.textContent='Send note to Nicole';
   }
-
-  btn.disabled=false;
-  btn.textContent='Send note to Nicole';
 }
 
 async function loadDocumentHistory(clientId){
@@ -417,6 +448,8 @@ async function loadDocumentHistory(clientId){
 
 async function sendDocuments(e,profile,clientId){
   e.preventDefault();
+  const formEl=e.currentTarget;
+  if(formEl.dataset.submitting==='1')return;
   const files=[...documentFile.files];
   if(!files.length)return show(documentMessage,'Choose at least one file.');
 
@@ -427,29 +460,40 @@ async function sendDocuments(e,profile,clientId){
   const total=files.reduce((sum,f)=>sum+f.size,0);
   if(total>20*1024*1024)return show(documentMessage,'Please keep the total upload under 20 MB.');
 
-  const btn=e.currentTarget.querySelector('button[type=submit]');
+  const btn=formEl.querySelector('button[type=submit]');
+  formEl.dataset.submitting='1';
   btn.disabled=true; btn.textContent='Sending…';
 
-  const form=new FormData();
-  files.forEach(file=>form.append('files',file,file.name));
-  form.append('note',documentNote.value.trim());
-  form.append('workId',documentWork.value||'');
+  try{
+    const form=new FormData();
+    files.forEach(file=>form.append('files',file,file.name));
+    form.append('note',documentNote.value.trim());
+    form.append('workId',documentWork.value||'');
 
-  const {data,error}=await sb.functions.invoke('email-document',{body:form});
-  const detail=data?.error||error?.message;
+    const {data,error}=await sb.functions.invoke('email-document',{body:form});
+    const detail=data?.error||error?.message;
+    const failed=error||data?.error;
 
-  show(documentMessage,(error||data?.error)
-    ? (detail||'The documents could not be emailed. Please try again.')
-    : 'Documents sent securely to Nicole ✓',!(error||data?.error));
+    show(documentMessage,failed
+      ? (detail||'The documents could not be emailed. Please try again.')
+      : 'Documents sent securely to Nicole ✓',!failed);
 
-  if(!(error||data?.error)){
-    const requestId=document.getElementById('documentRequest')?.value||'';
-    if(requestId){await sb.from('client_document_requests').update({status:'received',received_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',requestId).eq('client_id',clientId);}
-    document.getElementById('documentForm').reset();
-    await Promise.all([loadDocumentHistory(clientId),loadClientActions(clientId)]);
+    if(!failed){
+      const sentCount=files.length;
+      const requestId=document.getElementById('documentRequest')?.value||'';
+      if(requestId){await sb.from('client_document_requests').update({status:'received',received_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',requestId).eq('client_id',clientId);}
+      formEl.reset();
+      showPortalToast('DONE — Documents sent',`${sentCount} file${sentCount===1?'':'s'} sent securely to Nicole.`);
+      await Promise.all([loadDocumentHistory(clientId),loadClientActions(clientId)]);
+    }else{
+      showPortalToast('Documents not sent',detail||'Please try again.',true);
+    }
+  }finally{
+    formEl.dataset.submitting='0';
+    btn.disabled=false; btn.textContent='Email documents to Nicole';
   }
-  btn.disabled=false; btn.textContent='Email documents to Nicole';
 }
+
 function formatStamp(value){try{return new Date(value).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})}catch{return''}}
 function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function escAttr(v=''){return esc(v).replace(/`/g,'&#96;')}

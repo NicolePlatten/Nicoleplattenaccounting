@@ -1060,6 +1060,9 @@ async function sendClientEmail(){
     clientEmailSubject.value='';
     clientEmailBody.value='';
     clientEmailFiles.value='';
+    showAdminToast('DONE — Email sent','The message/documents have been sent to the client.');
+  }else{
+    showAdminToast('Email not sent',data?.error||error?.message||'Please try again.',true);
   }
 
   sendClientEmailBtn.disabled=false;
@@ -1069,9 +1072,20 @@ async function sendClientEmail(){
 async function sendMessage() {
   const body = newMessage.value.trim();
   if (!currentClientId || !body) return;
-  const { error } = await sb.from('messages').insert({ client_id: currentClientId, sender_id: currentAdminId, message: body });
-  show(clientMessage, error ? `Could not add message: ${error.message}` : 'Message added to client portal ✓', !error);
-  if (!error) newMessage.value = '';
+  if(sendMessageBtn?.dataset.submitting==='1') return;
+  if(sendMessageBtn){sendMessageBtn.dataset.submitting='1';sendMessageBtn.disabled=true;sendMessageBtn.textContent='Sending…';}
+  try{
+    const { error } = await sb.from('messages').insert({ client_id: currentClientId, sender_id: currentAdminId, message: body });
+    show(clientMessage, error ? `Could not add message: ${error.message}` : 'Message added to client portal ✓', !error);
+    if (!error){
+      newMessage.value = '';
+      showAdminToast('DONE — Message sent','It is now visible in the client portal.');
+    }else{
+      showAdminToast('Message not sent',error.message,true);
+    }
+  }finally{
+    if(sendMessageBtn){sendMessageBtn.dataset.submitting='0';sendMessageBtn.disabled=false;sendMessageBtn.textContent='Send message';}
+  }
 }
 
 
@@ -1732,13 +1746,20 @@ async function loadPotentialCommunication(clientId){
 
 async function sendPotentialPortalMessage(clientId){
   const field=potentialList?.querySelector(`[data-potential-message-text="${CSS.escape(clientId)}"]`);
+  const btn=potentialList?.querySelector(`[data-potential-send-message="${CSS.escape(clientId)}"]`);
   const body=field?.value.trim();
   if(!body)return showAdminToast('Write a message first','Enter the message you want the prospect to see.',true);
-  const {error}=await sb.from('messages').insert({client_id:clientId,sender_id:currentAdminId,message:body});
-  if(error)return showAdminToast('Couldn’t send portal message',error.message,true);
-  field.value='';
-  showAdminToast('Message sent','It will appear in the potential client’s portal.');
-  await logAudit(clientId,'potential_message_sent','Portal message sent to potential client',{message:body.slice(0,250)});
+  if(btn?.dataset.submitting==='1')return;
+  if(btn){btn.dataset.submitting='1';btn.disabled=true;btn.textContent='Sending…';}
+  try{
+    const {error}=await sb.from('messages').insert({client_id:clientId,sender_id:currentAdminId,message:body});
+    if(error)return showAdminToast('Couldn’t send portal message',error.message,true);
+    field.value='';
+    showAdminToast('DONE — Message sent','It is now visible in the potential client’s portal.');
+    await logAudit(clientId,'potential_message_sent','Portal message sent to potential client',{message:body.slice(0,250)});
+  }finally{
+    if(btn){btn.dataset.submitting='0';btn.disabled=false;btn.textContent='Send message';}
+  }
 }
 
 async function updatePotentialStep(input){
