@@ -1,3 +1,25 @@
+
+function showAdminToast(title, message='', isError=false){
+  let region=document.getElementById('adminToastRegion');
+  if(!region){
+    region=document.createElement('div');
+    region.id='adminToastRegion';
+    region.className='admin-toast-region';
+    region.setAttribute('aria-live','polite');
+    region.setAttribute('aria-atomic','true');
+    document.body.appendChild(region);
+  }
+  const toast=document.createElement('div');
+  toast.className=`admin-toast${isError?' error':''}`;
+  toast.setAttribute('role',isError?'alert':'status');
+  toast.innerHTML=`<span class="admin-toast-icon">${isError?'!':'✓'}</span><div><strong>${esc(title)}</strong>${message?`<span>${esc(message)}</span>`:''}</div>`;
+  region.appendChild(toast);
+  window.setTimeout(()=>{
+    toast.classList.add('is-leaving');
+    window.setTimeout(()=>toast.remove(),220);
+  },3200);
+}
+
 const cfg = window.NPA_PORTAL_CONFIG || {};
 const sb = supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
 let clientGroups = [];
@@ -660,8 +682,10 @@ async function saveClientSchedule(e){
   btn.disabled=true;btn.textContent='Saving…';
   const {error}=await sb.from('client_schedules').insert(payload);
   show(scheduleMessage,error?(error.message||'Could not save schedule.'):'Schedule added ✓',!error);
+  if(error) showAdminToast('Couldn’t save reminder', error.message||'Please try again.', true);
 
   if(!error){
+    showAdminToast('Done — reminder saved', `${payload.title} · ${formatFriendlyDate(payload.next_due_date)}`);
     scheduleForm.reset();
     scheduleClientLabel.value='Next invoice';
     scheduleAutoCreateWork.checked=true;scheduleRemind14.checked=true;scheduleRemind7.checked=true;
@@ -685,6 +709,7 @@ async function completeSchedule(id,schedule){
   if(error)return show(scheduleMessage,error.message||'Could not complete this date.');
 
   show(scheduleMessage,schedule.cadence==='one_off'?'One-off date completed ✓':`Completed ✓ Next date moved to ${formatFriendlyDate(next)}`,true);
+  showAdminToast('Done', schedule.cadence==='one_off'?'Reminder marked complete.':`Next reminder moved to ${formatFriendlyDate(next)}`);
   await loadClientSchedules(currentClientId);
   await loadAllSchedules();
 }
