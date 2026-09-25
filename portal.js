@@ -21,7 +21,13 @@ function bringIntoView(el, focusSelector = null){
 }
 
 
+let lastPortalToastKey='';
+let lastPortalToastAt=0;
 function showPortalToast(title, message='', isError=false){
+  const toastKey=`${isError?'error':'ok'}|${title}|${message}`;
+  const now=Date.now();
+  if(toastKey===lastPortalToastKey && now-lastPortalToastAt<900)return;
+  lastPortalToastKey=toastKey;lastPortalToastAt=now;
   let region=document.getElementById('portalToastRegion');
   if(!region){
     region=document.createElement('div');
@@ -40,6 +46,13 @@ function showPortalToast(title, message='', isError=false){
     toast.classList.add('is-leaving');
     window.setTimeout(()=>toast.remove(),220);
   },3600);
+}
+
+function portalActionDone(message,detail=''){
+  showPortalToast('✓ DONE',message+(detail?` — ${detail}`:''));
+}
+function portalActionFail(message,detail=''){
+  showPortalToast(message,detail,true);
 }
 
 const show = (el,msg,ok=false)=>{
@@ -64,6 +77,7 @@ const show = (el,msg,ok=false)=>{
         redirectTo:'https://nicoleplattenaccounting.co.uk/reset-password.html'
       });
       show(loginMessage,error?'We could not send the reset email.':'Password reset email sent. Please check your inbox and junk folder.',!error);
+      if(error)portalActionFail('Reset email not sent',error.message||'Please try again.');else portalActionDone('Password reset email sent','Please check your inbox and junk folder.');
       resetPassword.disabled=false;
       resetPassword.textContent='Forgotten password?';
     };
@@ -131,6 +145,7 @@ async function loadPasswordReset(){
     }
 
     show(status,'Password changed successfully ✓ Redirecting you to sign in…',true);
+    portalActionDone('Password changed successfully');
 
     await sb.auth.signOut();
     setTimeout(()=>location.href='client-login.html',900);
@@ -165,7 +180,8 @@ async function loadPasswordChange(user) {
       return;
     }
     show(passwordMessage, 'Password changed successfully ✓', true);
-    setTimeout(()=>location.href='portal.html',500);
+    portalActionDone('Password changed successfully');
+    setTimeout(()=>location.href='portal.html',650);
   });
 }
 
@@ -419,12 +435,13 @@ async function sendClientNote(e,clientId){
 
     if(!failed){
       clientNoteText.value='';
-      showPortalToast('DONE — Message sent','Nicole can now see your message in her portal.');
+      portalActionDone('Message sent','Nicole can now see your message in her portal.');
       await loadClientNoteHistory(clientId);
     }else{
-      showPortalToast('Message not sent',data?.error||error?.message||'Please try again.',true);
+      portalActionFail('Message not sent',data?.error||error?.message||'Please try again.');
     }
   }finally{
+    if(clientNoteMessage?.classList.contains('portal-success')){btn.textContent='✓ Sent';await new Promise(r=>setTimeout(r,1200));}
     formEl.dataset.submitting='0';
     btn.disabled=false;
     btn.textContent='Send note to Nicole';
@@ -483,12 +500,13 @@ async function sendDocuments(e,profile,clientId){
       const requestId=document.getElementById('documentRequest')?.value||'';
       if(requestId){await sb.from('client_document_requests').update({status:'received',received_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',requestId).eq('client_id',clientId);}
       formEl.reset();
-      showPortalToast('DONE — Documents sent',`${sentCount} file${sentCount===1?'':'s'} sent securely to Nicole.`);
+      portalActionDone('Documents sent',`${sentCount} file${sentCount===1?'':'s'} sent securely to Nicole.`);
       await Promise.all([loadDocumentHistory(clientId),loadClientActions(clientId)]);
     }else{
-      showPortalToast('Documents not sent',detail||'Please try again.',true);
+      portalActionFail('Documents not sent',detail||'Please try again.');
     }
   }finally{
+    if(documentMessage?.classList.contains('portal-success')){btn.textContent='✓ Sent';await new Promise(r=>setTimeout(r,1600));}
     formEl.dataset.submitting='0';
     btn.disabled=false; btn.textContent='Email documents to Nicole';
   }

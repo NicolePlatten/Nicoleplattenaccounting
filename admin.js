@@ -1,5 +1,11 @@
 
+let lastAdminToastKey='';
+let lastAdminToastAt=0;
 function showAdminToast(title, message='', isError=false){
+  const toastKey=`${isError?'error':'ok'}|${title}|${message}`;
+  const now=Date.now();
+  if(toastKey===lastAdminToastKey && now-lastAdminToastAt<900)return;
+  lastAdminToastKey=toastKey;lastAdminToastAt=now;
   let region=document.getElementById('adminToastRegion');
   if(!region){
     region=document.createElement('div');
@@ -18,6 +24,27 @@ function showAdminToast(title, message='', isError=false){
     toast.classList.add('is-leaving');
     window.setTimeout(()=>toast.remove(),220);
   },3200);
+}
+
+function actionBtnStart(btn,label='Saving…'){
+  if(!btn || btn.dataset.actionBusy==='1')return false;
+  btn.dataset.actionBusy='1';
+  if(!btn.dataset.actionOriginal)btn.dataset.actionOriginal=btn.textContent||'';
+  btn.disabled=true;btn.textContent=label;
+  return true;
+}
+async function actionBtnFinish(btn,success,label='✓ DONE',hold=1200){
+  if(!btn)return;
+  if(success){btn.textContent=label;await new Promise(r=>setTimeout(r,hold));}
+  btn.disabled=false;btn.dataset.actionBusy='0';
+  btn.textContent=btn.dataset.actionOriginal||btn.textContent;
+  delete btn.dataset.actionOriginal;
+}
+function actionDone(message,detail=''){
+  showAdminToast('✓ DONE',message+(detail?` — ${detail}`:''));
+}
+function actionFail(message,detail=''){
+  showAdminToast(message,detail,true);
 }
 
 const cfg = window.NPA_PORTAL_CONFIG || {};
@@ -205,15 +232,18 @@ function formatLastLogin(value){
 }
 
 async function saveClientStatus(){
-  if(!currentClientId)return;
+  if(!currentClientId||saveClientStatusBtn?.dataset.actionBusy==='1')return;
   const value=clientStatusSelect.value;
+  actionBtnStart(saveClientStatusBtn,'Saving…');
   const {error}=await sb.from('profiles').update({client_status:value}).eq('id',currentClientId);
   show(clientMessage,error?`Could not update client status: ${error.message}`:`Client status changed to ${clientStatusLabel(value)} ✓`,!error);
   if(!error){
+    actionDone('Client status saved',clientStatusLabel(value));
     const client=clientGroups.find(c=>c.id===currentClientId); if(client)client.client_status=value;
     await logAudit(currentClientId,'client_status',`Client status changed to ${clientStatusLabel(value)}`,{status:value});
     renderClientList(); await loadClientAuditLog(currentClientId);
-  }
+  } else actionFail('Client status not saved',error.message||'Please try again.');
+  await actionBtnFinish(saveClientStatusBtn,!error,'✓ Saved');
 }
 
 function bindMarkReadButtons(root){
@@ -228,6 +258,7 @@ async function markActivityItemRead(kind,id,clientId){
   const {error}=await sb.from(table).update({admin_seen_at:new Date().toISOString()}).eq('id',id);
   if(error){alert(`Could not mark as read: ${error.message}`);return;}
   await logAudit(clientId,'activity_read',`${kind==='email'?'Email reply':kind==='document'?'Document upload':'Client note'} marked as read`,{source_id:id});
+  actionDone('Activity marked as read');
   await loadClients();
   if(currentClientId===clientId){await loadClientActivity(clientId);await loadClientEmailReplies(clientId);await loadClientAuditLog(clientId);}
 }
@@ -440,7 +471,8 @@ async function markAllActivityRead(){
   unreadByClient={};
   await loadClients();
   if(currentClientId)await loadClientActivity(currentClientId);
-  markAllNotificationsRead.textContent='Mark all read';
+  actionDone('All client activity marked as read');
+  markAllNotificationsRead.disabled=false;markAllNotificationsRead.textContent='Mark all read';
 }
 
 async function loadClientActivity(clientId){
@@ -679,8 +711,8 @@ async function loadClientSchedules(clientId){
       </div>
     </article>`).join(''):'<p class="portal-muted">No recurring dates added yet.</p>';
 
-  clientSchedules.querySelectorAll('[data-complete-schedule]').forEach(btn=>btn.addEventListener('click',()=>completeSchedule(btn.dataset.completeSchedule,rows.find(x=>x.id===btn.dataset.completeSchedule))));
-  clientSchedules.querySelectorAll('[data-delete-schedule]').forEach(btn=>btn.addEventListener('click',()=>deleteSchedule(btn.dataset.deleteSchedule)));
+  clientSchedules.querySelectorAll('[data-complete-schedule]').forEach(btn=>btn.addEventListener('click',()=>completeSchedule(btn.dataset.completeSchedule,rows.find(x=>x.id===btn.dataset.completeSchedule),btn)));
+  clientSchedules.querySelectorAll('[data-delete-schedule]').forEach(btn=>btn.addEventListener('click',()=>deleteSchedule(btn.dataset.deleteSchedule,btn)));
 }
 
 async function saveClientSchedule(e){
@@ -707,7 +739,7 @@ async function saveClientSchedule(e){
   if(error) showAdminToast('Couldn’t save reminder', error.message||'Please try again.', true);
 
   if(!error){
-    showAdminToast('Done — reminder saved', `${payload.title} · ${formatFriendlyDate(payload.next_due_date)}`);
+    actionDone('Calendar reminder added',`${payload.title} · ${formatFriendlyDate(payload.next_due_date)}`);
     scheduleForm.reset();
     scheduleClientLabel.value='Next invoice';
     scheduleAutoCreateWork.checked=true;scheduleRemind14.checked=true;scheduleRemind7.checked=true;
@@ -720,28 +752,33 @@ async function saveClientSchedule(e){
   btn.disabled=false;btn.textContent='Save schedule';
 }
 
-async function completeSchedule(id,schedule){
-  if(!schedule)return;
+async function completeSchedule(id,schedule,btn=null){
+  if(!schedule||btn?.dataset.actionBusy==='1')return;
+  actionBtnStart(btn,'Completing…');
   const next=nextScheduleDate(schedule.next_due_date,schedule.cadence);
   const patch=schedule.cadence==='one_off'
     ? {is_active:false,updated_at:new Date().toISOString()}
     : {next_due_date:next,reminder_14_sent_for:null,reminder_7_sent_for:null,updated_at:new Date().toISOString()};
 
   const {error}=await sb.from('client_schedules').update(patch).eq('id',id);
-  if(error)return show(scheduleMessage,error.message||'Could not complete this date.');
+  if(error){await actionBtnFinish(btn,false);actionFail('Reminder not completed',error.message||'Please try again.');return show(scheduleMessage,error.message||'Could not complete this date.');}
 
   show(scheduleMessage,schedule.cadence==='one_off'?'One-off date completed ✓':`Completed ✓ Next date moved to ${formatFriendlyDate(next)}`,true);
-  showAdminToast('Done', schedule.cadence==='one_off'?'Reminder marked complete.':`Next reminder moved to ${formatFriendlyDate(next)}`);
+  actionDone(schedule.cadence==='one_off'?'Reminder marked complete':`Reminder completed`,schedule.cadence==='one_off'?'':`Next date ${formatFriendlyDate(next)}`);
   await loadClientSchedules(currentClientId);
   await loadAllSchedules();
+  await actionBtnFinish(btn,true,'✓ DONE');
 }
 
-async function deleteSchedule(id){
+async function deleteSchedule(id,btn=null){
   if(!confirm('Delete this calendar schedule?'))return;
+  if(btn?.dataset.actionBusy==='1')return;actionBtnStart(btn,'Deleting…');
   const {error}=await sb.from('client_schedules').delete().eq('id',id);
-  if(error)return show(scheduleMessage,error.message||'Could not delete schedule.');
+  if(error){await actionBtnFinish(btn,false);actionFail('Reminder not deleted',error.message||'Please try again.');return show(scheduleMessage,error.message||'Could not delete schedule.');}
+  actionDone('Calendar reminder deleted');
   await loadClientSchedules(currentClientId);
   await loadAllSchedules();
+  await actionBtnFinish(btn,true,'✓ DONE');
 }
 
 function nextScheduleDate(value,cadence){
@@ -907,6 +944,7 @@ async function addSelectedStageNote(){
   show(adminNoteMessage,error?`Could not add note: ${error.message}`:'Note added to client portal ✓',!error);
 
   if(!error && data){
+    actionDone('Portal note added',stageName);
     currentNotes.push(data);
     adminNoteText.value='';
     renderNotesPanel();
@@ -917,16 +955,19 @@ async function addSelectedStageNote(){
 }
 
 function bindDeleteNoteButtons() {
-  adminNotesHistory?.querySelectorAll('.note-delete').forEach(btn => btn.onclick = () => deleteStageNote(btn.dataset.noteId));
+  adminNotesHistory?.querySelectorAll('.note-delete').forEach(btn => btn.onclick = () => deleteStageNote(btn.dataset.noteId,btn));
 }
 
-async function deleteStageNote(noteId) {
+async function deleteStageNote(noteId,btn=null) {
   if (!confirm('Delete this note? It will disappear from the client portal.')) return;
+  if(btn?.dataset.actionBusy==='1')return;actionBtnStart(btn,'Deleting…');
   const { error } = await sb.from('work_notes').delete().eq('id', noteId);
   if (!error) {
     currentNotes = currentNotes.filter(n => n.id !== noteId);
     renderNotesPanel();
-  }
+    actionDone('Portal note deleted');
+  } else actionFail('Note not deleted',error.message||'Please try again.');
+  await actionBtnFinish(btn,!error,'✓ DONE');
 }
 
 function readStages() {
@@ -952,6 +993,8 @@ function showNewWork() {
 
 async function createWork(e) {
   e.preventDefault();
+  const form=e.currentTarget; const btn=form.querySelector('button[type=submit]');
+  if(form.dataset.submitting==='1')return; form.dataset.submitting='1'; actionBtnStart(btn,'Adding…');
   const stages = defaultStageState(newWorkWorkflow.value);
   const { error } = await sb.from('client_work').insert({
     client_id: currentClientId,
@@ -968,17 +1011,20 @@ async function createWork(e) {
   });
   show(newWorkMessage, error ? `Could not add work: ${error.message}` : 'New work added ✓', !error);
   if (!error) {
+    actionDone('New work added',newWorkService.value.trim()||'Work item');
     await logAudit(currentClientId,'work_created',`Work created: ${newWorkService.value.trim()||'Work item'}`,{workflow:newWorkWorkflow.value,period:newWorkPeriod.value.trim()||null});
     e.currentTarget.reset();
     await loadClients();
     await loadClientAuditLog(currentClientId);
     newWorkForm.classList.add('hidden');
-  }
+  } else actionFail('Work not added',error.message||'Please try again.');
+  form.dataset.submitting='0'; await actionBtnFinish(btn,!error,'✓ Added');
 }
 
 async function saveWork(e) {
   e.preventDefault();
   if (!currentWorkId) return;
+  const form=e.currentTarget;const btn=form.querySelector('button[type=submit]');if(form.dataset.submitting==='1')return;form.dataset.submitting='1';actionBtnStart(btn,'Saving…');
   const stages = readStages();
   const completedCount = stages.filter(s => s.completed).length;
   const progress = stages.length ? Math.round(completedCount / stages.length * 100) : 0;
@@ -1003,31 +1049,36 @@ async function saveWork(e) {
   const { error } = await sb.from('client_work').update(payload).eq('id', currentWorkId);
   show(workMessage, error ? `Could not save: ${error.message}` : `Saved ✓ ${progress}% complete`, !error);
   if (!error) {
+    actionDone('Work saved',`${progress}% complete`);
     const client=clientGroups.find(c=>c.id===currentClientId);
     const originalWork=client?.works.find(w=>w.id===currentWorkId);
     await logAudit(currentClientId,'work_updated',`${editService.value.trim()} updated to ${progress}%`,{progress,status:payload.status});
     if(allDone&&originalWork?.source_schedule_id&&originalWork?.source_due_date)await advanceScheduleAfterWork(originalWork.source_schedule_id,originalWork.source_due_date);
     await loadClients();await loadAllSchedules();await loadClientAuditLog(currentClientId);
-  }
+  } else actionFail('Work not saved',error.message||'Please try again.');
+  form.dataset.submitting='0';await actionBtnFinish(btn,!error,'✓ Saved');
 }
 
 async function archiveWork() {
-  if (!currentWorkId || !confirm('Move this work item to completed history?')) return;
+  if (!currentWorkId || deleteWorkBtn?.dataset.actionBusy==='1' || !confirm('Move this work item to completed history?')) return;
+  actionBtnStart(deleteWorkBtn,'Completing…');
   const client = clientGroups.find(c => c.id === currentClientId);
   const work = client?.works.find(w => w.id === currentWorkId);
   const stages = parseStages(work).map(s => ({ ...s, completed: true }));
   const { error } = await sb.from('client_work').update({ stages, is_active: false, status: 'Completed', progress: 100, current_stage: 'Completed', completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', currentWorkId);
   show(workMessage, error ? `Could not complete item: ${error.message}` : 'Moved to completed history ✓', !error);
   if (!error) {
+    actionDone('Work moved to completed history');
     await logAudit(currentClientId,'work_completed',`Work completed: ${work?.service_name||'Work item'}`,{work_id:currentWorkId});
     if(work?.source_schedule_id&&work?.source_due_date)await advanceScheduleAfterWork(work.source_schedule_id,work.source_due_date);
     await loadClients();await loadAllSchedules();await loadClientAuditLog(currentClientId);workEditor.classList.add('hidden');
-  }
+  } else actionFail('Work not completed',error.message||'Please try again.');
+  await actionBtnFinish(deleteWorkBtn,!error,'✓ Completed');
 }
 
 
 async function sendClientEmail(){
-  if(!currentClientId) return;
+  if(!currentClientId || sendClientEmailBtn?.dataset.submitting==='1') return;
   const subject=clientEmailSubject.value.trim();
   const message=clientEmailBody.value.trim();
   const files=[...(clientEmailFiles.files||[])];
@@ -1040,6 +1091,7 @@ async function sendClientEmail(){
   if(files.some(f=>f.size>maxEach)) return show(clientEmailMessage,'Each file must be 8 MB or smaller.');
   if(files.reduce((n,f)=>n+f.size,0)>maxTotal) return show(clientEmailMessage,'Files must total 20 MB or less.');
 
+  sendClientEmailBtn.dataset.submitting='1';
   sendClientEmailBtn.disabled=true;
   sendClientEmailBtn.textContent='Sending…';
 
@@ -1060,11 +1112,13 @@ async function sendClientEmail(){
     clientEmailSubject.value='';
     clientEmailBody.value='';
     clientEmailFiles.value='';
-    showAdminToast('DONE — Email sent','The message/documents have been sent to the client.');
+    actionDone('Email / documents sent','The client has been sent the update.');
   }else{
     showAdminToast('Email not sent',data?.error||error?.message||'Please try again.',true);
   }
 
+  if(!failed){sendClientEmailBtn.textContent='✓ Sent';await new Promise(r=>setTimeout(r,1200));}
+  sendClientEmailBtn.dataset.submitting='0';
   sendClientEmailBtn.disabled=false;
   sendClientEmailBtn.textContent='Send email / documents';
 }
@@ -1079,12 +1133,15 @@ async function sendMessage() {
     show(clientMessage, error ? `Could not add message: ${error.message}` : 'DONE — Message added to client portal ✓', !error);
     if (!error){
       newMessage.value = '';
-      showAdminToast('DONE — Message sent','It is now visible in the client portal.');
+      actionDone('Portal message sent','It is now visible in the client portal.');
     }else{
       showAdminToast('Message not sent',error.message,true);
     }
   }finally{
-    if(sendMessageBtn){sendMessageBtn.dataset.submitting='0';sendMessageBtn.disabled=false;sendMessageBtn.textContent='Send message';}
+    if(sendMessageBtn){
+      if(!clientMessage?.classList.contains('portal-error')){sendMessageBtn.textContent='✓ Sent';await new Promise(r=>setTimeout(r,1200));}
+      sendMessageBtn.dataset.submitting='0';sendMessageBtn.disabled=false;sendMessageBtn.textContent='Send message';
+    }
   }
 }
 
@@ -1118,6 +1175,7 @@ async function deleteCurrentClient(){
     return;
   }
 
+  actionDone('Client deleted',name);
   currentClientId=null;
   currentWorkId=null;
   clientWorkspace.classList.add('hidden');
@@ -1144,8 +1202,13 @@ async function createClient(e) {
     ? `Client created, but the welcome email could not be delivered: ${data.warning}`
     : 'Client login created and welcome email sent ✓';
   show(newClientMessage, failed ? (detail || 'Could not create client.') : successText, !failed);
+  if (!failed) {
+    actionDone('Client created',`${newName.value.trim()||'Client'} login has been created.`);
+    btn.textContent='✓ DONE';await new Promise(r=>setTimeout(r,1400));
+    e.currentTarget.reset(); await loadClients();
+    setTimeout(() => { newClientForm.classList.add('hidden'); adminEmpty.classList.remove('hidden'); }, 800);
+  } else actionFail('Client not created',detail||'Please try again.');
   btn.disabled = false; btn.textContent = 'Create client';
-  if (!(error || data?.error)) { e.currentTarget.reset(); await loadClients(); setTimeout(() => { newClientForm.classList.add('hidden'); adminEmpty.classList.remove('hidden'); }, 800); }
 }
 
 function formatStamp(value) {
@@ -1333,7 +1396,7 @@ async function saveAttentionFlag(){
   const client=clientGroups.find(c=>c.id===currentClientId); if(client)Object.assign(client,patch);
   await logAudit(currentClientId,'attention_flag',status==='none'?'Needs-attention flag cleared':`${attentionLabel(status)}${note?`: ${note}`:''}`,patch);
   updateClientOverview(client);renderClientList();renderTodayPanel();
-  showAdminToast('Done — client flag saved',attentionLabel(status));
+  actionDone('Client flag saved',attentionLabel(status));
   await loadClientAuditLog(currentClientId);
 }
 
@@ -1418,8 +1481,8 @@ async function loadClientSchedules(clientId){
       <div class="schedule-row-actions">${s.is_active?`<button class="schedule-complete" data-complete-schedule="${s.id}" type="button">✓ Complete</button>`:''}<button class="schedule-delete" data-delete-schedule="${s.id}" type="button">Delete</button></div>
     </article>`;
   }).join(''):'<p class="portal-muted">No recurring dates added yet.</p>';
-  clientSchedules.querySelectorAll('[data-complete-schedule]').forEach(btn=>btn.addEventListener('click',()=>completeSchedule(btn.dataset.completeSchedule,rows.find(x=>x.id===btn.dataset.completeSchedule))));
-  clientSchedules.querySelectorAll('[data-delete-schedule]').forEach(btn=>btn.addEventListener('click',()=>deleteSchedule(btn.dataset.deleteSchedule)));
+  clientSchedules.querySelectorAll('[data-complete-schedule]').forEach(btn=>btn.addEventListener('click',()=>completeSchedule(btn.dataset.completeSchedule,rows.find(x=>x.id===btn.dataset.completeSchedule),btn)));
+  clientSchedules.querySelectorAll('[data-delete-schedule]').forEach(btn=>btn.addEventListener('click',()=>deleteSchedule(btn.dataset.deleteSchedule,btn)));
 }
 
 
@@ -1486,28 +1549,32 @@ async function loadOnboarding(clientId){
   if(v11El('onboardingProgressPill'))v11El('onboardingProgressPill').textContent=`${pct}%`;
   el.innerHTML=onboardingCache.length?onboardingCache.map(x=>`<label class="onboarding-row ${x.completed?'completed':''}"><input type="checkbox" data-onboarding-toggle="${x.id}" ${x.completed?'checked':''}><span><strong>${esc(x.title)}</strong><small>${x.client_action_required?'Client action required':'Practice action'}</small></span><button class="row-delete-btn" data-onboarding-delete="${x.id}" type="button">Remove</button></label>`).join(''):'<p class="portal-muted">No onboarding items yet.</p>';
   el.querySelectorAll('[data-onboarding-toggle]').forEach(cb=>cb.addEventListener('change',()=>toggleOnboarding(cb.dataset.onboardingToggle,cb.checked)));
-  el.querySelectorAll('[data-onboarding-delete]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();deleteOnboardingItem(b.dataset.onboardingDelete);}));
+  el.querySelectorAll('[data-onboarding-delete]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();deleteOnboardingItem(b.dataset.onboardingDelete,b);}));
 }
 async function toggleOnboarding(id,completed){
   const patch={completed,completed_at:completed?new Date().toISOString():null,updated_at:new Date().toISOString()};
   const {error}=await sb.from('client_onboarding_items').update(patch).eq('id',id);
   if(error)return showAdminToast('Couldn’t update onboarding',error.message,true);
+  actionDone(completed?'Onboarding item completed':'Onboarding item reopened');
   const row=onboardingCache.find(x=>x.id===id); if(row)Object.assign(row,patch);
   await logAudit(currentClientId,'onboarding_updated',`${row?.title||'Onboarding item'} ${completed?'completed':'reopened'}`,{id,completed});
   await loadOnboarding(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();
 }
 async function addOnboardingItem(e){
-  e.preventDefault(); const title=v11El('onboardingNewItem').value.trim(); if(!title||!currentClientId)return;
+  e.preventDefault(); const form=e.currentTarget; const title=v11El('onboardingNewItem').value.trim(); if(!title||!currentClientId||form.dataset.submitting==='1')return;
+  const btn=form.querySelector('button[type=submit]');form.dataset.submitting='1';actionBtnStart(btn,'Adding…');
   const max=Math.max(0,...onboardingCache.map(x=>Number(x.position)||0));
   const {error}=await sb.from('client_onboarding_items').insert({client_id:currentClientId,title,position:max+10,client_action_required:v11El('onboardingClientAction').checked});
-  if(error)return showAdminToast('Couldn’t add checklist item',error.message,true);
-  e.currentTarget.reset(); showAdminToast('Checklist item added',title); await loadOnboarding(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);
+  if(error){form.dataset.submitting='0';await actionBtnFinish(btn,false);return showAdminToast('Couldn’t add checklist item',error.message,true);}
+  form.reset(); actionDone('Onboarding checklist item added',title); await loadOnboarding(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);form.dataset.submitting='0';await actionBtnFinish(btn,true,'✓ Added');
 }
-async function deleteOnboardingItem(id){
+async function deleteOnboardingItem(id,btn=null){
   if(!confirm('Remove this onboarding checklist item?'))return;
+  if(btn?.dataset.actionBusy==='1')return;actionBtnStart(btn,'Removing…');
   const row=onboardingCache.find(x=>x.id===id); const {error}=await sb.from('client_onboarding_items').delete().eq('id',id);
-  if(error)return showAdminToast('Couldn’t remove item',error.message,true);
-  await logAudit(currentClientId,'onboarding_removed',`Onboarding item removed: ${row?.title||'Item'}`,{id}); await loadOnboarding(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);
+  if(error){await actionBtnFinish(btn,false);return showAdminToast('Couldn’t remove item',error.message,true);}
+  actionDone('Onboarding checklist item removed',row?.title||'Item');
+  await logAudit(currentClientId,'onboarding_removed',`Onboarding item removed: ${row?.title||'Item'}`,{id}); await loadOnboarding(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);await actionBtnFinish(btn,true,'✓ DONE');
 }
 
 async function loadDocumentRequests(clientId){
@@ -1517,24 +1584,51 @@ async function loadDocumentRequests(clientId){
   documentRequestCache=data||[]; const today=dateOnly(new Date()); const open=documentRequestCache.filter(x=>x.status==='requested');
   if(v11El('documentRequestCount'))v11El('documentRequestCount').textContent=`${open.length} open`;
   el.innerHTML=documentRequestCache.length?documentRequestCache.map(x=>{const overdue=x.status==='requested'&&x.due_date&&x.due_date<today;return `<article class="document-request-row ${x.status==='received'?'received':''} ${overdue?'overdue':''}"><div><strong>${esc(x.title)}</strong><small>${x.note?esc(x.note)+' · ':''}${x.due_date?`Due ${formatFriendlyDate(x.due_date)}`:'No due date'}</small></div><div class="request-actions"><span class="request-status ${x.status==='received'?'received':overdue?'overdue':''}">${x.status==='received'?'Received ✓':overdue?'Overdue':'Requested'}</span>${x.status==='requested'?`<button data-request-received="${x.id}" type="button">Mark received</button>`:''}<button data-request-delete="${x.id}" type="button">Delete</button></div></article>`}).join(''):'<p class="portal-muted">No document requests yet.</p>';
-  el.querySelectorAll('[data-request-received]').forEach(b=>b.onclick=()=>markDocumentRequestReceived(b.dataset.requestReceived));
-  el.querySelectorAll('[data-request-delete]').forEach(b=>b.onclick=()=>deleteDocumentRequest(b.dataset.requestDelete));
+  el.querySelectorAll('[data-request-received]').forEach(b=>b.onclick=()=>markDocumentRequestReceived(b.dataset.requestReceived,b));
+  el.querySelectorAll('[data-request-delete]').forEach(b=>b.onclick=()=>deleteDocumentRequest(b.dataset.requestDelete,b));
 }
 async function addDocumentRequest(e){
-  e.preventDefault(); if(!currentClientId)return; const title=v11El('documentRequestTitle').value.trim(); if(!title)return;
+  e.preventDefault();
+  const form=e.currentTarget;
+  if(!currentClientId || form.dataset.submitting==='1')return;
+  const title=v11El('documentRequestTitle').value.trim();
+  if(!title)return;
+  const btn=form.querySelector('button[type="submit"]');
+  const status=v11El('documentRequestSubmitMessage');
+  const originalText=btn?.textContent||'Request document';
+  form.dataset.submitting='1';
+  if(btn){btn.disabled=true;btn.textContent='Sending request…';}
+  if(status){status.hidden=false;status.className='action-confirmation pending';status.textContent='Sending request…';}
   const payload={client_id:currentClientId,title,note:v11El('documentRequestNote').value.trim()||null,due_date:v11El('documentRequestDue').value||null,status:'requested'};
-  const {error}=await sb.from('client_document_requests').insert(payload); if(error)return showAdminToast('Couldn’t request document',error.message,true);
-  e.currentTarget.reset(); showAdminToast('Document requested',title); await logAudit(currentClientId,'document_requested',`Document requested: ${title}`,payload); await loadDocumentRequests(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();
+  try{
+    const {error}=await sb.from('client_document_requests').insert(payload);
+    if(error){
+      if(status){status.className='action-confirmation error';status.textContent=`Not sent — ${error.message}`;}
+      showAdminToast('Couldn’t request document',error.message,true);
+      return;
+    }
+    form.reset();
+    if(status){status.className='action-confirmation success';status.textContent=`✓ DONE — ${title} requested from client`;}
+    if(btn)btn.textContent='✓ Requested';
+    actionDone('Document request sent',`${title} has been added to the client portal.`);
+    await logAudit(currentClientId,'document_requested',`Document requested: ${title}`,payload);
+    await loadDocumentRequests(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();
+    await new Promise(r=>setTimeout(r,1600));
+  }finally{
+    form.dataset.submitting='0';
+    if(btn){btn.disabled=false;btn.textContent=originalText;}
+  }
 }
-async function markDocumentRequestReceived(id){
+async function markDocumentRequestReceived(id,btn=null){
+  if(btn?.dataset.actionBusy==='1')return;actionBtnStart(btn,'Updating…');
   const row=documentRequestCache.find(x=>x.id===id); const patch={status:'received',received_at:new Date().toISOString(),updated_at:new Date().toISOString()};
-  const {error}=await sb.from('client_document_requests').update(patch).eq('id',id); if(error)return showAdminToast('Couldn’t update request',error.message,true);
-  showAdminToast('Marked as received',row?.title||'Document'); await logAudit(currentClientId,'document_received',`Document received: ${row?.title||'Document'}`,{id}); await loadDocumentRequests(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);
+  const {error}=await sb.from('client_document_requests').update(patch).eq('id',id); if(error){await actionBtnFinish(btn,false);return showAdminToast('Couldn’t update request',error.message,true);}
+  actionDone('Document marked as received',row?.title||'Document'); await logAudit(currentClientId,'document_received',`Document received: ${row?.title||'Document'}`,{id}); await loadDocumentRequests(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);await actionBtnFinish(btn,true,'✓ DONE');
 }
-async function deleteDocumentRequest(id){
-  if(!confirm('Delete this document request?'))return; const row=documentRequestCache.find(x=>x.id===id);
-  const {error}=await sb.from('client_document_requests').delete().eq('id',id); if(error)return showAdminToast('Couldn’t delete request',error.message,true);
-  await logAudit(currentClientId,'document_request_deleted',`Document request removed: ${row?.title||'Document'}`,{id}); await loadDocumentRequests(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);
+async function deleteDocumentRequest(id,btn=null){
+  if(!confirm('Delete this document request?'))return;if(btn?.dataset.actionBusy==='1')return;actionBtnStart(btn,'Deleting…'); const row=documentRequestCache.find(x=>x.id===id);
+  const {error}=await sb.from('client_document_requests').delete().eq('id',id); if(error){await actionBtnFinish(btn,false);return showAdminToast('Couldn’t delete request',error.message,true);}
+  actionDone('Document request deleted',row?.title||'Document'); await logAudit(currentClientId,'document_request_deleted',`Document request removed: ${row?.title||'Document'}`,{id}); await loadDocumentRequests(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);await actionBtnFinish(btn,true,'✓ DONE');
 }
 
 async function loadInternalNotes(clientId){
@@ -1542,15 +1636,16 @@ async function loadInternalNotes(clientId){
   const {data,error}=await sb.from('client_internal_notes').select('*').eq('client_id',clientId).order('created_at',{ascending:false}).limit(30);
   if(error){el.innerHTML='<p class="portal-muted">Run the V11 Supabase SQL to enable private notes.</p>';return;}
   internalNoteCache=data||[]; el.innerHTML=internalNoteCache.length?internalNoteCache.map(x=>`<article class="internal-note-row"><p>${esc(x.note)}</p><footer><time>${formatStamp(x.created_at)}</time><button type="button" data-internal-note-delete="${x.id}">Delete</button></footer></article>`).join(''):'<p class="portal-muted">No private notes yet.</p>';
-  el.querySelectorAll('[data-internal-note-delete]').forEach(b=>b.onclick=()=>deleteInternalNote(b.dataset.internalNoteDelete));
+  el.querySelectorAll('[data-internal-note-delete]').forEach(b=>b.onclick=()=>deleteInternalNote(b.dataset.internalNoteDelete,b));
 }
 async function addInternalNote(e){
-  e.preventDefault(); const note=v11El('internalNoteText').value.trim(); if(!note||!currentClientId)return;
-  const {error}=await sb.from('client_internal_notes').insert({client_id:currentClientId,note,created_by:currentAdminId}); if(error)return showAdminToast('Couldn’t save private note',error.message,true);
-  e.currentTarget.reset(); showAdminToast('Private note saved'); await logAudit(currentClientId,'internal_note_added','Private practice note added',{}); await loadInternalNotes(currentClientId); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();
+  e.preventDefault(); const form=e.currentTarget; const note=v11El('internalNoteText').value.trim(); if(!note||!currentClientId||form.dataset.submitting==='1')return;
+  const btn=form.querySelector('button[type=submit]');form.dataset.submitting='1';actionBtnStart(btn,'Saving…');
+  const {error}=await sb.from('client_internal_notes').insert({client_id:currentClientId,note,created_by:currentAdminId}); if(error){form.dataset.submitting='0';await actionBtnFinish(btn,false);return showAdminToast('Couldn’t save private note',error.message,true);}
+  form.reset(); actionDone('Private note saved'); await logAudit(currentClientId,'internal_note_added','Private practice note added',{}); await loadInternalNotes(currentClientId); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();await actionBtnFinish(btn,true,'✓ DONE');
 }
-async function deleteInternalNote(id){
-  if(!confirm('Delete this private note?'))return; const {error}=await sb.from('client_internal_notes').delete().eq('id',id); if(error)return showAdminToast('Couldn’t delete note',error.message,true); await loadInternalNotes(currentClientId); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();
+async function deleteInternalNote(id,btn=null){
+  if(!confirm('Delete this private note?'))return;if(btn?.dataset.actionBusy==='1')return;actionBtnStart(btn,'Deleting…'); const {error}=await sb.from('client_internal_notes').delete().eq('id',id); if(error){await actionBtnFinish(btn,false);return showAdminToast('Couldn’t delete note',error.message,true);} actionDone('Private note deleted'); await loadInternalNotes(currentClientId); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();
 }
 
 function updateV11ClientOverview(){
@@ -1599,15 +1694,20 @@ function renderDeadlineCentreList(){
 }
 
 async function loadWorkTemplates(){
-  const el=v11El('workTemplateList'); if(!el)return; const {data,error}=await sb.from('work_templates').select('*').order('created_at',{ascending:false}); if(error){el.innerHTML='<p class="portal-muted">Run the V11 Supabase SQL to enable templates.</p>';return;} workTemplateCache=data||[]; el.innerHTML=workTemplateCache.length?workTemplateCache.map(x=>`<article class="template-card"><span><strong>${esc(x.name)}</strong><small>${serviceTypeLabel(x.service_type)} · ${cadenceLabel(x.cadence)}</small></span><button type="button" data-template-use="${x.id}">Use</button><button type="button" data-template-delete="${x.id}">Delete</button></article>`).join(''):'<p class="portal-muted">No templates yet.</p>'; el.querySelectorAll('[data-template-use]').forEach(b=>b.onclick=()=>useWorkTemplate(b.dataset.templateUse));el.querySelectorAll('[data-template-delete]').forEach(b=>b.onclick=()=>deleteWorkTemplate(b.dataset.templateDelete));
+  const el=v11El('workTemplateList'); if(!el)return; const {data,error}=await sb.from('work_templates').select('*').order('created_at',{ascending:false}); if(error){el.innerHTML='<p class="portal-muted">Run the V11 Supabase SQL to enable templates.</p>';return;} workTemplateCache=data||[]; el.innerHTML=workTemplateCache.length?workTemplateCache.map(x=>`<article class="template-card"><span><strong>${esc(x.name)}</strong><small>${serviceTypeLabel(x.service_type)} · ${cadenceLabel(x.cadence)}</small></span><button type="button" data-template-use="${x.id}">Use</button><button type="button" data-template-delete="${x.id}">Delete</button></article>`).join(''):'<p class="portal-muted">No templates yet.</p>'; el.querySelectorAll('[data-template-use]').forEach(b=>b.onclick=()=>useWorkTemplate(b.dataset.templateUse));el.querySelectorAll('[data-template-delete]').forEach(b=>b.onclick=()=>deleteWorkTemplate(b.dataset.templateDelete,b));
 }
 async function saveWorkTemplate(e){
-  e.preventDefault(); const payload={name:v11El('templateName').value.trim(),service_type:v11El('templateServiceType').value,cadence:v11El('templateCadence').value,client_label:v11El('templateClientLabel').value.trim()||'Next due date',remind_14_days:true,remind_7_days:true,auto_create_work:true}; if(!payload.name)return; const {error}=await sb.from('work_templates').insert(payload); if(error)return showAdminToast('Couldn’t save template',error.message,true);e.currentTarget.reset();v11El('templateClientLabel').value='Next due date';e.currentTarget.classList.add('hidden');showAdminToast('Template saved',payload.name);await loadWorkTemplates();
+  e.preventDefault();const form=e.currentTarget;if(form.dataset.submitting==='1')return;const btn=form.querySelector('button[type=submit]');
+  const payload={name:v11El('templateName').value.trim(),service_type:v11El('templateServiceType').value,cadence:v11El('templateCadence').value,client_label:v11El('templateClientLabel').value.trim()||'Next due date',remind_14_days:true,remind_7_days:true,auto_create_work:true};
+  if(!payload.name)return;form.dataset.submitting='1';actionBtnStart(btn,'Saving…');
+  const {error}=await sb.from('work_templates').insert(payload);
+  if(error){form.dataset.submitting='0';await actionBtnFinish(btn,false);return showAdminToast('Couldn’t save template',error.message,true);}
+  form.reset();v11El('templateClientLabel').value='Next due date';form.classList.add('hidden');actionDone('Recurring work template saved',payload.name);await loadWorkTemplates();form.dataset.submitting='0';await actionBtnFinish(btn,true,'✓ Saved');
 }
 function useWorkTemplate(id){
   const t=workTemplateCache.find(x=>x.id===id); if(!t)return;if(!currentClientId)return showAdminToast('Select a client first','Open a client, then apply this template.',true);scheduleServiceType.value=t.service_type;scheduleTitle.value=t.name;scheduleClientLabel.value=t.client_label;scheduleCadence.value=t.cadence;scheduleAutoCreateWork.checked=t.auto_create_work!==false;scheduleRemind14.checked=t.remind_14_days!==false;scheduleRemind7.checked=t.remind_7_days!==false;if(!scheduleDueDate.value)scheduleDueDate.value=formatDateInput(new Date());revealPanel(scheduleForm,'#scheduleDueDate');showAdminToast('Template applied',`Choose the first due date for ${t.name}.`);
 }
-async function deleteWorkTemplate(id){if(!confirm('Delete this recurring work template?'))return;const {error}=await sb.from('work_templates').delete().eq('id',id);if(error)return showAdminToast('Couldn’t delete template',error.message,true);await loadWorkTemplates();}
+async function deleteWorkTemplate(id,btn=null){if(!confirm('Delete this recurring work template?'))return;if(btn?.dataset.actionBusy==='1')return;actionBtnStart(btn,'Deleting…');const {error}=await sb.from('work_templates').delete().eq('id',id);if(error){await actionBtnFinish(btn,false);return showAdminToast('Couldn’t delete template',error.message,true);}actionDone('Recurring work template deleted');await loadWorkTemplates();await actionBtnFinish(btn,true,'✓ DONE');}
 
 // V11 timeline also includes document requests, onboarding changes (via audit), and private practice notes.
 async function loadClientAuditLog(clientId){
@@ -1714,8 +1814,8 @@ function renderPotentialClients(){
       </div>
     </article>`;
   }).join(''):`<div class="potential-empty"><strong>No potential clients yet</strong><p>Create a preview login when someone is discussing services with Nicole but has not agreed a package yet.</p></div>`;
-  potentialList.querySelectorAll('[data-upgrade-potential]').forEach(btn=>btn.addEventListener('click',()=>upgradePotentialClient(btn.dataset.upgradePotential)));
-  potentialList.querySelectorAll('[data-delete-potential]').forEach(btn=>btn.addEventListener('click',()=>deletePotentialClient(btn.dataset.deletePotential)));
+  potentialList.querySelectorAll('[data-upgrade-potential]').forEach(btn=>btn.addEventListener('click',()=>upgradePotentialClient(btn.dataset.upgradePotential,btn)));
+  potentialList.querySelectorAll('[data-delete-potential]').forEach(btn=>btn.addEventListener('click',()=>deletePotentialClient(btn.dataset.deletePotential,btn)));
   potentialList.querySelectorAll('[data-potential-step]').forEach(input=>input.addEventListener('change',()=>updatePotentialStep(input)));
   potentialList.querySelectorAll('[data-potential-communication]').forEach(details=>details.addEventListener('toggle',()=>{if(details.open)loadPotentialCommunication(details.dataset.potentialCommunication);}));
   potentialList.querySelectorAll('[data-potential-send-message]').forEach(btn=>btn.addEventListener('click',()=>sendPotentialPortalMessage(btn.dataset.potentialSendMessage)));
@@ -1738,7 +1838,8 @@ async function loadPotentialCommunication(clientId){
     const table=btn.dataset.kind==='document'?'document_submissions':'client_notes';
     btn.disabled=true;
     const {error}=await sb.from(table).update({admin_seen_at:new Date().toISOString()}).eq('id',btn.dataset.potentialMarkRead);
-    if(error)return showAdminToast('Couldn’t mark as read',error.message,true);
+    if(error){btn.disabled=false;return showAdminToast('Couldn’t mark as read',error.message,true);}
+    actionDone('Potential-client activity marked as read');
     await loadClients();
     const reopened=potentialList?.querySelector(`[data-potential-communication="${CSS.escape(clientId)}"]`); if(reopened){reopened.open=true;await loadPotentialCommunication(clientId);}
   }));
@@ -1755,10 +1856,13 @@ async function sendPotentialPortalMessage(clientId){
     const {error}=await sb.from('messages').insert({client_id:clientId,sender_id:currentAdminId,message:body});
     if(error)return showAdminToast('Couldn’t send portal message',error.message,true);
     field.value='';
-    showAdminToast('DONE — Message sent','It is now visible in the potential client’s portal.');
+    actionDone('Portal message sent','It is now visible in the potential client’s portal.');
     await logAudit(clientId,'potential_message_sent','Portal message sent to potential client',{message:body.slice(0,250)});
   }finally{
-    if(btn){btn.dataset.submitting='0';btn.disabled=false;btn.textContent='Send message';}
+    if(btn){
+      if(field && !field.value){btn.textContent='✓ Sent';await new Promise(r=>setTimeout(r,1200));}
+      btn.dataset.submitting='0';btn.disabled=false;btn.textContent='Send message';
+    }
   }
 }
 
@@ -1779,7 +1883,7 @@ async function updatePotentialStep(input){
   c.potential_checklist=next;
   renderPotentialClients();
   const progress=potentialProgress(c);
-  showAdminToast('Prospect journey updated',progress.percent===100?`${c.full_name||'Potential client'} is ready to move into onboarding.`:`Progress is now ${progress.percent}%.`);
+  actionDone('Prospect journey updated',progress.percent===100?`${c.full_name||'Potential client'} is ready to move into onboarding.`:`Progress is now ${progress.percent}%.`);
   if(progress.percent===100){
     const upgradeBtn=potentialList?.querySelector(`[data-upgrade-potential="${CSS.escape(clientId)}"]`);
     upgradeBtn?.classList.add('attention-pulse');
@@ -1800,32 +1904,33 @@ async function createPotentialClient(e){
   const {data,error}=await sb.functions.invoke('create-potential-client',{body:payload});
   const failed=error||data?.error;
   show(potentialMessage,failed?(data?.error||error?.message||'Could not create the potential client.'):'Preview login created and welcome email sent ✓',!failed);
-  btn.disabled=false;btn.textContent='Create preview login & send email';
   if(!failed){
+    actionDone('Potential client created',`${payload.name} has been emailed their preview login.`);
+    btn.textContent='✓ DONE';await new Promise(r=>setTimeout(r,1400));
     e.currentTarget.reset();
-    showAdminToast('Potential client created',`${payload.name} has been emailed their preview login.`);
     await loadClients();
     window.setTimeout(()=>potentialForm?.classList.add('hidden'),900);
-  }
+  } else actionFail('Potential client not created',data?.error||error?.message||'Please try again.');
+  btn.disabled=false;btn.textContent='Create preview login & send email';
 }
 
-async function upgradePotentialClient(clientId){
+async function upgradePotentialClient(clientId,btn=null){
   const c=potentialClients.find(x=>x.id===clientId); if(!c)return;
   if(!confirm(`Upgrade ${c.full_name||'this potential client'} to full client access?\n\nTheir existing login will immediately unlock the full client portal.`))return;
   const {error}=await sb.from('profiles').update({portal_tier:'full',converted_at:new Date().toISOString(),client_status:'onboarding'}).eq('id',clientId);
-  if(error)return showAdminToast('Couldn’t upgrade client',error.message,true);
+  if(error){await actionBtnFinish(btn,false);return showAdminToast('Couldn’t upgrade client',error.message,true);}
   await logAudit(clientId,'potential_converted','Potential client upgraded to full portal access',{from:'potential',to:'full'});
-  showAdminToast('Full client access enabled',`${c.full_name||'Client'} can now use the complete portal.`);
+  actionDone('Full client access enabled',`${c.full_name||'Client'} can now use the complete portal.`);
   await loadClients();
-  const upgraded=clientGroups.find(x=>x.id===clientId); if(upgraded) openClient(clientId);
+  const upgraded=clientGroups.find(x=>x.id===clientId); if(upgraded) openClient(clientId);await actionBtnFinish(btn,true,'✓ DONE');
 }
 
-async function deletePotentialClient(clientId){
+async function deletePotentialClient(clientId,btn=null){
   const c=potentialClients.find(x=>x.id===clientId); if(!c)return;
   const typed=prompt(`Delete potential client ${c.full_name||''}?\n\nThis permanently removes their preview login and portal record.\n\nType DELETE to confirm.`);
-  if(typed!=='DELETE')return;
+  if(typed!=='DELETE')return;if(btn?.dataset.actionBusy==='1')return;actionBtnStart(btn,'Deleting…');
   const {data,error}=await sb.functions.invoke('delete-client',{body:{clientId}});
-  if(error||data?.error)return showAdminToast('Couldn’t delete potential client',data?.error||error?.message||'Delete failed.',true);
-  showAdminToast('Potential client deleted',`${c.full_name||'The preview account'} has been removed.`);
-  await loadClients();
+  if(error||data?.error){await actionBtnFinish(btn,false);return showAdminToast('Couldn’t delete potential client',data?.error||error?.message||'Delete failed.',true);}
+  actionDone('Potential client deleted',`${c.full_name||'The preview account'} has been removed.`);
+  await loadClients();await actionBtnFinish(btn,true,'✓ DONE');
 }

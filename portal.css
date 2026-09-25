@@ -1352,3 +1352,15 @@ details[open]>.dropdown-chevron,details[open]>summary .dropdown-chevron{transfor
 
 /* V13.3 — persistent confirmation emphasis */
 .portal-message.success,.message.success,[data-status="success"]{font-weight:700}.portal-message.success::before,.message.success::before{content:"✓ DONE — ";font-weight:800}
+
+
+/* V13.4 — explicit per-action confirmation and duplicate-submit protection */
+.action-confirmation{grid-column:1/-1;margin-top:8px;padding:11px 13px;border-radius:12px;font-size:.84rem;font-weight:750;line-height:1.35}
+.action-confirmation.pending{display:block;background:#f5eee7;color:#6f5947;border:1px solid #eaded2}
+.action-confirmation.success{display:block;background:#eef6ef;color:#41614a;border:1px solid rgba(65,97,74,.18)}
+.action-confirmation.error{display:block;background:#fff1ef;color:#8b3d32;border:1px solid rgba(139,61,50,.18)}
+.document-request-form button[disabled],.portal-form button[disabled]{pointer-events:none}
+
+/* V13.5 global action feedback */
+.portal-btn:disabled, button:disabled{cursor:wait;opacity:.72}
+.portal-btn:disabled{transform:none!important}
