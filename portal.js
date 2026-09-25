@@ -154,6 +154,8 @@ async function loadPortal(user){
   welcomeName.textContent=`Welcome, ${profile?.full_name||'there'}`;
   if((profile?.portal_tier||'full')==='potential'){
     renderPotentialPortal(profile);
+    await loadSharedPortalCommunication(profile,user.id,[]);
+    bindPortalAutoReveal();
     return;
   }
 
@@ -184,20 +186,37 @@ async function loadPortal(user){
   nextAction.textContent=priority?.next_action||'Nothing needed right now';
   nextActionDetail.textContent=priority?.next_action_detail||'Nicole will update this if anything is required from you.';
 
-  const activeOptions=active.length
-    ? active.map(w=>`<option value="${escAttr(w.id)}">${esc(w.service_name||'Accounting')}${w.period_label?` — ${esc(w.period_label)}`:''}</option>`).join('')
+  await loadSharedPortalCommunication(profile,user.id,active);
+  bindPortalAutoReveal();
+}
+
+async function loadSharedPortalCommunication(profile,clientId,activeWorks=[]){
+  const activeOptions=(activeWorks||[]).length
+    ? activeWorks.map(w=>`<option value="${escAttr(w.id)}">${esc(w.service_name||'Accounting')}${w.period_label?` — ${esc(w.period_label)}`:''}</option>`).join('')
     : '';
 
-  documentWork.innerHTML=activeOptions || '<option value="">General documents</option>';
-  clientNoteWork.innerHTML='<option value="">General note</option>'+activeOptions;
+  if(window.documentWork) documentWork.innerHTML=activeOptions || '<option value="">General documents</option>';
+  if(window.clientNoteWork) clientNoteWork.innerHTML='<option value="">General note</option>'+activeOptions;
 
-  const {data:msgs}=await sb.from('messages').select('*').eq('client_id',user.id).order('created_at',{ascending:false});
-  if(msgs?.length)messages.innerHTML=msgs.map(m=>`<div class="message"><p>${esc(m.message)}</p><time>${formatStamp(m.created_at)}</time></div>`).join('');
+  if(window.messages){
+    const {data:msgs,error}=await sb.from('messages').select('*').eq('client_id',clientId).order('created_at',{ascending:false});
+    messages.innerHTML=error
+      ? '<p class="portal-muted">No portal messages yet.</p>'
+      : msgs?.length
+        ? msgs.map(m=>`<div class="message"><p>${esc(m.message)}</p><time>${formatStamp(m.created_at)}</time></div>`).join('')
+        : '<p class="portal-muted">No messages yet.</p>';
+  }
 
-  await Promise.all([loadDocumentHistory(user.id),loadClientNoteHistory(user.id)]);
-  documentForm.addEventListener('submit',e=>sendDocuments(e,profile,user.id));
-  clientNoteForm.addEventListener('submit',e=>sendClientNote(e,user.id));
-  bindPortalAutoReveal();
+  await Promise.all([loadDocumentHistory(clientId),loadClientNoteHistory(clientId)]);
+
+  if(window.documentForm && !documentForm.dataset.bound){
+    documentForm.dataset.bound='1';
+    documentForm.addEventListener('submit',e=>sendDocuments(e,profile,clientId));
+  }
+  if(window.clientNoteForm && !clientNoteForm.dataset.bound){
+    clientNoteForm.dataset.bound='1';
+    clientNoteForm.addEventListener('submit',e=>sendClientNote(e,clientId));
+  }
 }
 
 function renderPotentialPortal(profile){
@@ -205,7 +224,7 @@ function renderPotentialPortal(profile){
   document.querySelectorAll('.full-client-only').forEach(el=>el.classList.add('hidden'));
   const count=document.getElementById('activeCount'); if(count)count.textContent='Preview access';
   const copy=document.getElementById('welcomePortalCopy');
-  if(copy)copy.textContent='Your preview account is ready. Explore how the full Nicole Platten Accounting client portal will support you once your package is agreed.';
+  if(copy)copy.textContent='Your preview account is ready. Follow your progress, message Nicole and send documents securely while you discuss the right package for your business.';
   const preview=document.getElementById('potentialPortalPreview');
   if(preview && profile?.potential_discussion){
     const hero=preview.querySelector('.potential-preview-hero');
@@ -213,6 +232,30 @@ function renderPotentialPortal(profile){
     note.innerHTML=`<span>Current discussion</span><strong>${esc(profile.potential_discussion)}</strong>`;
     hero?.appendChild(note);
   }
+  renderPotentialJourney(profile);
+}
+
+function renderPotentialJourney(profile){
+  const steps=[
+    ['discuss_needs','Discuss your accountancy needs'],
+    ['learn_business','Learn about your business and key information'],
+    ['discuss_package','Discuss a package and services tailored to you'],
+    ['agree_scope_fee','Agree the scope of work and fee'],
+    ['move_to_onboarding','Move into the client onboarding process']
+  ];
+  const raw=profile?.potential_checklist&&typeof profile.potential_checklist==='object'?profile.potential_checklist:{};
+  const complete=steps.filter(([key])=>!!raw[key]).length;
+  const percent=Math.round((complete/steps.length)*100);
+  const percentEl=document.getElementById('potentialJourneyPercent');
+  const bar=document.getElementById('potentialJourneyBar');
+  const title=document.getElementById('potentialJourneyTitle');
+  const copy=document.getElementById('potentialJourneyCopy');
+  const list=document.getElementById('potentialJourneySteps');
+  if(percentEl)percentEl.textContent=`${percent}%`;
+  if(bar)bar.style.width=`${percent}%`;
+  if(title)title.textContent=percent===100?'Ready to start your journey with Nicole':`${percent}% of the way there`;
+  if(copy)copy.textContent=percent===100?'Your discussions are complete. Nicole can now move your account into the full onboarding portal.':`${percent}% of the way to starting your journey with Nicole. Nicole will update each step as your discussions progress.`;
+  if(list)list.innerHTML=steps.map(([key,label],ix)=>`<div class="potential-client-step ${raw[key]?'completed':''}"><span class="potential-client-step-icon">${raw[key]?'✓':ix+1}</span><div><strong>${esc(label)}</strong><small>${raw[key]?'Completed':'To be completed'}</small></div></div>`).join('');
 }
 
 function bindPortalAutoReveal(){

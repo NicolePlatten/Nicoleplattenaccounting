@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <link rel="icon" href="assets/logo.png">
-  <link rel="stylesheet" href="portal.css?v=26">
+  <link rel="stylesheet" href="portal.css?v=27">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <title>Your Dashboard | Nicole Platten Accounting</title>
@@ -20,6 +20,14 @@
       <h2>A look inside your future client portal</h2>
       <p>Nicole has created this preview while you discuss your accountancy needs. Once you agree a package, your login can be upgraded to the full portal without creating a new account.</p>
     </div>
+    <div id="potentialJourneyCard" class="potential-journey-client">
+      <div class="potential-journey-client-head">
+        <div><span class="portal-kicker">Your journey with Nicole</span><h3 id="potentialJourneyTitle">Getting started</h3><p id="potentialJourneyCopy" class="portal-muted">Nicole will update these steps as your discussions progress.</p></div>
+        <strong id="potentialJourneyPercent" class="potential-journey-percent">0%</strong>
+      </div>
+      <div class="potential-progress-track potential-progress-track-large"><span id="potentialJourneyBar" style="width:0%"></span></div>
+      <div id="potentialJourneySteps" class="potential-client-checklist"></div>
+    </div>
     <div class="potential-preview-grid">
       <article><span class="preview-feature-icon">✓</span><strong>See work progress</strong><p>Full clients can follow each job and see exactly where their accounts, VAT, payroll or tax work has reached.</p></article>
       <article><span class="preview-feature-icon">↥</span><strong>Secure document requests</strong><p>Nicole can request exactly what she needs and your dashboard keeps outstanding actions clear in one place.</p></article>
@@ -27,27 +35,28 @@
       <article><span class="preview-feature-icon">✉</span><strong>Direct communication</strong><p>Messages, notes and accountancy updates stay connected to your client record rather than scattered across different places.</p></article>
     </div>
     <div class="potential-preview-next"><div><span class="portal-kicker">What happens next?</span><h3>Agree your package with Nicole</h3><p>When you are ready to proceed, Nicole will upgrade this same login to full client access and your live work, document requests, deadlines and progress will appear here.</p></div><a class="portal-btn" href="contact.html">Contact Nicole</a></div>
+    <div class="potential-communication-hint"><span>Already have something for Nicole?</span><strong>You can message Nicole and send documents securely below, even while you are still discussing your package.</strong></div>
   </section>
   <section id="clientActionsCard" class="full-client-only portal-card pad client-actions-card">
     <div class="client-actions-heading"><div><span class="portal-kicker">What you need to do</span><h2 id="clientActionsTitle">You’re all caught up</h2><p id="clientActionsSub" class="portal-muted">Anything Nicole needs from you will appear here.</p></div><span id="clientActionsCount" class="client-action-count">0</span></div>
     <div id="clientActionsList" class="client-actions-list"><p class="portal-muted">Loading your actions…</p></div>
   </section>
-  <main class="portal-grid full-client-only">
+  <main class="portal-grid">
     <div class="portal-main">
-      <section><div class="section-heading"><span class="portal-kicker">Active work</span><h2>What Nicole is working on</h2></div><div id="activeWork" class="work-cards"><p class="portal-muted">Loading your work…</p></div></section>
-      <section class="portal-card pad"><span class="portal-kicker">Completed history</span><h2>Finished work</h2><div id="completedWork"></div></section>
-      <section class="portal-card pad"><span class="portal-kicker">Messages</span><h2>General updates from Nicole</h2><div id="messages"><p class="portal-muted">No messages yet.</p></div></section>
+      <section class="full-client-only"><div class="section-heading"><span class="portal-kicker">Active work</span><h2>What Nicole is working on</h2></div><div id="activeWork" class="work-cards"><p class="portal-muted">Loading your work…</p></div></section>
+      <section class="full-client-only portal-card pad"><span class="portal-kicker">Completed history</span><h2>Finished work</h2><div id="completedWork"></div></section>
+      <section class="portal-card pad shared-client-communication"><span class="portal-kicker">Messages</span><h2>Updates from Nicole</h2><p class="portal-muted">Any direct portal messages Nicole sends you will appear here.</p><div id="messages"><p class="portal-muted">No messages yet.</p></div></section>
     </div>
     <aside class="portal-side">
-      <section id="clientDueCard" class="portal-card pad client-due-card">
+      <section id="clientDueCard" class="full-client-only portal-card pad client-due-card">
         <span class="portal-kicker">Next due date</span>
         <h2 id="clientDueHeadline">Nothing due yet</h2>
         <p id="clientDueDate" class="due-date-text">Nicole will add your next date when required.</p>
         <small id="clientDueService" class="portal-muted"></small>
       </section>
-      <section class="portal-card pad"><span class="portal-kicker">Next action</span><h2 id="nextAction">Nothing needed right now</h2><p id="nextActionDetail" class="portal-muted">Nicole will update this if anything is required from you.</p></section>
+      <section class="full-client-only portal-card pad"><span class="portal-kicker">Next action</span><h2 id="nextAction">Nothing needed right now</h2><p id="nextActionDetail" class="portal-muted">Nicole will update this if anything is required from you.</p></section>
 
-      <section class="portal-card pad client-note-card">
+      <section class="portal-card pad client-note-card shared-client-communication">
         <span class="portal-kicker">Contact Nicole</span>
         <h2>Send Nicole a note</h2>
         <p class="portal-muted">Ask a question, add an update or explain something relating to your accounts. Nicole is notified when you send it.</p>
@@ -65,11 +74,11 @@
         </div>
       </section>
 
-      <section class="portal-card pad"><span class="portal-kicker">Documents</span><h2>Send documents</h2><p class="portal-muted">Your files are emailed directly to Nicole and are not stored in your portal. You can send up to 5 files at once.</p><form id="documentForm" class="portal-form upload-box"><label for="documentRequest">Are you sending something Nicole requested?</label><select id="documentRequest"><option value="">No — general document upload</option></select><label>Which work is this for?</label><select id="documentWork"></select><label for="documentFile">Choose files</label><input id="documentFile" type="file" multiple required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.heic,.webp"><small class="portal-muted">PDF, Word, Excel, CSV or image files. Maximum 8 MB per file and 20 MB total.</small><textarea id="documentNote" maxlength="2000" placeholder="Optional note for Nicole"></textarea><div id="documentMessage" hidden></div><button class="portal-btn" type="submit">Email documents to Nicole</button></form><div class="document-history"><h3>Recently sent</h3><div id="documentHistory"><p class="portal-muted">No documents sent yet.</p></div></div></section>
+      <section class="portal-card pad shared-client-communication"><span class="portal-kicker">Documents</span><h2>Send documents</h2><p class="portal-muted">Your files are emailed directly to Nicole and are not stored in your portal. You can send up to 5 files at once.</p><form id="documentForm" class="portal-form upload-box"><label for="documentRequest">Are you sending something Nicole requested?</label><select id="documentRequest"><option value="">No — general document upload</option></select><label>Which work is this for?</label><select id="documentWork"></select><label for="documentFile">Choose files</label><input id="documentFile" type="file" multiple required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.heic,.webp"><small class="portal-muted">PDF, Word, Excel, CSV or image files. Maximum 8 MB per file and 20 MB total.</small><textarea id="documentNote" maxlength="2000" placeholder="Optional note for Nicole"></textarea><div id="documentMessage" hidden></div><button class="portal-btn" type="submit">Email documents to Nicole</button></form><div class="document-history"><h3>Recently sent</h3><div id="documentHistory"><p class="portal-muted">No documents sent yet.</p></div></div></section>
     </aside>
   </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="portal-config.js"></script>
-<script src="portal.js?v=26"></script>
+<script src="portal.js?v=27"></script>
 </body></html>

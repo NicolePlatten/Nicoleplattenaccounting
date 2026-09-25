@@ -1194,7 +1194,10 @@ async function loadClients() {
     return;
   }
 
-  const profileResult = await sb.from('profiles').select('id,full_name,business_name,login_email,role,client_status,last_login_at,attention_status,attention_note,attention_updated_at,portal_tier,potential_discussion,created_at,converted_at').eq('role', 'client');
+  let profileResult = await sb.from('profiles').select('id,full_name,business_name,login_email,role,client_status,last_login_at,attention_status,attention_note,attention_updated_at,portal_tier,potential_discussion,potential_checklist,created_at,converted_at').eq('role', 'client');
+  if(profileResult.error && /potential_checklist/i.test(profileResult.error.message||'')){
+    profileResult = await sb.from('profiles').select('id,full_name,business_name,login_email,role,client_status,last_login_at,attention_status,attention_note,attention_updated_at,portal_tier,potential_discussion,created_at,converted_at').eq('role', 'client');
+  }
   if(profileResult.error){
     clientList.innerHTML=`<p class="portal-error">Could not load client flags. Run the supplied Supabase update first: ${esc(profileResult.error.message)}</p>`;
     return;
@@ -1630,28 +1633,136 @@ document.getElementById('cancelPotentialClient')?.addEventListener('click',()=>{
 });
 potentialForm?.addEventListener('submit',createPotentialClient);
 
+function potentialChecklistValue(c){
+  const raw=c?.potential_checklist&&typeof c.potential_checklist==='object'?c.potential_checklist:{};
+  return {
+    discuss_needs:!!raw.discuss_needs,
+    learn_business:!!raw.learn_business,
+    discuss_package:!!raw.discuss_package,
+    agree_scope_fee:!!raw.agree_scope_fee,
+    move_to_onboarding:!!raw.move_to_onboarding
+  };
+}
+
+const POTENTIAL_STEPS=[
+  ['discuss_needs','Discuss customer needs'],
+  ['learn_business','Learn about the business and gather key information'],
+  ['discuss_package','Discuss custom packages and services'],
+  ['agree_scope_fee','Agree scope and fee'],
+  ['move_to_onboarding','Move client to onboarding process']
+];
+
+function potentialProgress(c){
+  const value=potentialChecklistValue(c);
+  const complete=POTENTIAL_STEPS.filter(([key])=>value[key]).length;
+  return {value,complete,percent:Math.round((complete/POTENTIAL_STEPS.length)*100)};
+}
+
 function renderPotentialClients(){
   if(!potentialList)return;
   const rows=[...potentialClients].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
   if(potentialCount) potentialCount.textContent=`${rows.length} potential`;
   potentialList.innerHTML=rows.length?rows.map(c=>{
     const email=c.login_email||'';
-    return `<article class="potential-client-row">
-      <div class="potential-avatar">${esc(initials(c.full_name||'P'))}</div>
-      <div class="potential-client-copy">
-        <div class="potential-client-title"><strong>${esc(c.full_name||'Potential client')}</strong><span class="potential-badge">Preview access</span></div>
-        ${c.business_name?`<small>${esc(c.business_name)}</small>`:''}
-        <small>${esc(email)}${c.last_login_at?` · Last login ${esc(formatLastLogin(c.last_login_at))}`:' · Not logged in yet'}</small>
-        ${c.potential_discussion?`<p>${esc(c.potential_discussion)}</p>`:''}
+    const progress=potentialProgress(c);
+    const progressCopy=progress.percent===100?'100% — Ready to start their journey with Nicole':`${progress.percent}% towards starting their journey with Nicole`;
+    return `<article class="potential-client-row potential-client-card">
+      <div class="potential-client-summary">
+        <div class="potential-avatar">${esc(initials(c.full_name||'P'))}</div>
+        <div class="potential-client-copy">
+          <div class="potential-client-title"><strong>${esc(c.full_name||'Potential client')}</strong><span class="potential-badge">Preview access</span></div>
+          ${c.business_name?`<small>${esc(c.business_name)}</small>`:''}
+          <small>${esc(email)}${c.last_login_at?` · Last login ${esc(formatLastLogin(c.last_login_at))}`:' · Not logged in yet'}</small>
+          ${c.potential_discussion?`<p>${esc(c.potential_discussion)}</p>`:''}
+        </div>
+        <div class="potential-client-actions">
+          <button class="portal-btn potential-upgrade" type="button" data-upgrade-potential="${escAttr(c.id)}">Upgrade to full client</button>
+          <button class="portal-btn danger-outline" type="button" data-delete-potential="${escAttr(c.id)}">Delete</button>
+        </div>
       </div>
-      <div class="potential-client-actions">
-        <button class="portal-btn potential-upgrade" type="button" data-upgrade-potential="${escAttr(c.id)}">Upgrade to full client</button>
-        <button class="portal-btn danger-outline" type="button" data-delete-potential="${escAttr(c.id)}">Delete</button>
+      <details class="potential-communication-panel" data-potential-communication="${escAttr(c.id)}">
+        <summary><span><strong>Messages & documents</strong><small>${unreadByClient[c.id]||0 ? `${unreadByClient[c.id]} unread update${unreadByClient[c.id]===1?'':'s'}` : 'View prospect communication'}</small></span><span class="potential-comm-chevron">⌄</span></summary>
+        <div class="potential-communication-body">
+          <div class="potential-message-compose">
+            <label>Send a portal message</label>
+            <textarea data-potential-message-text="${escAttr(c.id)}" maxlength="3000" placeholder="Write a message for ${escAttr(c.full_name||'this potential client')}…"></textarea>
+            <button class="portal-btn secondary" type="button" data-potential-send-message="${escAttr(c.id)}">Send message</button>
+          </div>
+          <div class="potential-activity-list" data-potential-activity-list="${escAttr(c.id)}"><p class="portal-muted">Open this section to load notes and documents.</p></div>
+        </div>
+      </details>
+      <div class="potential-journey" data-potential-journey="${escAttr(c.id)}">
+        <div class="potential-journey-head"><div><span class="portal-kicker">Prospect journey</span><strong>${esc(progressCopy)}</strong></div><span class="potential-progress-number">${progress.percent}%</span></div>
+        <div class="potential-progress-track"><span style="width:${progress.percent}%"></span></div>
+        <div class="potential-checklist">
+          ${POTENTIAL_STEPS.map(([key,label],ix)=>`<label class="potential-check-row ${progress.value[key]?'completed':''}"><input type="checkbox" data-potential-step="${escAttr(key)}" data-potential-id="${escAttr(c.id)}" ${progress.value[key]?'checked':''}><span><b>${ix+1}</b><strong>${esc(label)}</strong></span></label>`).join('')}
+        </div>
       </div>
     </article>`;
   }).join(''):`<div class="potential-empty"><strong>No potential clients yet</strong><p>Create a preview login when someone is discussing services with Nicole but has not agreed a package yet.</p></div>`;
   potentialList.querySelectorAll('[data-upgrade-potential]').forEach(btn=>btn.addEventListener('click',()=>upgradePotentialClient(btn.dataset.upgradePotential)));
   potentialList.querySelectorAll('[data-delete-potential]').forEach(btn=>btn.addEventListener('click',()=>deletePotentialClient(btn.dataset.deletePotential)));
+  potentialList.querySelectorAll('[data-potential-step]').forEach(input=>input.addEventListener('change',()=>updatePotentialStep(input)));
+  potentialList.querySelectorAll('[data-potential-communication]').forEach(details=>details.addEventListener('toggle',()=>{if(details.open)loadPotentialCommunication(details.dataset.potentialCommunication);}));
+  potentialList.querySelectorAll('[data-potential-send-message]').forEach(btn=>btn.addEventListener('click',()=>sendPotentialPortalMessage(btn.dataset.potentialSendMessage)));
+}
+
+async function loadPotentialCommunication(clientId){
+  const host=potentialList?.querySelector(`[data-potential-activity-list="${CSS.escape(clientId)}"]`);
+  if(!host)return;
+  host.innerHTML='<p class="portal-muted">Loading communication…</p>';
+  const [notesRes,docsRes]=await Promise.all([
+    sb.from('client_notes').select('id,note,service_name,created_at,admin_seen_at').eq('client_id',clientId).order('created_at',{ascending:false}).limit(20),
+    sb.from('document_submissions').select('id,file_name,file_count,service_name,client_note,sent_at,admin_seen_at').eq('client_id',clientId).order('sent_at',{ascending:false}).limit(20)
+  ]);
+  const rows=[];
+  (notesRes.data||[]).forEach(x=>rows.push({kind:'note',id:x.id,at:x.created_at,title:'Message from potential client',detail:x.note,seen:!!x.admin_seen_at}));
+  (docsRes.data||[]).forEach(x=>rows.push({kind:'document',id:x.id,at:x.sent_at,title:'Documents received',detail:`${x.file_name||`${x.file_count||1} file(s)`}${x.client_note?` · ${x.client_note}`:''}`,seen:!!x.admin_seen_at}));
+  rows.sort((a,b)=>new Date(b.at)-new Date(a.at));
+  host.innerHTML=rows.length?rows.map(x=>`<article class="potential-activity-row ${x.seen?'':'unread'}"><span class="potential-activity-icon">${x.kind==='document'?'↥':'✎'}</span><span><strong>${esc(x.title)}</strong><small>${esc(x.detail||'')}</small><time>${formatStamp(x.at)}</time></span>${x.seen?'':`<button type="button" data-potential-mark-read="${escAttr(x.id)}" data-kind="${x.kind}">Mark read</button>`}</article>`).join(''):'<p class="portal-muted">No messages or documents received yet.</p>';
+  host.querySelectorAll('[data-potential-mark-read]').forEach(btn=>btn.addEventListener('click',async()=>{
+    const table=btn.dataset.kind==='document'?'document_submissions':'client_notes';
+    btn.disabled=true;
+    const {error}=await sb.from(table).update({admin_seen_at:new Date().toISOString()}).eq('id',btn.dataset.potentialMarkRead);
+    if(error)return showAdminToast('Couldn’t mark as read',error.message,true);
+    await loadClients();
+    const reopened=potentialList?.querySelector(`[data-potential-communication="${CSS.escape(clientId)}"]`); if(reopened){reopened.open=true;await loadPotentialCommunication(clientId);}
+  }));
+}
+
+async function sendPotentialPortalMessage(clientId){
+  const field=potentialList?.querySelector(`[data-potential-message-text="${CSS.escape(clientId)}"]`);
+  const body=field?.value.trim();
+  if(!body)return showAdminToast('Write a message first','Enter the message you want the prospect to see.',true);
+  const {error}=await sb.from('messages').insert({client_id:clientId,sender_id:currentAdminId,message:body});
+  if(error)return showAdminToast('Couldn’t send portal message',error.message,true);
+  field.value='';
+  showAdminToast('Message sent','It will appear in the potential client’s portal.');
+  await logAudit(clientId,'potential_message_sent','Portal message sent to potential client',{message:body.slice(0,250)});
+}
+
+async function updatePotentialStep(input){
+  const clientId=input.dataset.potentialId;
+  const key=input.dataset.potentialStep;
+  const c=potentialClients.find(x=>x.id===clientId);
+  if(!c||!POTENTIAL_STEPS.some(([step])=>step===key))return;
+  const previous=potentialChecklistValue(c);
+  const next={...previous,[key]:!!input.checked};
+  input.disabled=true;
+  const {error}=await sb.from('profiles').update({potential_checklist:next}).eq('id',clientId);
+  input.disabled=false;
+  if(error){
+    input.checked=!!previous[key];
+    return showAdminToast('Couldn’t update prospect journey',error.message,true);
+  }
+  c.potential_checklist=next;
+  renderPotentialClients();
+  const progress=potentialProgress(c);
+  showAdminToast('Prospect journey updated',progress.percent===100?`${c.full_name||'Potential client'} is ready to move into onboarding.`:`Progress is now ${progress.percent}%.`);
+  if(progress.percent===100){
+    const upgradeBtn=potentialList?.querySelector(`[data-upgrade-potential="${CSS.escape(clientId)}"]`);
+    upgradeBtn?.classList.add('attention-pulse');
+  }
 }
 
 async function createPotentialClient(e){
@@ -1665,44 +1776,16 @@ async function createPotentialClient(e){
   };
   if(!payload.name||!payload.email)return;
   btn.disabled=true;btn.textContent='Creating & emailing…';
-
-  let data=null,error=null;
-  try{
-    ({data,error}=await sb.functions.invoke('create-potential-client',{body:payload}));
-  }catch(err){
-    error=err;
-  }
-
-  let detailedError=data?.error||'';
-  if(error?.context){
-    try{
-      const response=error.context.clone?error.context.clone():error.context;
-      const body=await response.json();
-      detailedError=body?.error||body?.message||body?.detail||detailedError;
-      if(body?.detail && body.detail!==detailedError){
-        const extra=typeof body.detail==='string'?body.detail:JSON.stringify(body.detail);
-        detailedError=`${detailedError} — ${extra}`;
-      }
-    }catch(_){
-      try{
-        const response=error.context.clone?error.context.clone():error.context;
-        const text=await response.text();
-        if(text)detailedError=text;
-      }catch(__){}
-    }
-  }
-  const failed=!!(error||data?.error);
-  const errorText=detailedError||error?.message||'Could not create the potential client.';
-  show(potentialMessage,failed?errorText:'Preview login created and welcome email sent ✓',!failed);
+  const {data,error}=await sb.functions.invoke('create-potential-client',{body:payload});
+  const failed=error||data?.error;
+  show(potentialMessage,failed?(data?.error||error?.message||'Could not create the potential client.'):'Preview login created and welcome email sent ✓',!failed);
   btn.disabled=false;btn.textContent='Create preview login & send email';
-  if(failed){
-    showAdminToast('Potential client not created',errorText,true);
-    return;
+  if(!failed){
+    e.currentTarget.reset();
+    showAdminToast('Potential client created',`${payload.name} has been emailed their preview login.`);
+    await loadClients();
+    window.setTimeout(()=>potentialForm?.classList.add('hidden'),900);
   }
-  e.currentTarget.reset();
-  showAdminToast('Potential client created',`${payload.name} has been emailed their preview login.`);
-  await loadClients();
-  window.setTimeout(()=>potentialForm?.classList.add('hidden'),900);
 }
 
 async function upgradePotentialClient(clientId){
