@@ -1194,7 +1194,7 @@ async function loadClients() {
     return;
   }
 
-  const profileResult = await sb.from('profiles').select('id,full_name,business_name,login_email,email,role,client_status,last_login_at,attention_status,attention_note,attention_updated_at,portal_tier,potential_discussion,created_at,converted_at').eq('role', 'client');
+  const profileResult = await sb.from('profiles').select('id,full_name,business_name,login_email,role,client_status,last_login_at,attention_status,attention_note,attention_updated_at,portal_tier,potential_discussion,created_at,converted_at').eq('role', 'client');
   if(profileResult.error){
     clientList.innerHTML=`<p class="portal-error">Could not load client flags. Run the supplied Supabase update first: ${esc(profileResult.error.message)}</p>`;
     return;
@@ -1635,7 +1635,7 @@ function renderPotentialClients(){
   const rows=[...potentialClients].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
   if(potentialCount) potentialCount.textContent=`${rows.length} potential`;
   potentialList.innerHTML=rows.length?rows.map(c=>{
-    const email=c.login_email||c.email||'';
+    const email=c.login_email||'';
     return `<article class="potential-client-row">
       <div class="potential-avatar">${esc(initials(c.full_name||'P'))}</div>
       <div class="potential-client-copy">
