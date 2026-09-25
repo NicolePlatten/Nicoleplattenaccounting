@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <link rel="icon" href="assets/logo.png">
-  <link rel="stylesheet" href="portal.css?v=16">
+  <link rel="stylesheet" href="portal.css?v=20">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <title>Admin Portal | Nicole Platten Accounting</title>
@@ -126,6 +126,14 @@
       <div id="todayItems" class="today-items"></div>
     </section>
 
+    <section class="dashboard-shortcuts" aria-label="Dashboard shortcuts">
+      <button type="button" data-shortcut="todayPanel"><span>◎</span><strong>Nicole Today</strong><small>What needs action now</small></button>
+      <button type="button" data-shortcut="clientDirectory"><span>◌</span><strong>Clients</strong><small>Open the client directory</small></button>
+      <button type="button" data-shortcut="calendarSection"><span>□</span><strong>Calendar</strong><small>Deadlines & recurring work</small></button>
+      <button type="button" data-shortcut="notificationSection"><span>✦</span><strong>Activity</strong><small>Unread notes & uploads</small></button>
+      <button type="button" id="shortcutAddClient"><span>＋</span><strong>Add client</strong><small>Create a new portal login</small></button>
+    </section>
+
     <section id="notificationSection" class="notification-centre compact-centre">
       <div class="notification-centre-head">
         <div>
@@ -207,15 +215,30 @@
         <button id="newClientBtn" class="portal-btn">+ Add client</button>
         <button id="exportClientsBtn" class="portal-btn secondary" type="button">Export CSV</button>
       </div>
-      <label class="sr-only" for="clientStatusFilter">Filter client status</label>
-      <select id="clientStatusFilter" class="client-status-filter">
-        <option value="current">Current clients</option>
-        <option value="active">Active</option>
-        <option value="onboarding">Onboarding</option>
-        <option value="paused">Paused</option>
-        <option value="former">Former clients</option>
-        <option value="all">All clients</option>
-      </select>
+      <div class="client-directory-toolbar">
+        <label class="sr-only" for="clientStatusFilter">Filter client status</label>
+        <select id="clientStatusFilter" class="client-status-filter">
+          <option value="current">Current clients</option>
+          <option value="active">Active</option>
+          <option value="onboarding">Onboarding</option>
+          <option value="paused">Paused</option>
+          <option value="former">Former clients</option>
+          <option value="all">All clients</option>
+        </select>
+        <label class="sr-only" for="clientSort">Sort clients</label>
+        <select id="clientSort" class="client-status-filter">
+          <option value="attention">Priority first</option>
+          <option value="name">Name A–Z</option>
+          <option value="deadline">Next deadline</option>
+          <option value="login">Most recent login</option>
+        </select>
+      </div>
+      <div class="client-quick-filters" aria-label="Quick client filters">
+        <button type="button" class="active" data-client-quick="all">All</button>
+        <button type="button" data-client-quick="attention">Needs attention</button>
+        <button type="button" data-client-quick="unread">Unread</button>
+        <button type="button" data-client-quick="onboarding">Onboarding</button>
+      </div>
       <div id="clientList" class="client-list"></div>
     </aside>
     <section class="portal-card pad">
@@ -224,6 +247,31 @@
         <p class="portal-muted">Manage one-off and recurring work, tick individual stages and add permanent notes clients can see.</p>
       </div>
       <div id="clientWorkspace" class="hidden">
+        <section class="client-overview-header">
+          <div class="client-overview-main">
+            <div class="client-avatar-large" id="clientAvatarLarge">C</div>
+            <div><span class="portal-kicker">Client overview</span><h2 id="clientOverviewName">Client</h2><p id="clientOverviewBusiness">—</p></div>
+          </div>
+          <div class="client-overview-stats">
+            <div><span>Status</span><strong id="clientOverviewStatus">Active</strong></div>
+            <div><span>Active work</span><strong id="clientOverviewWork">0</strong></div>
+            <div><span>Next deadline</span><strong id="clientOverviewDue">None</strong></div>
+            <div><span>Last login</span><strong id="clientOverviewLogin">Never</strong></div>
+          </div>
+          <div class="attention-control-card">
+            <div><span class="portal-kicker">Needs attention</span><strong id="attentionSummary">No flag set</strong></div>
+            <div class="attention-control-fields">
+              <select id="attentionStatus" aria-label="Attention status">
+                <option value="none">No action needed</option>
+                <option value="nicole">Nicole to action</option>
+                <option value="client">Waiting for client</option>
+                <option value="urgent">Urgent</option>
+              </select>
+              <input id="attentionNote" maxlength="180" placeholder="Optional note, e.g. Chase bank statements">
+              <button id="saveAttentionBtn" class="portal-btn secondary" type="button">Save flag</button>
+            </div>
+          </div>
+        </section>
         <div class="workspace-head">
           <div><span class="portal-kicker">Client</span><h1 id="clientHeading">Client</h1><p id="clientSub" class="portal-muted"></p></div>
           <div class="workspace-actions">
@@ -313,7 +361,7 @@
           <div class="activity-heading">
             <div>
               <span class="portal-kicker">Client activity</span>
-              <h2>Notes & uploads from this client</h2>
+              <h2>Client messages & uploads</h2>
             </div>
             <span id="clientUnreadPill" class="status-pill hidden">New activity</span>
           </div>
@@ -369,32 +417,38 @@
           <button id="deleteWorkBtn" class="portal-btn secondary" type="button">Mark work complete / archive</button>
         </form>
 
-        <details class="audit-panel subpanel">
+        <details class="audit-panel subpanel" open>
           <summary>
-            <span><span class="portal-kicker">History</span><strong>Audit trail</strong><small>Important actions recorded against this client</small></span>
+            <span><span class="portal-kicker">History</span><strong>Client timeline</strong><small>Work, reminders, uploads and important account activity in date order</small></span>
             <span class="dropdown-chevron">⌄</span>
           </summary>
           <div class="audit-panel-body">
-            <div id="clientAuditLog"><p class="portal-muted">No audit events yet.</p></div>
+            <div class="timeline-filter-row">
+              <button type="button" class="timeline-filter active" data-timeline-filter="all">Everything</button>
+              <button type="button" class="timeline-filter" data-timeline-filter="work">Work</button>
+              <button type="button" class="timeline-filter" data-timeline-filter="client">Client activity</button>
+              <button type="button" class="timeline-filter" data-timeline-filter="schedule">Reminders</button>
+            </div>
+            <div id="clientAuditLog"><p class="portal-muted">No timeline events yet.</p></div>
           </div>
         </details>
 
         <details class="communication-dropdown subpanel">
           <summary>
-            <span><span class="portal-kicker">Communication</span><strong>Messages & documents</strong><small>Send portal updates or email documents to this client</small></span>
+            <span><span class="portal-kicker">Communication</span><strong>Messages & documents</strong><small>Everything you send to this client, organised in one place</small></span>
             <span class="dropdown-chevron">⌄</span>
           </summary>
-          <div class="communication-dropdown-body">
-            <div class="communication-section">
+          <div class="communication-dropdown-body communication-grid">
+            <div class="communication-section communication-card portal-message-card">
+              <span class="communication-icon">💬</span>
               <h3>Portal message</h3>
               <p class="portal-muted compact-copy">A simple update that appears when the client logs in.</p>
               <textarea id="newMessage" placeholder="Write an update the client will see…"></textarea>
               <button id="sendMessageBtn" class="portal-btn secondary" type="button">Add portal message</button>
             </div>
 
-            <div class="communication-divider"></div>
-
-            <div class="communication-section">
+            <div class="communication-section communication-card email-document-card">
+              <span class="communication-icon">↗</span>
               <h3>Email client / send documents</h3>
               <p class="portal-muted compact-copy">Send an email directly to the client's login email. If they press Reply in Outlook, Gmail or Apple Mail, their reply will automatically appear here in the portal too.</p>
               <label for="clientEmailSubject">Subject</label>
@@ -408,9 +462,8 @@
               <button id="sendClientEmailBtn" class="portal-btn" type="button">Send email / documents</button>
             </div>
 
-            <div class="communication-divider"></div>
-
-            <div class="communication-section">
+            <div class="communication-section communication-card replies-card">
+              <span class="communication-icon">↙</span>
               <div class="email-reply-heading">
                 <div>
                   <h3>Email replies</h3>
@@ -453,7 +506,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="portal-config.js"></script>
-<script src="admin.js?v=16"></script>
+<script src="admin.js?v=24"></script>
 
   <div id="activityDrawer" class="activity-drawer hidden" aria-hidden="true">
     <div class="activity-drawer-backdrop" data-close-activity></div>

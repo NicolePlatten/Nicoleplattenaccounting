@@ -558,19 +558,14 @@ async function loadClientEmailReplies(clientId){
     </article>
   `).join('') : '<p class="portal-muted">No email replies yet.</p>';
 
-  if(unread){
-    await sb.from('client_email_replies')
-      .update({admin_seen_at:new Date().toISOString()})
-      .eq('client_id',clientId)
-      .is('admin_seen_at',null);
-    emailReplyCount?.classList.add('hidden');
-  }
+  // Replies stay unread until Nicole deliberately marks them as dealt with,
+  // matching the behaviour of notes and document uploads.
 }
 
 
 async function loadAllSchedules(){
   const {data,error}=await sb.from('client_schedules')
-    .select('id,client_id,title,client_label,service_type,cadence,next_due_date,remind_14_days,remind_7_days,is_active,profiles!client_schedules_client_id_fkey(full_name)')
+    .select('id,client_id,title,client_label,service_type,cadence,next_due_date,remind_14_days,remind_7_days,reminder_14_sent_for,reminder_7_sent_for,reminder_last_checked_at,reminder_last_error,auto_create_work,is_active,profiles!client_schedules_client_id_fkey(full_name)')
     .eq('is_active',true)
     .order('next_due_date',{ascending:true});
 
@@ -579,6 +574,8 @@ async function loadAllSchedules(){
   updateScheduleStats();
   renderCalendar();
   updateServiceSummary();
+  renderClientList();
+  renderTodayPanel();
 }
 
 function updateScheduleStats(){
@@ -1146,3 +1143,256 @@ function escAttr(v='') { return esc(v).replace(/`/g,'&#96;'); }
 // Initial binding for any notes rendered after opening work.
 const noteObserver = new MutationObserver(() => bindDeleteNoteButtons());
 noteObserver.observe(stageChecklist, { childList: true, subtree: true });
+
+/* =========================================================
+   V10 — Practice workflow upgrade
+   ========================================================= */
+let clientQuickFilter='all';
+let clientSortMode='attention';
+let timelineFilter='all';
+
+function attentionLabel(v){return ({none:'No action needed',nicole:'Nicole to action',client:'Waiting for client',urgent:'Urgent'})[v]||'No action needed';}
+function attentionRank(v){return ({urgent:0,nicole:1,client:2,none:3})[v]??3;}
+function clientNextDue(clientId){
+  return allSchedules.filter(s=>s.client_id===clientId&&s.is_active!==false).sort((a,b)=>a.next_due_date.localeCompare(b.next_due_date))[0]||null;
+}
+function initials(name='Client'){return name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'C';}
+
+// Bind controls added by V10.
+document.querySelectorAll('[data-shortcut]').forEach(btn=>btn.addEventListener('click',()=>{
+  document.getElementById(btn.dataset.shortcut)?.scrollIntoView({behavior:'smooth',block:'start'});
+}));
+document.getElementById('shortcutAddClient')?.addEventListener('click',showNewClient);
+document.querySelectorAll('[data-client-quick]').forEach(btn=>btn.addEventListener('click',()=>{
+  clientQuickFilter=btn.dataset.clientQuick;
+  document.querySelectorAll('[data-client-quick]').forEach(x=>x.classList.toggle('active',x===btn));
+  renderClientList();
+}));
+document.getElementById('clientSort')?.addEventListener('change',e=>{clientSortMode=e.target.value;renderClientList();});
+document.getElementById('saveAttentionBtn')?.addEventListener('click',saveAttentionFlag);
+document.querySelectorAll('[data-timeline-filter]').forEach(btn=>btn.addEventListener('click',()=>{
+  timelineFilter=btn.dataset.timelineFilter;
+  document.querySelectorAll('[data-timeline-filter]').forEach(x=>x.classList.toggle('active',x===btn));
+  if(currentClientId)loadClientAuditLog(currentClientId);
+}));
+
+async function loadClients() {
+  unreadByClient = {};
+  const [unreadNotesResult, unreadDocsResult, unreadEmailRepliesResult] = await Promise.all([
+    sb.from('client_notes').select('client_id').is('admin_seen_at', null),
+    sb.from('document_submissions').select('client_id').is('admin_seen_at', null),
+    sb.from('client_email_replies').select('client_id').is('admin_seen_at', null)
+  ]);
+  [...(unreadNotesResult.data || []), ...(unreadDocsResult.data || []), ...(unreadEmailRepliesResult.data || [])].forEach(r => {
+    unreadByClient[r.client_id] = (unreadByClient[r.client_id] || 0) + 1;
+  });
+
+  const { data: rows, error } = await sb.from('client_work').select('*').order('updated_at', { ascending: false });
+  if (error) {
+    clientList.innerHTML = `<p class="portal-error">Could not load clients: ${esc(error.message)}</p>`;
+    return;
+  }
+
+  const profileResult = await sb.from('profiles').select('id,full_name,business_name,role,client_status,last_login_at,attention_status,attention_note,attention_updated_at').eq('role', 'client');
+  if(profileResult.error){
+    clientList.innerHTML=`<p class="portal-error">Could not load client flags. Run the supplied Supabase update first: ${esc(profileResult.error.message)}</p>`;
+    return;
+  }
+  const profiles = profileResult.data || [];
+  const map = Object.fromEntries(profiles.map(p => [p.id, { ...p, works: [] }]));
+  (rows || []).forEach(r => {
+    if (!map[r.client_id]) map[r.client_id] = { id: r.client_id, full_name: 'Client', attention_status:'none', works: [] };
+    map[r.client_id].works.push(r);
+  });
+
+  clientGroups = Object.values(map).sort((a,b) => (a.full_name || '').localeCompare(b.full_name || ''));
+  renderClientList();
+  await refreshDashboardOverview();
+  if (currentClientId && clientGroups.some(c => c.id === currentClientId)) openClient(currentClientId, false);
+}
+
+function renderClientList(){
+  let filtered=clientGroups.filter(c=>{
+    const status=c.client_status||'active';
+    const statusOk=clientStatusFilterValue==='all' || (clientStatusFilterValue==='current' && status!=='former') || status===clientStatusFilterValue;
+    if(!statusOk)return false;
+    const attention=c.attention_status||'none';
+    if(clientQuickFilter==='attention' && attention==='none')return false;
+    if(clientQuickFilter==='unread' && !(unreadByClient[c.id]>0))return false;
+    if(clientQuickFilter==='onboarding' && status!=='onboarding')return false;
+    if(globalSearchTerm){
+      const hay=[c.full_name,c.business_name,status,attention,c.attention_note,...(c.works||[]).flatMap(w=>[w.service_name,w.period_label,w.status,w.current_stage])].filter(Boolean).join(' ').toLowerCase();
+      if(!hay.includes(globalSearchTerm))return false;
+    }
+    return true;
+  });
+  filtered=[...filtered].sort((a,b)=>{
+    if(clientSortMode==='name')return (a.full_name||'').localeCompare(b.full_name||'');
+    if(clientSortMode==='deadline')return (clientNextDue(a.id)?.next_due_date||'9999').localeCompare(clientNextDue(b.id)?.next_due_date||'9999');
+    if(clientSortMode==='login')return new Date(b.last_login_at||0)-new Date(a.last_login_at||0);
+    const ar=attentionRank(a.attention_status||'none'), br=attentionRank(b.attention_status||'none');
+    if(ar!==br)return ar-br;
+    const au=unreadByClient[a.id]||0, bu=unreadByClient[b.id]||0;
+    if(au!==bu)return bu-au;
+    return (a.full_name||'').localeCompare(b.full_name||'');
+  });
+  clientList.innerHTML=filtered.length?filtered.map(c=>{
+    const active=c.works.filter(w=>w.is_active!==false).length;
+    const unread=unreadByClient[c.id]||0;
+    const status=c.client_status||'active';
+    const attention=c.attention_status||'none';
+    const due=clientNextDue(c.id);
+    return `<button class="client-item ${attention!=='none'?'has-attention attention-'+attention:''}" data-id="${c.id}">
+      <span class="client-item-row"><strong>${esc(c.full_name||'Client')}</strong><span class="client-row-badges">${attention!=='none'?`<span class="attention-mini ${attention}">${esc(attentionLabel(attention))}</span>`:''}${unread?`<span class="activity-badge">${unread}</span>`:''}</span></span>
+      ${c.business_name?`<small class="client-business-line">${esc(c.business_name)}</small>`:''}
+      <small><span class="client-status-dot status-${status}"></span>${clientStatusLabel(status)} · ${active} active${due?` · next ${formatShortDate(due.next_due_date)}`:''}</small>
+      <small class="client-last-login">Last login: ${formatLastLogin(c.last_login_at)}</small>
+    </button>`;
+  }).join(''):'<p class="portal-muted">No clients match this view.</p>';
+  clientList.querySelectorAll('button[data-id]').forEach(btn=>btn.onclick=()=>openClient(btn.dataset.id));
+}
+
+function formatShortDate(value){
+  if(!value)return 'None';
+  return new Date(`${value}T12:00:00`).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+
+function openClient(clientId, scroll = true) {
+  const client = clientGroups.find(c => c.id === clientId);
+  if (!client) return;
+  currentClientId = clientId;
+  currentWorkId = null;
+  currentNotes = [];
+
+  document.querySelectorAll('.client-item').forEach(x => x.classList.toggle('active', x.dataset.id === clientId));
+  adminEmpty.classList.add('hidden');
+  newClientForm.classList.add('hidden');
+  revealPanel(clientWorkspace);
+  workEditor.classList.add('hidden');
+  newWorkForm.classList.add('hidden');
+
+  clientHeading.textContent = client.full_name || 'Client';
+  clientSub.textContent = client.business_name || 'Manage ongoing and one-off work';
+  clientStatusSelect.value = client.client_status || 'active';
+  attentionStatus.value=client.attention_status||'none';
+  attentionNote.value=client.attention_note||'';
+  updateClientOverview(client);
+  renderWorkList(client);
+  loadClientActivity(clientId);
+  loadClientEmailReplies(clientId);
+  loadClientSchedules(clientId);
+  loadClientAuditLog(clientId);
+  if (scroll) bringIntoView(clientWorkspace);
+}
+
+function updateClientOverview(client){
+  const active=(client.works||[]).filter(w=>w.is_active!==false).length;
+  const due=clientNextDue(client.id);
+  const attention=client.attention_status||'none';
+  clientAvatarLarge.textContent=initials(client.full_name||'Client');
+  clientOverviewName.textContent=client.full_name||'Client';
+  clientOverviewBusiness.textContent=client.business_name||'Individual client';
+  clientOverviewStatus.textContent=clientStatusLabel(client.client_status||'active');
+  clientOverviewWork.textContent=String(active);
+  clientOverviewDue.textContent=due?`${formatShortDate(due.next_due_date)} · ${dueRelativeText(due.next_due_date)}`:'None scheduled';
+  clientOverviewLogin.textContent=formatLastLogin(client.last_login_at);
+  attentionSummary.textContent=attention==='none'?'No flag set':`${attentionLabel(attention)}${client.attention_note?` · ${client.attention_note}`:''}`;
+  document.querySelector('.client-overview-header')?.setAttribute('data-attention',attention);
+}
+
+async function saveAttentionFlag(){
+  if(!currentClientId)return;
+  const status=attentionStatus.value;
+  const note=attentionNote.value.trim();
+  saveAttentionBtn.disabled=true;saveAttentionBtn.textContent='Saving…';
+  const patch={attention_status:status,attention_note:note||null,attention_updated_at:new Date().toISOString()};
+  const {error}=await sb.from('profiles').update(patch).eq('id',currentClientId);
+  saveAttentionBtn.disabled=false;saveAttentionBtn.textContent='Save flag';
+  if(error)return showAdminToast('Couldn’t save flag',error.message||'Please try again.',true);
+  const client=clientGroups.find(c=>c.id===currentClientId); if(client)Object.assign(client,patch);
+  await logAudit(currentClientId,'attention_flag',status==='none'?'Needs-attention flag cleared':`${attentionLabel(status)}${note?`: ${note}`:''}`,patch);
+  updateClientOverview(client);renderClientList();renderTodayPanel();
+  showAdminToast('Done — client flag saved',attentionLabel(status));
+  await loadClientAuditLog(currentClientId);
+}
+
+function renderTodayPanel(){
+  if(!window.todayItems)return;
+  const today=dateOnly(new Date()), week=addDays(today,7);
+  const overdue=allSchedules.filter(s=>s.next_due_date<today).sort((a,b)=>a.next_due_date.localeCompare(b.next_due_date));
+  const dueToday=allSchedules.filter(s=>s.next_due_date===today);
+  const manual=clientGroups.filter(c=>(c.attention_status||'none')!=='none').sort((a,b)=>attentionRank(a.attention_status)-attentionRank(b.attention_status));
+  const unread=dashboardActivity.filter(x=>x.unread);
+  const upcoming=allSchedules.filter(s=>s.next_due_date>today&&s.next_due_date<=week).sort((a,b)=>a.next_due_date.localeCompare(b.next_due_date));
+  const total=overdue.length+dueToday.length+manual.length+unread.length;
+  todayHeading.textContent=total?`${total} item${total===1?'':'s'} need attention`:'Nothing urgent right now';
+  todaySub.textContent=total?'Priority items are grouped here so Nicole can work through the day without hunting around the portal.':'You’re clear for now. Upcoming deadlines are shown below.';
+  const rows=[];
+  manual.slice(0,4).forEach(c=>rows.push(`<button class="today-item manual ${escAttr(c.attention_status||'nicole')}" type="button" data-today-client="${c.id}"><span><strong>${esc(attentionLabel(c.attention_status))} · ${esc(c.full_name||'Client')}</strong><small>${esc(c.attention_note||'Client has been flagged for follow-up')}</small></span><b>Open</b></button>`));
+  overdue.slice(0,4).forEach(s=>rows.push(`<button class="today-item overdue" type="button" data-today-client="${s.client_id}"><span><strong>Overdue · ${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${serviceLabel(s.service_type)}</small></span><b>${dueRelativeText(s.next_due_date)}</b></button>`));
+  dueToday.slice(0,4).forEach(s=>rows.push(`<button class="today-item due-today" type="button" data-today-client="${s.client_id}"><span><strong>Due today · ${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${serviceLabel(s.service_type)}</small></span><b>Today</b></button>`));
+  unread.slice(0,4).forEach(x=>{const c=clientGroups.find(v=>v.id===x.client_id);rows.push(`<button class="today-item unread" type="button" data-today-client="${x.client_id}"><span><strong>Unread ${x.kind==='email'?'email reply':x.kind==='document'?'document':'client note'} · ${esc(c?.full_name||'Client')}</strong><small>${esc((x.detail||'').slice(0,120))}</small></span><b>Open</b></button>`)});
+  if(!rows.length&&upcoming.length)upcoming.slice(0,4).forEach(s=>rows.push(`<button class="today-item upcoming" type="button" data-today-client="${s.client_id}"><span><strong>Coming up · ${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${formatFriendlyDate(s.next_due_date)}</small></span><b>${dueRelativeText(s.next_due_date)}</b></button>`));
+  todayItems.innerHTML=rows.length?rows.join(''):'<div class="today-clear">All clear — nothing needs attention today.</div>';
+  todayItems.querySelectorAll('[data-today-client]').forEach(btn=>btn.onclick=()=>openClient(btn.dataset.todayClient));
+  if(window.statNewActivity)statNewActivity.textContent=String(manual.length+unread.length);
+}
+
+function timelineCategoryFromAudit(action=''){
+  const a=String(action).toLowerCase();
+  if(a.includes('schedule')||a.includes('reminder'))return 'schedule';
+  if(a.includes('work')||a.includes('stage')||a.includes('status'))return 'work';
+  return 'admin';
+}
+function timelineIcon(kind){return ({document:'↥',email:'✉',note:'✎',schedule:'◷',work:'✓',admin:'•'})[kind]||'•';}
+
+async function loadClientAuditLog(clientId){
+  if(!window.clientAuditLog)return;
+  const [auditRes,notesRes,docsRes,repliesRes]=await Promise.all([
+    sb.from('practice_audit_log').select('id,actor_name,action_type,summary,created_at').eq('client_id',clientId).order('created_at',{ascending:false}).limit(60),
+    sb.from('client_notes').select('id,note,service_name,created_at').eq('client_id',clientId).order('created_at',{ascending:false}).limit(30),
+    sb.from('document_submissions').select('id,file_name,file_count,service_name,client_note,sent_at').eq('client_id',clientId).order('sent_at',{ascending:false}).limit(30),
+    sb.from('client_email_replies').select('id,subject,body_text,received_at').eq('client_id',clientId).order('received_at',{ascending:false}).limit(30)
+  ]);
+  const events=[];
+  (auditRes.data||[]).forEach(r=>events.push({id:`a-${r.id}`,category:timelineCategoryFromAudit(r.action_type),kind:timelineCategoryFromAudit(r.action_type),title:r.summary,detail:r.actor_name||'Nicole',at:r.created_at}));
+  (notesRes.data||[]).forEach(r=>events.push({id:`n-${r.id}`,category:'client',kind:'note',title:'Client added a note',detail:`${r.service_name?`${r.service_name} · `:''}${r.note||''}`,at:r.created_at}));
+  (docsRes.data||[]).forEach(r=>events.push({id:`d-${r.id}`,category:'client',kind:'document',title:'Client uploaded documents',detail:`${r.file_name||`${r.file_count||1} file(s)`}${r.client_note?` · ${r.client_note}`:''}`,at:r.sent_at}));
+  (repliesRes.data||[]).forEach(r=>events.push({id:`e-${r.id}`,category:'client',kind:'email',title:'Client replied by email',detail:`${r.subject||'Reply'}${r.body_text?` · ${r.body_text.slice(0,180)}`:''}`,at:r.received_at}));
+  let rows=events.sort((a,b)=>new Date(b.at)-new Date(a.at));
+  if(timelineFilter!=='all')rows=rows.filter(x=>x.category===timelineFilter);
+  rows=rows.slice(0,80);
+  const err=auditRes.error||notesRes.error||docsRes.error||repliesRes.error;
+  if(err&&!rows.length){clientAuditLog.innerHTML=`<p class="portal-error">Could not load timeline: ${esc(err.message)}</p>`;return;}
+  clientAuditLog.innerHTML=rows.length?rows.map(r=>`<article class="timeline-row ${escAttr(r.kind)}"><div class="timeline-marker">${timelineIcon(r.kind)}</div><div class="timeline-card"><div class="timeline-card-top"><strong>${esc(r.title||'Activity')}</strong><time>${formatStamp(r.at)}</time></div><p>${esc(r.detail||'')}</p></div></article>`).join(''):'<p class="portal-muted">No timeline events in this view yet.</p>';
+}
+
+async function loadClientSchedules(clientId){
+  if(!window.clientSchedules)return;
+  const {data,error}=await sb.from('client_schedules').select('*').eq('client_id',clientId)
+    .order('is_active',{ascending:false}).order('next_due_date',{ascending:true});
+  if(error){clientSchedules.innerHTML=`<p class="portal-error">Could not load calendar dates: ${esc(error.message)}</p>`;return;}
+  const rows=data||[];
+  const today=dateOnly(new Date());
+  clientSchedules.innerHTML=rows.length?rows.map(s=>{
+    const reminder14=addDays(s.next_due_date,-14), reminder7=addDays(s.next_due_date,-7);
+    const state14=!s.remind_14_days?'off':s.reminder_14_sent_for===s.next_due_date?'sent':reminder14<=today?'due':'pending';
+    const state7=!s.remind_7_days?'off':s.reminder_7_sent_for===s.next_due_date?'sent':reminder7<=today?'due':'pending';
+    return `<article class="client-schedule-row ${s.is_active?'':'inactive'}">
+      <div class="schedule-date-badge"><strong>${new Date(`${s.next_due_date}T12:00:00`).getDate()}</strong><small>${new Date(`${s.next_due_date}T12:00:00`).toLocaleDateString('en-GB',{month:'short'}).toUpperCase()}</small></div>
+      <div class="schedule-row-copy">
+        <strong>${esc(s.title)}</strong>
+        <small>${serviceTypeLabel(s.service_type)} · ${esc(s.client_label)} · ${cadenceLabel(s.cadence)} · ${esc(dueRelativeText(s.next_due_date))}</small>
+        <div class="reminder-status-row">
+          <span class="reminder-state ${state14}">14-day ${state14==='sent'?'sent ✓':state14==='off'?'off':state14==='due'?'due now':formatShortDate(reminder14)}</span>
+          <span class="reminder-state ${state7}">7-day ${state7==='sent'?'sent ✓':state7==='off'?'off':state7==='due'?'due now':formatShortDate(reminder7)}</span>
+          <span class="reminder-state ${s.auto_create_work?'sent':'off'}">Auto work ${s.auto_create_work?'on':'off'}</span>
+        </div>
+        ${s.reminder_last_error?`<small class="reminder-error">Reminder issue: ${esc(s.reminder_last_error)}</small>`:''}
+      </div>
+      <div class="schedule-row-actions">${s.is_active?`<button class="schedule-complete" data-complete-schedule="${s.id}" type="button">✓ Complete</button>`:''}<button class="schedule-delete" data-delete-schedule="${s.id}" type="button">Delete</button></div>
+    </article>`;
+  }).join(''):'<p class="portal-muted">No recurring dates added yet.</p>';
+  clientSchedules.querySelectorAll('[data-complete-schedule]').forEach(btn=>btn.addEventListener('click',()=>completeSchedule(btn.dataset.completeSchedule,rows.find(x=>x.id===btn.dataset.completeSchedule))));
+  clientSchedules.querySelectorAll('[data-delete-schedule]').forEach(btn=>btn.addEventListener('click',()=>deleteSchedule(btn.dataset.deleteSchedule)));
+}
