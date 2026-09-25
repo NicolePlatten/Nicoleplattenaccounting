@@ -1423,3 +1423,16 @@ body.menu-open{overflow:hidden;}
 @media (prefers-reduced-motion:reduce){
   .mobile-trust-ticker-track{animation:none!important;transform:none!important;}
 }
+
+
+/* v4.8 mobile header cache-safe final override */
+@media (max-width:900px){
+  .site-header .header-inner{min-height:78px!important;}
+  .site-header .header-inner > .brand-logo img{width:60px!important;height:60px!important;object-fit:contain!important;}
+  .mobile-trust-ticker{height:31px!important;min-height:31px!important;overflow:hidden!important;}
+  .mobile-trust-ticker-track{display:inline-flex!important;flex-wrap:nowrap!important;width:max-content!important;height:30px!important;gap:10px!important;padding:0!important;white-space:nowrap!important;align-items:center!important;animation:mobileTrustTickerV48 25s linear infinite!important;}
+  .mobile-trust-ticker-track span,.mobile-trust-ticker-track b{display:inline-block!important;flex:0 0 auto!important;white-space:nowrap!important;}
+  .mobile-trust-ticker-track span{font-size:11px!important;text-transform:none!important;letter-spacing:.025em!important;}
+}
+@media (max-width:520px){.site-header .header-inner > .brand-logo img{width:58px!important;height:58px!important;}}
+@keyframes mobileTrustTickerV48{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
