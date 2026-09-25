@@ -1320,3 +1320,106 @@ body.menu-open{overflow:hidden;}
 .portal-proof-line span{display:inline-flex;align-items:center;gap:7px;color:#6e6258;font-size:.74rem;font-weight:600}
 .portal-proof-line span::before{content:"";width:6px;height:6px;border-radius:50%;background:#a17b61}
 @media(max-width:600px){.portal-usp-badge{font-size:.66rem}.portal-proof-line{gap:7px 14px}.portal-proof-line span{font-size:.7rem}}
+
+/* ============================================================
+   v4.7 — centred mobile logo + premium rolling trust ticker
+   Desktop layout intentionally unchanged.
+   ============================================================ */
+.mobile-trust-ticker{display:none;}
+
+@media (max-width:900px){
+  .site-header .header-inner{
+    position:relative;
+    min-height:72px;
+  }
+  .site-header .header-inner > .brand-logo{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    z-index:2;
+  }
+  .site-header .header-inner > .brand-logo img{
+    width:116px!important;
+    height:54px!important;
+    object-fit:contain!important;
+  }
+  .site-header .header-actions{
+    margin-left:auto;
+    position:relative;
+    z-index:3;
+  }
+  .mobile-trust-ticker{
+    display:block;
+    position:relative;
+    z-index:55;
+    overflow:hidden;
+    width:100%;
+    background:linear-gradient(90deg,#a56f55 0%,#bc8b70 48%,#a56f55 100%);
+    color:#fffaf5;
+    border-top:1px solid rgba(255,255,255,.18);
+    border-bottom:1px solid rgba(92,56,41,.12);
+    box-shadow:0 5px 14px rgba(78,49,35,.08);
+  }
+  .mobile-trust-ticker::before,
+  .mobile-trust-ticker::after{
+    content:"";
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:28px;
+    z-index:2;
+    pointer-events:none;
+  }
+  .mobile-trust-ticker::before{
+    left:0;
+    background:linear-gradient(90deg,#a56f55,rgba(165,111,85,0));
+  }
+  .mobile-trust-ticker::after{
+    right:0;
+    background:linear-gradient(270deg,#a56f55,rgba(165,111,85,0));
+  }
+  .mobile-trust-ticker-track{
+    display:flex;
+    align-items:center;
+    width:max-content;
+    gap:.8rem;
+    padding:.52rem 0;
+    white-space:nowrap;
+    animation:mobileTrustTicker 27s linear infinite;
+    will-change:transform;
+  }
+  .mobile-trust-ticker-track span{
+    font-size:.68rem;
+    font-weight:600;
+    letter-spacing:.075em;
+    text-transform:uppercase;
+  }
+  .mobile-trust-ticker-track b{
+    font-size:.55rem;
+    font-weight:400;
+    opacity:.62;
+  }
+}
+
+@media (max-width:520px){
+  .site-header .header-inner{min-height:68px!important;}
+  .site-header .header-inner > .brand-logo img{
+    width:118px!important;
+    height:55px!important;
+  }
+  .mobile-trust-ticker-track{
+    gap:.7rem;
+    padding:.49rem 0;
+  }
+  .mobile-trust-ticker-track span{font-size:.64rem;}
+}
+
+@keyframes mobileTrustTicker{
+  from{transform:translateX(0)}
+  to{transform:translateX(-50%)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .mobile-trust-ticker-track{animation:none!important;transform:none!important;}
+}
