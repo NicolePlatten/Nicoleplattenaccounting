@@ -1665,16 +1665,44 @@ async function createPotentialClient(e){
   };
   if(!payload.name||!payload.email)return;
   btn.disabled=true;btn.textContent='Creating & emailing…';
-  const {data,error}=await sb.functions.invoke('create-potential-client',{body:payload});
-  const failed=error||data?.error;
-  show(potentialMessage,failed?(data?.error||error?.message||'Could not create the potential client.'):'Preview login created and welcome email sent ✓',!failed);
-  btn.disabled=false;btn.textContent='Create preview login & send email';
-  if(!failed){
-    e.currentTarget.reset();
-    showAdminToast('Potential client created',`${payload.name} has been emailed their preview login.`);
-    await loadClients();
-    window.setTimeout(()=>potentialForm?.classList.add('hidden'),900);
+
+  let data=null,error=null;
+  try{
+    ({data,error}=await sb.functions.invoke('create-potential-client',{body:payload}));
+  }catch(err){
+    error=err;
   }
+
+  let detailedError=data?.error||'';
+  if(error?.context){
+    try{
+      const response=error.context.clone?error.context.clone():error.context;
+      const body=await response.json();
+      detailedError=body?.error||body?.message||body?.detail||detailedError;
+      if(body?.detail && body.detail!==detailedError){
+        const extra=typeof body.detail==='string'?body.detail:JSON.stringify(body.detail);
+        detailedError=`${detailedError} — ${extra}`;
+      }
+    }catch(_){
+      try{
+        const response=error.context.clone?error.context.clone():error.context;
+        const text=await response.text();
+        if(text)detailedError=text;
+      }catch(__){}
+    }
+  }
+  const failed=!!(error||data?.error);
+  const errorText=detailedError||error?.message||'Could not create the potential client.';
+  show(potentialMessage,failed?errorText:'Preview login created and welcome email sent ✓',!failed);
+  btn.disabled=false;btn.textContent='Create preview login & send email';
+  if(failed){
+    showAdminToast('Potential client not created',errorText,true);
+    return;
+  }
+  e.currentTarget.reset();
+  showAdminToast('Potential client created',`${payload.name} has been emailed their preview login.`);
+  await loadClients();
+  window.setTimeout(()=>potentialForm?.classList.add('hidden'),900);
 }
 
 async function upgradePotentialClient(clientId){
