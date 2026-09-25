@@ -154,6 +154,7 @@ async function loadPortal(user){
   welcomeName.textContent=`Welcome, ${profile?.full_name||'there'}`;
 
   await loadClientNextDue(user.id);
+  await loadClientActions(user.id);
 
   const {data:works,error}=await sb.from('client_work').select('*').eq('client_id',user.id).order('updated_at',{ascending:false});
   if(error){activeWork.innerHTML='<p class="portal-error">We could not load your work right now.</p>';return;}
@@ -380,11 +381,31 @@ async function sendDocuments(e,profile,clientId){
     : 'Documents sent securely to Nicole ✓',!(error||data?.error));
 
   if(!(error||data?.error)){
+    const requestId=document.getElementById('documentRequest')?.value||'';
+    if(requestId){await sb.from('client_document_requests').update({status:'received',received_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',requestId).eq('client_id',clientId);}
     document.getElementById('documentForm').reset();
-    await loadDocumentHistory(clientId);
+    await Promise.all([loadDocumentHistory(clientId),loadClientActions(clientId)]);
   }
   btn.disabled=false; btn.textContent='Email documents to Nicole';
 }
 function formatStamp(value){try{return new Date(value).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})}catch{return''}}
 function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function escAttr(v=''){return esc(v).replace(/`/g,'&#96;')}
+
+
+/* V11 — client action centre */
+async function loadClientActions(clientId){
+  const list=document.getElementById('clientActionsList'); if(!list)return;
+  const [requestsRes,onboardingRes,workRes]=await Promise.all([
+    sb.from('client_document_requests').select('id,title,note,due_date,status').eq('client_id',clientId).eq('status','requested').order('due_date',{ascending:true,nullsFirst:false}),
+    sb.from('client_onboarding_items').select('id,title,completed,client_action_required').eq('client_id',clientId).eq('completed',false).eq('client_action_required',true).order('position',{ascending:true}),
+    sb.from('client_work').select('id,service_name,period_label,current_stage,next_action,next_action_detail,is_active').eq('client_id',clientId).eq('is_active',true)
+  ]);
+  const today=localDateOnly(new Date()); const actions=[];
+  (requestsRes.data||[]).forEach(r=>actions.push({kind:'document',title:`Upload ${r.title}`,detail:r.note||'Nicole is waiting for this document.',due:r.due_date,overdue:!!r.due_date&&r.due_date<today,requestId:r.id}));
+  (onboardingRes.data||[]).forEach(r=>actions.push({kind:'onboarding',title:r.title,detail:'Needed to complete your onboarding.'}));
+  (workRes.data||[]).forEach(w=>{const action=(w.next_action||'').trim(); const stage=(w.current_stage||'').toLowerCase(); if(action&&action.toLowerCase()!=='nothing needed right now')actions.push({kind:'work',title:action,detail:w.next_action_detail||`${w.service_name||'Accounting work'}${w.period_label?` · ${w.period_label}`:''}`}); else if(stage.includes('approval from client'))actions.push({kind:'approval',title:`Approve ${w.service_name||'your accounting work'}`,detail:w.period_label||'Nicole is waiting for your approval.'});});
+  const title=document.getElementById('clientActionsTitle'),sub=document.getElementById('clientActionsSub'),count=document.getElementById('clientActionsCount'); if(count)count.textContent=String(actions.length); if(title)title.textContent=actions.length?`${actions.length} action${actions.length===1?'':'s'} needed`:'You’re all caught up'; if(sub)sub.textContent=actions.length?'Complete these items to keep your work moving.':'Anything Nicole needs from you will appear here.';
+  list.innerHTML=actions.length?actions.map(a=>`<article class="client-action-row ${a.overdue?'overdue':''} ${a.requestId?'clickable':''}" ${a.requestId?`data-client-request="${escAttr(a.requestId)}" role="button" tabindex="0"`:''}><span class="action-icon">${a.kind==='document'?'↥':a.kind==='approval'?'✓':a.kind==='onboarding'?'○':'→'}</span><span><strong>${esc(a.title)}</strong><small>${esc(a.detail||'')}${a.due?` · Due ${new Date(`${a.due}T12:00:00`).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}`:''}</small></span><b>${a.overdue?'Overdue':a.kind==='document'?'Upload':'Action'}</b></article>`).join(''):'<div class="today-clear">No actions needed right now.</div>'; list.querySelectorAll('[data-client-request]').forEach(row=>{const go=()=>{const sel=document.getElementById('documentRequest');if(sel)sel.value=row.dataset.clientRequest;document.getElementById('documentForm')?.scrollIntoView({behavior:'smooth',block:'start'});};row.addEventListener('click',go);row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});
+  const select=document.getElementById('documentRequest'); if(select){select.innerHTML='<option value="">No — general document upload</option>'+(requestsRes.data||[]).map(r=>`<option value="${escAttr(r.id)}">${esc(r.title)}</option>`).join('');}
+}

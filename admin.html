@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <link rel="icon" href="assets/logo.png">
-  <link rel="stylesheet" href="portal.css?v=20">
+  <link rel="stylesheet" href="portal.css?v=25">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <title>Admin Portal | Nicole Platten Accounting</title>
@@ -54,7 +54,7 @@
 
       <div class="admin-global-search">
         <label class="sr-only" for="globalClientSearch">Search clients or services</label>
-        <input id="globalClientSearch" type="search" placeholder="Search clients or services…" autocomplete="off">
+        <input id="globalClientSearch" type="search" placeholder="Search clients, work, notes or documents…" autocomplete="off">
       </div>
 
       <div class="admin-header-actions">
@@ -91,27 +91,13 @@
         <p>Here’s what’s happening across your clients today.</p>
       </div>
 
-      <div class="admin-overview">
-        <div class="overview-stat">
-          <span class="overview-label">Clients</span>
-          <strong id="statClients">0</strong>
-          <small>Total client accounts</small>
-        </div>
-        <div class="overview-stat">
-          <span class="overview-label">Active work</span>
-          <strong id="statActiveWork">0</strong>
-          <small>Open pieces of work</small>
-        </div>
-        <div class="overview-stat attention">
-          <span class="overview-label">Needs attention</span>
-          <strong id="statNewActivity">0</strong>
-          <small>Unread client updates</small>
-        </div>
-      <div class="overview-stat upcoming-stat">
-          <span class="overview-label">Upcoming</span>
-          <strong id="statUpcoming">0</strong>
-          <small>Due in the next 7 days</small>
-        </div>
+      <div class="admin-overview v11-overview">
+        <div class="overview-stat"><span class="overview-label">Active clients</span><strong id="statClients">0</strong><small>Current active accounts</small></div>
+        <div class="overview-stat"><span class="overview-label">Jobs in progress</span><strong id="statActiveWork">0</strong><small>Open work items</small></div>
+        <div class="overview-stat"><span class="overview-label">Waiting for clients</span><strong id="statWaitingClients">0</strong><small>Information or action due</small></div>
+        <div class="overview-stat attention"><span class="overview-label">Overdue</span><strong id="statOverdue">0</strong><small>Deadlines already passed</small></div>
+        <div class="overview-stat upcoming-stat"><span class="overview-label">Due this week</span><strong id="statUpcoming">0</strong><small>Next 7 days</small></div>
+        <div class="overview-stat"><span class="overview-label">Unread activity</span><strong id="statNewActivity">0</strong><small>Client updates to review</small></div>
       </div>
     </section>
 
@@ -123,15 +109,15 @@
           <p id="todaySub" class="portal-muted">Your deadlines and unread client activity will appear here.</p>
         </div>
       </div>
-      <div id="todayItems" class="today-items"></div>
+      <div id="todayItems" class="today-items"></div><div class="today-activity-wrap"><div class="today-activity-head"><span class="portal-kicker">Live client activity</span><strong>What has just happened</strong></div><div id="todayActivityFeed" class="today-activity-feed"><p class="portal-muted">Recent uploads, messages and replies will appear here.</p></div></div>
     </section>
 
     <section class="dashboard-shortcuts" aria-label="Dashboard shortcuts">
-      <button type="button" data-shortcut="todayPanel"><span>◎</span><strong>Nicole Today</strong><small>What needs action now</small></button>
-      <button type="button" data-shortcut="clientDirectory"><span>◌</span><strong>Clients</strong><small>Open the client directory</small></button>
-      <button type="button" data-shortcut="calendarSection"><span>□</span><strong>Calendar</strong><small>Deadlines & recurring work</small></button>
-      <button type="button" data-shortcut="notificationSection"><span>✦</span><strong>Activity</strong><small>Unread notes & uploads</small></button>
-      <button type="button" id="shortcutAddClient"><span>＋</span><strong>Add client</strong><small>Create a new portal login</small></button>
+      <button type="button" data-shortcut="todayPanel"><span class="shortcut-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span><strong>Nicole Today</strong><small>What needs action now</small></button>
+      <button type="button" data-shortcut="clientDirectory"><span class="shortcut-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c.5-3.2 2.4-5 5.5-5s5 1.8 5.5 5"/><circle cx="17" cy="9" r="2.3"/><path d="M15.5 14.8c2.7-.7 4.5.7 5 3.7"/></svg></span><strong>Clients</strong><small>Open the client directory</small></button>
+      <button type="button" data-shortcut="calendarSection"><span class="shortcut-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span><strong>Deadline Centre</strong><small>Dates, reminders & recurring work</small></button>
+      <button type="button" data-shortcut="notificationSection"><span class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><strong>Activity</strong><small>Unread notes & uploads</small></button>
+      <button type="button" id="shortcutAddClient"><span class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><strong>Add client</strong><small>Create a new portal login</small></button>
     </section>
 
     <section id="notificationSection" class="notification-centre compact-centre">
@@ -157,8 +143,8 @@
     <section id="calendarSection" class="practice-calendar-section">
       <div class="calendar-section-head">
         <div>
-          <span class="portal-kicker">Client calendar</span>
-          <h2>Upcoming work & reminders</h2>
+          <span class="portal-kicker">Deadline centre</span>
+          <h2>Deadlines, reminders & recurring work</h2>
           <p>Monthly, quarterly, annual and one-off client dates in one place.</p>
         </div>
         <div class="calendar-summary-chips">
@@ -206,6 +192,19 @@
           <div id="calendarDayItems"><p class="portal-muted">Click a date to see what is due.</p></div>
         </aside>
       </div>
+      <div class="deadline-centre-list-wrap">
+        <div class="deadline-list-head"><div><span class="portal-kicker">Deadline list</span><h3>Everything due next</h3></div><select id="deadlineRangeFilter"><option value="all">All upcoming</option><option value="overdue">Overdue</option><option value="today">Due today</option><option value="week">Next 7 days</option><option value="month">Next 30 days</option></select></div>
+        <div id="deadlineCentreList" class="deadline-centre-list"><p class="portal-muted">Loading deadlines…</p></div>
+      </div>
+      <div class="work-template-panel">
+        <div class="deadline-list-head"><div><span class="portal-kicker">Recurring work templates</span><h3>Create once, reuse for any client</h3><p>Save common jobs such as Quarterly VAT Return, then apply them to a client in one click.</p></div><button id="toggleTemplateForm" class="portal-btn secondary" type="button">+ New template</button></div>
+        <form id="workTemplateForm" class="template-form hidden">
+          <div class="row2"><div><label>Template name</label><input id="templateName" required placeholder="Quarterly VAT Return"></div><div><label>Service type</label><select id="templateServiceType"><option value="vat">VAT</option><option value="bookkeeping">Bookkeeping</option><option value="payroll">Payroll</option><option value="annual_accounts">Annual Accounts</option><option value="self_assessment">Self Assessment</option><option value="corporation_tax">Corporation Tax</option><option value="quarterly_review">Quarterly Review</option><option value="other">Other</option></select></div></div>
+          <div class="row2"><div><label>Repeat</label><select id="templateCadence"><option value="monthly">Monthly</option><option value="quarterly" selected>Quarterly</option><option value="annual">Annual</option></select></div><div><label>Client wording</label><input id="templateClientLabel" value="Next due date"></div></div>
+          <div class="portal-actions"><button class="portal-btn" type="submit">Save template</button><button id="cancelTemplateForm" class="portal-btn secondary" type="button">Cancel</button></div>
+        </form>
+        <div id="workTemplateList" class="template-list"><p class="portal-muted">No templates yet.</p></div>
+      </div>
     </section>
 
     <div id="clientDirectory" class="admin-layout">
@@ -236,6 +235,8 @@
       <div class="client-quick-filters" aria-label="Quick client filters">
         <button type="button" class="active" data-client-quick="all">All</button>
         <button type="button" data-client-quick="attention">Needs attention</button>
+        <button type="button" data-client-quick="waiting">Waiting on client</button>
+        <button type="button" data-client-quick="overdue">Overdue</button>
         <button type="button" data-client-quick="unread">Unread</button>
         <button type="button" data-client-quick="onboarding">Onboarding</button>
       </div>
@@ -257,6 +258,8 @@
             <div><span>Active work</span><strong id="clientOverviewWork">0</strong></div>
             <div><span>Next deadline</span><strong id="clientOverviewDue">None</strong></div>
             <div><span>Last login</span><strong id="clientOverviewLogin">Never</strong></div>
+            <div><span>Onboarding</span><strong id="clientOverviewOnboarding">—</strong></div>
+            <div><span>Document requests</span><strong id="clientOverviewRequests">0 open</strong></div>
           </div>
           <div class="attention-control-card">
             <div><span class="portal-kicker">Needs attention</span><strong id="attentionSummary">No flag set</strong></div>
@@ -272,6 +275,13 @@
             </div>
           </div>
         </section>
+        <nav class="client-quick-actions" aria-label="Client quick actions">
+          <button type="button" data-client-action="work"><span>＋</span>Add work</button>
+          <button type="button" data-client-action="reminder"><span>◷</span>Add reminder</button>
+          <button type="button" data-client-action="document"><span>↥</span>Request document</button>
+          <button type="button" data-client-action="note"><span>✎</span>Internal note</button>
+          <button type="button" data-client-action="message"><span>✉</span>Send message</button>
+        </nav>
         <div class="workspace-head">
           <div><span class="portal-kicker">Client</span><h1 id="clientHeading">Client</h1><p id="clientSub" class="portal-muted"></p></div>
           <div class="workspace-actions">
@@ -291,6 +301,32 @@
         </div>
         <div id="clientMessage" hidden></div>
         <div id="workList" class="work-list"></div>
+
+        <div class="practice-tools-grid">
+          <section id="onboardingPanel" class="subpanel practice-tool-card">
+            <div class="practice-tool-head"><div><span class="portal-kicker">Onboarding</span><h2>Client checklist</h2><p>See what is complete and what is still outstanding.</p></div><span id="onboardingProgressPill" class="status-pill">0%</span></div>
+            <div id="onboardingChecklist" class="onboarding-checklist"><p class="portal-muted">Loading checklist…</p></div>
+            <form id="onboardingAddForm" class="inline-add-form"><input id="onboardingNewItem" maxlength="140" placeholder="Add a custom onboarding item"><label><input id="onboardingClientAction" type="checkbox"> Client action</label><button class="portal-btn secondary" type="submit">Add</button></form>
+          </section>
+
+          <section id="documentRequestsPanel" class="subpanel practice-tool-card">
+            <div class="practice-tool-head"><div><span class="portal-kicker">Document requests</span><h2>What Nicole is waiting for</h2><p>Request a document and track it through to received.</p></div><span id="documentRequestCount" class="status-pill">0 open</span></div>
+            <form id="documentRequestForm" class="document-request-form">
+              <input id="documentRequestTitle" required maxlength="160" placeholder="e.g. Bank statements">
+              <input id="documentRequestDue" type="date" aria-label="Due date">
+              <textarea id="documentRequestNote" maxlength="500" placeholder="Optional note for the client"></textarea>
+              <button class="portal-btn secondary" type="submit">Request document</button>
+            </form>
+            <div id="documentRequestList" class="document-request-list"><p class="portal-muted">No document requests yet.</p></div>
+          </section>
+        </div>
+
+        <section id="internalNotesPanel" class="subpanel internal-notes-panel">
+          <div class="practice-tool-head"><div><span class="portal-kicker">Private practice notes</span><h2>Internal-only notes</h2><p>Only Nicole can see these. They never appear in the client portal.</p></div></div>
+          <form id="internalNoteForm" class="internal-note-form"><textarea id="internalNoteText" required maxlength="2000" placeholder="e.g. Prefers WhatsApp. Chase again next Friday."></textarea><button class="portal-btn secondary" type="submit">Add private note</button></form>
+          <div id="internalNotesList" class="internal-notes-list"><p class="portal-muted">No private notes yet.</p></div>
+        </section>
+
         <div class="subpanel client-schedule-panel">
           <div class="activity-heading">
             <div>
@@ -428,6 +464,7 @@
               <button type="button" class="timeline-filter" data-timeline-filter="work">Work</button>
               <button type="button" class="timeline-filter" data-timeline-filter="client">Client activity</button>
               <button type="button" class="timeline-filter" data-timeline-filter="schedule">Reminders</button>
+              <button type="button" class="timeline-filter" data-timeline-filter="admin">Practice notes</button>
             </div>
             <div id="clientAuditLog"><p class="portal-muted">No timeline events yet.</p></div>
           </div>
@@ -506,7 +543,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="portal-config.js"></script>
-<script src="admin.js?v=24"></script>
+<script src="admin.js?v=25"></script>
 
   <div id="activityDrawer" class="activity-drawer hidden" aria-hidden="true">
     <div class="activity-drawer-backdrop" data-close-activity></div>

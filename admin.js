@@ -1193,7 +1193,7 @@ async function loadClients() {
     return;
   }
 
-  const profileResult = await sb.from('profiles').select('id,full_name,business_name,role,client_status,last_login_at,attention_status,attention_note,attention_updated_at').eq('role', 'client');
+  const profileResult = await sb.from('profiles').select('id,full_name,business_name,login_email,role,client_status,last_login_at,attention_status,attention_note,attention_updated_at').eq('role', 'client');
   if(profileResult.error){
     clientList.innerHTML=`<p class="portal-error">Could not load client flags. Run the supplied Supabase update first: ${esc(profileResult.error.message)}</p>`;
     return;
@@ -1282,6 +1282,7 @@ function openClient(clientId, scroll = true) {
   loadClientEmailReplies(clientId);
   loadClientSchedules(clientId);
   loadClientAuditLog(clientId);
+  loadClientPracticeTools(clientId);
   if (scroll) bringIntoView(clientWorkspace);
 }
 
@@ -1335,8 +1336,12 @@ function renderTodayPanel(){
   if(!rows.length&&upcoming.length)upcoming.slice(0,4).forEach(s=>rows.push(`<button class="today-item upcoming" type="button" data-today-client="${s.client_id}"><span><strong>Coming up · ${esc(s.profiles?.full_name||'Client')}</strong><small>${esc(s.title)} · ${formatFriendlyDate(s.next_due_date)}</small></span><b>${dueRelativeText(s.next_due_date)}</b></button>`));
   todayItems.innerHTML=rows.length?rows.join(''):'<div class="today-clear">All clear — nothing needs attention today.</div>';
   todayItems.querySelectorAll('[data-today-client]').forEach(btn=>btn.onclick=()=>openClient(btn.dataset.todayClient));
-  if(window.statNewActivity)statNewActivity.textContent=String(manual.length+unread.length);
+  if(window.statNewActivity)statNewActivity.textContent=String(unread.length);
+  renderV11Metrics();
+  renderTodayActivityFeed();
+  renderDeadlineCentreList();
 }
+
 
 function timelineCategoryFromAudit(action=''){
   const a=String(action).toLowerCase();
@@ -1395,4 +1400,210 @@ async function loadClientSchedules(clientId){
   }).join(''):'<p class="portal-muted">No recurring dates added yet.</p>';
   clientSchedules.querySelectorAll('[data-complete-schedule]').forEach(btn=>btn.addEventListener('click',()=>completeSchedule(btn.dataset.completeSchedule,rows.find(x=>x.id===btn.dataset.completeSchedule))));
   clientSchedules.querySelectorAll('[data-delete-schedule]').forEach(btn=>btn.addEventListener('click',()=>deleteSchedule(btn.dataset.deleteSchedule)));
+}
+
+
+/* =========================================================
+   V11 — practice management suite
+   ========================================================= */
+let onboardingCache=[];
+let documentRequestCache=[];
+let internalNoteCache=[];
+let workTemplateCache=[];
+let globalSearchExtras={};
+let deadlineRange='all';
+
+const v11El=id=>document.getElementById(id);
+
+// Process due recurring work whenever Nicole opens the dashboard. If Supabase Cron is enabled,
+// the supplied SQL also runs this every morning in the background.
+(async()=>{
+  try{
+    const {data,error}=await sb.rpc('npa_create_due_work');
+    if(!error && Number(data)>0){
+      showAdminToast('Recurring work created',`${data} due work item${Number(data)===1?'':'s'} added automatically.`);
+      await loadClients();
+    }
+  }catch(e){console.debug('Due-work processor unavailable until V11 SQL is run.');}
+  await loadWorkTemplates();
+  await loadGlobalSearchExtras();
+})();
+
+v11El('deadlineRangeFilter')?.addEventListener('change',e=>{deadlineRange=e.target.value;renderDeadlineCentreList();});
+v11El('toggleTemplateForm')?.addEventListener('click',()=>revealPanel(v11El('workTemplateForm'),'#templateName'));
+v11El('cancelTemplateForm')?.addEventListener('click',()=>v11El('workTemplateForm')?.classList.add('hidden'));
+v11El('workTemplateForm')?.addEventListener('submit',saveWorkTemplate);
+v11El('onboardingAddForm')?.addEventListener('submit',addOnboardingItem);
+v11El('documentRequestForm')?.addEventListener('submit',addDocumentRequest);
+v11El('internalNoteForm')?.addEventListener('submit',addInternalNote);
+
+document.querySelectorAll('[data-client-action]').forEach(btn=>btn.addEventListener('click',()=>{
+  if(!currentClientId)return;
+  const action=btn.dataset.clientAction;
+  if(action==='work')return showNewWork();
+  if(action==='reminder'){if(!scheduleDueDate.value)scheduleDueDate.value=formatDateInput(new Date());return revealPanel(scheduleForm,'#scheduleTitle');}
+  if(action==='document')return bringIntoView(v11El('documentRequestsPanel'),'#documentRequestTitle');
+  if(action==='note')return bringIntoView(v11El('internalNotesPanel'),'#internalNoteText');
+  if(action==='message'){
+    const details=document.querySelector('.communication-dropdown'); if(details) details.open=true;
+    return bringIntoView(details,'#clientEmailSubject');
+  }
+}));
+
+async function loadClientPracticeTools(clientId){
+  try{await sb.rpc('ensure_client_onboarding',{p_client_id:clientId});}catch(e){}
+  await Promise.all([loadOnboarding(clientId),loadDocumentRequests(clientId),loadInternalNotes(clientId)]);
+  updateV11ClientOverview();
+}
+
+async function loadOnboarding(clientId){
+  const el=v11El('onboardingChecklist'); if(!el)return;
+  const {data,error}=await sb.from('client_onboarding_items').select('*').eq('client_id',clientId).order('position',{ascending:true}).order('created_at',{ascending:true});
+  if(error){el.innerHTML='<p class="portal-muted">Run the V11 Supabase SQL to enable onboarding.</p>';return;}
+  onboardingCache=data||[];
+  const done=onboardingCache.filter(x=>x.completed).length;
+  const pct=onboardingCache.length?Math.round(done/onboardingCache.length*100):0;
+  if(v11El('onboardingProgressPill'))v11El('onboardingProgressPill').textContent=`${pct}%`;
+  el.innerHTML=onboardingCache.length?onboardingCache.map(x=>`<label class="onboarding-row ${x.completed?'completed':''}"><input type="checkbox" data-onboarding-toggle="${x.id}" ${x.completed?'checked':''}><span><strong>${esc(x.title)}</strong><small>${x.client_action_required?'Client action required':'Practice action'}</small></span><button class="row-delete-btn" data-onboarding-delete="${x.id}" type="button">Remove</button></label>`).join(''):'<p class="portal-muted">No onboarding items yet.</p>';
+  el.querySelectorAll('[data-onboarding-toggle]').forEach(cb=>cb.addEventListener('change',()=>toggleOnboarding(cb.dataset.onboardingToggle,cb.checked)));
+  el.querySelectorAll('[data-onboarding-delete]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();deleteOnboardingItem(b.dataset.onboardingDelete);}));
+}
+async function toggleOnboarding(id,completed){
+  const patch={completed,completed_at:completed?new Date().toISOString():null,updated_at:new Date().toISOString()};
+  const {error}=await sb.from('client_onboarding_items').update(patch).eq('id',id);
+  if(error)return showAdminToast('Couldn’t update onboarding',error.message,true);
+  const row=onboardingCache.find(x=>x.id===id); if(row)Object.assign(row,patch);
+  await logAudit(currentClientId,'onboarding_updated',`${row?.title||'Onboarding item'} ${completed?'completed':'reopened'}`,{id,completed});
+  await loadOnboarding(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();
+}
+async function addOnboardingItem(e){
+  e.preventDefault(); const title=v11El('onboardingNewItem').value.trim(); if(!title||!currentClientId)return;
+  const max=Math.max(0,...onboardingCache.map(x=>Number(x.position)||0));
+  const {error}=await sb.from('client_onboarding_items').insert({client_id:currentClientId,title,position:max+10,client_action_required:v11El('onboardingClientAction').checked});
+  if(error)return showAdminToast('Couldn’t add checklist item',error.message,true);
+  e.currentTarget.reset(); showAdminToast('Checklist item added',title); await loadOnboarding(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);
+}
+async function deleteOnboardingItem(id){
+  if(!confirm('Remove this onboarding checklist item?'))return;
+  const row=onboardingCache.find(x=>x.id===id); const {error}=await sb.from('client_onboarding_items').delete().eq('id',id);
+  if(error)return showAdminToast('Couldn’t remove item',error.message,true);
+  await logAudit(currentClientId,'onboarding_removed',`Onboarding item removed: ${row?.title||'Item'}`,{id}); await loadOnboarding(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);
+}
+
+async function loadDocumentRequests(clientId){
+  const el=v11El('documentRequestList'); if(!el)return;
+  const {data,error}=await sb.from('client_document_requests').select('*').eq('client_id',clientId).order('requested_at',{ascending:false});
+  if(error){el.innerHTML='<p class="portal-muted">Run the V11 Supabase SQL to enable document requests.</p>';return;}
+  documentRequestCache=data||[]; const today=dateOnly(new Date()); const open=documentRequestCache.filter(x=>x.status==='requested');
+  if(v11El('documentRequestCount'))v11El('documentRequestCount').textContent=`${open.length} open`;
+  el.innerHTML=documentRequestCache.length?documentRequestCache.map(x=>{const overdue=x.status==='requested'&&x.due_date&&x.due_date<today;return `<article class="document-request-row ${x.status==='received'?'received':''} ${overdue?'overdue':''}"><div><strong>${esc(x.title)}</strong><small>${x.note?esc(x.note)+' · ':''}${x.due_date?`Due ${formatFriendlyDate(x.due_date)}`:'No due date'}</small></div><div class="request-actions"><span class="request-status ${x.status==='received'?'received':overdue?'overdue':''}">${x.status==='received'?'Received ✓':overdue?'Overdue':'Requested'}</span>${x.status==='requested'?`<button data-request-received="${x.id}" type="button">Mark received</button>`:''}<button data-request-delete="${x.id}" type="button">Delete</button></div></article>`}).join(''):'<p class="portal-muted">No document requests yet.</p>';
+  el.querySelectorAll('[data-request-received]').forEach(b=>b.onclick=()=>markDocumentRequestReceived(b.dataset.requestReceived));
+  el.querySelectorAll('[data-request-delete]').forEach(b=>b.onclick=()=>deleteDocumentRequest(b.dataset.requestDelete));
+}
+async function addDocumentRequest(e){
+  e.preventDefault(); if(!currentClientId)return; const title=v11El('documentRequestTitle').value.trim(); if(!title)return;
+  const payload={client_id:currentClientId,title,note:v11El('documentRequestNote').value.trim()||null,due_date:v11El('documentRequestDue').value||null,status:'requested'};
+  const {error}=await sb.from('client_document_requests').insert(payload); if(error)return showAdminToast('Couldn’t request document',error.message,true);
+  e.currentTarget.reset(); showAdminToast('Document requested',title); await logAudit(currentClientId,'document_requested',`Document requested: ${title}`,payload); await loadDocumentRequests(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();
+}
+async function markDocumentRequestReceived(id){
+  const row=documentRequestCache.find(x=>x.id===id); const patch={status:'received',received_at:new Date().toISOString(),updated_at:new Date().toISOString()};
+  const {error}=await sb.from('client_document_requests').update(patch).eq('id',id); if(error)return showAdminToast('Couldn’t update request',error.message,true);
+  showAdminToast('Marked as received',row?.title||'Document'); await logAudit(currentClientId,'document_received',`Document received: ${row?.title||'Document'}`,{id}); await loadDocumentRequests(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);
+}
+async function deleteDocumentRequest(id){
+  if(!confirm('Delete this document request?'))return; const row=documentRequestCache.find(x=>x.id===id);
+  const {error}=await sb.from('client_document_requests').delete().eq('id',id); if(error)return showAdminToast('Couldn’t delete request',error.message,true);
+  await logAudit(currentClientId,'document_request_deleted',`Document request removed: ${row?.title||'Document'}`,{id}); await loadDocumentRequests(currentClientId); updateV11ClientOverview(); await loadClientAuditLog(currentClientId);
+}
+
+async function loadInternalNotes(clientId){
+  const el=v11El('internalNotesList'); if(!el)return;
+  const {data,error}=await sb.from('client_internal_notes').select('*').eq('client_id',clientId).order('created_at',{ascending:false}).limit(30);
+  if(error){el.innerHTML='<p class="portal-muted">Run the V11 Supabase SQL to enable private notes.</p>';return;}
+  internalNoteCache=data||[]; el.innerHTML=internalNoteCache.length?internalNoteCache.map(x=>`<article class="internal-note-row"><p>${esc(x.note)}</p><footer><time>${formatStamp(x.created_at)}</time><button type="button" data-internal-note-delete="${x.id}">Delete</button></footer></article>`).join(''):'<p class="portal-muted">No private notes yet.</p>';
+  el.querySelectorAll('[data-internal-note-delete]').forEach(b=>b.onclick=()=>deleteInternalNote(b.dataset.internalNoteDelete));
+}
+async function addInternalNote(e){
+  e.preventDefault(); const note=v11El('internalNoteText').value.trim(); if(!note||!currentClientId)return;
+  const {error}=await sb.from('client_internal_notes').insert({client_id:currentClientId,note,created_by:currentAdminId}); if(error)return showAdminToast('Couldn’t save private note',error.message,true);
+  e.currentTarget.reset(); showAdminToast('Private note saved'); await logAudit(currentClientId,'internal_note_added','Private practice note added',{}); await loadInternalNotes(currentClientId); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();
+}
+async function deleteInternalNote(id){
+  if(!confirm('Delete this private note?'))return; const {error}=await sb.from('client_internal_notes').delete().eq('id',id); if(error)return showAdminToast('Couldn’t delete note',error.message,true); await loadInternalNotes(currentClientId); await loadClientAuditLog(currentClientId); await loadGlobalSearchExtras();
+}
+
+function updateV11ClientOverview(){
+  const pct=onboardingCache.length?Math.round(onboardingCache.filter(x=>x.completed).length/onboardingCache.length*100):0;
+  const open=documentRequestCache.filter(x=>x.status==='requested').length;
+  if(v11El('clientOverviewOnboarding'))v11El('clientOverviewOnboarding').textContent=onboardingCache.length?`${pct}% complete`:'Not started';
+  if(v11El('clientOverviewRequests'))v11El('clientOverviewRequests').textContent=`${open} open`;
+}
+
+async function loadGlobalSearchExtras(){
+  try{
+    const [notes,requests,onboarding]=await Promise.all([
+      sb.from('client_internal_notes').select('client_id,note'),
+      sb.from('client_document_requests').select('client_id,title,note'),
+      sb.from('client_onboarding_items').select('client_id,title')
+    ]);
+    globalSearchExtras={};
+    const add=(id,t)=>{if(!id||!t)return;(globalSearchExtras[id] ||= []).push(t)};
+    (notes.data||[]).forEach(x=>add(x.client_id,x.note)); (requests.data||[]).forEach(x=>{add(x.client_id,x.title);add(x.client_id,x.note)}); (onboarding.data||[]).forEach(x=>add(x.client_id,x.title));
+    renderClientList();
+  }catch(e){}
+}
+
+// Final V11 client-list renderer adds private notes/document request text to global search.
+function renderClientList(){
+  let filtered=clientGroups.filter(c=>{
+    const status=c.client_status||'active';
+    const statusOk=clientStatusFilterValue==='all' || (clientStatusFilterValue==='current'&&status!=='former') || status===clientStatusFilterValue; if(!statusOk)return false;
+    const attention=c.attention_status||'none'; if(clientQuickFilter==='attention'&&attention==='none')return false; if(clientQuickFilter==='waiting'&&attention!=='client')return false; if(clientQuickFilter==='overdue'&&!(clientNextDue(c.id)?.next_due_date<dateOnly(new Date())))return false; if(clientQuickFilter==='unread'&&!(unreadByClient[c.id]>0))return false; if(clientQuickFilter==='onboarding'&&status!=='onboarding')return false;
+    if(globalSearchTerm){const hay=[c.full_name,c.business_name,c.login_email,status,attention,c.attention_note,...(globalSearchExtras[c.id]||[]),...(c.works||[]).flatMap(w=>[w.service_name,w.period_label,w.status,w.current_stage])].filter(Boolean).join(' ').toLowerCase();if(!hay.includes(globalSearchTerm))return false;} return true;
+  });
+  filtered=[...filtered].sort((a,b)=>{if(clientSortMode==='name')return(a.full_name||'').localeCompare(b.full_name||'');if(clientSortMode==='deadline')return(clientNextDue(a.id)?.next_due_date||'9999').localeCompare(clientNextDue(b.id)?.next_due_date||'9999');if(clientSortMode==='login')return new Date(b.last_login_at||0)-new Date(a.last_login_at||0);const ar=attentionRank(a.attention_status||'none'),br=attentionRank(b.attention_status||'none');if(ar!==br)return ar-br;const au=unreadByClient[a.id]||0,bu=unreadByClient[b.id]||0;if(au!==bu)return bu-au;return(a.full_name||'').localeCompare(b.full_name||'');});
+  clientList.innerHTML=filtered.length?filtered.map(c=>{const active=c.works.filter(w=>w.is_active!==false).length,unread=unreadByClient[c.id]||0,status=c.client_status||'active',attention=c.attention_status||'none',due=clientNextDue(c.id);return `<button class="client-item ${attention!=='none'?'has-attention attention-'+attention:''}" data-id="${c.id}"><span class="client-item-row"><strong>${esc(c.full_name||'Client')}</strong><span class="client-row-badges">${attention!=='none'?`<span class="attention-mini ${attention}">${esc(attentionLabel(attention))}</span>`:''}${unread?`<span class="activity-badge">${unread}</span>`:''}</span></span>${c.business_name?`<small class="client-business-line">${esc(c.business_name)}</small>`:''}<small><span class="client-status-dot status-${status}"></span>${clientStatusLabel(status)} · ${active} active${due?` · next ${formatShortDate(due.next_due_date)}`:''}</small><small class="client-last-login">Last login: ${formatLastLogin(c.last_login_at)}</small></button>`}).join(''):'<p class="portal-muted">No clients match this view.</p>';
+  clientList.querySelectorAll('button[data-id]').forEach(btn=>btn.onclick=()=>openClient(btn.dataset.id));
+}
+
+function renderV11Metrics(){
+  const today=dateOnly(new Date()),week=addDays(today,7); const activeClients=clientGroups.filter(c=>(c.client_status||'active')==='active').length; const jobs=clientGroups.reduce((n,c)=>n+(c.works||[]).filter(w=>w.is_active!==false).length,0); const waiting=clientGroups.filter(c=>c.attention_status==='client').length; const overdue=allSchedules.filter(s=>s.next_due_date<today).length; const dueWeek=allSchedules.filter(s=>s.next_due_date>=today&&s.next_due_date<=week).length; const unread=dashboardActivity.filter(x=>x.unread).length;
+  if(v11El('statClients'))v11El('statClients').textContent=activeClients;if(v11El('statActiveWork'))v11El('statActiveWork').textContent=jobs;if(v11El('statWaitingClients'))v11El('statWaitingClients').textContent=waiting;if(v11El('statOverdue'))v11El('statOverdue').textContent=overdue;if(v11El('statUpcoming'))v11El('statUpcoming').textContent=dueWeek;if(v11El('statNewActivity'))v11El('statNewActivity').textContent=unread;
+}
+function renderTodayActivityFeed(){
+  const el=v11El('todayActivityFeed'); if(!el)return; const rows=dashboardActivity.slice(0,8); el.innerHTML=rows.length?rows.map(x=>{const c=clientGroups.find(v=>v.id===x.client_id);const icon=x.kind==='document'?'↥':x.kind==='email'?'✉':'✎';return `<button class="today-feed-item" type="button" data-feed-client="${x.client_id}"><span class="today-feed-icon">${icon}</span><span class="today-feed-copy"><strong>${esc(c?.full_name||'Client')} · ${esc(x.title)}</strong><small>${esc((x.detail||'').slice(0,100))}</small><time>${formatStamp(x.created_at)}</time></span></button>`}).join(''):'<p class="portal-muted">No recent client activity yet.</p>'; el.querySelectorAll('[data-feed-client]').forEach(b=>b.onclick=()=>openClient(b.dataset.feedClient));
+}
+function renderDeadlineCentreList(){
+  const el=v11El('deadlineCentreList'); if(!el)return; const today=dateOnly(new Date()),week=addDays(today,7),month=addDays(today,30); let rows=[...allSchedules]; if(deadlineRange==='overdue')rows=rows.filter(x=>x.next_due_date<today);if(deadlineRange==='today')rows=rows.filter(x=>x.next_due_date===today);if(deadlineRange==='week')rows=rows.filter(x=>x.next_due_date>=today&&x.next_due_date<=week);if(deadlineRange==='month')rows=rows.filter(x=>x.next_due_date>=today&&x.next_due_date<=month);rows=rows.sort((a,b)=>a.next_due_date.localeCompare(b.next_due_date)).slice(0,40); el.innerHTML=rows.length?rows.map(x=>{const overdue=x.next_due_date<today, dueToday=x.next_due_date===today;return `<article class="deadline-row ${overdue?'overdue':dueToday?'today':''}"><div class="deadline-row-date"><strong>${formatShortDate(x.next_due_date)}</strong><small>${esc(dueRelativeText(x.next_due_date))}</small></div><div class="deadline-row-copy"><strong>${esc(x.profiles?.full_name||'Client')} · ${esc(x.title)}</strong><small>${serviceTypeLabel(x.service_type)} · ${cadenceLabel(x.cadence)}${x.auto_create_work?' · Auto-create work':''}</small></div><button type="button" data-deadline-client="${x.client_id}">Open client</button></article>`}).join(''):'<p class="portal-muted">No deadlines in this view.</p>'; el.querySelectorAll('[data-deadline-client]').forEach(b=>b.onclick=()=>openClient(b.dataset.deadlineClient));
+}
+
+async function loadWorkTemplates(){
+  const el=v11El('workTemplateList'); if(!el)return; const {data,error}=await sb.from('work_templates').select('*').order('created_at',{ascending:false}); if(error){el.innerHTML='<p class="portal-muted">Run the V11 Supabase SQL to enable templates.</p>';return;} workTemplateCache=data||[]; el.innerHTML=workTemplateCache.length?workTemplateCache.map(x=>`<article class="template-card"><span><strong>${esc(x.name)}</strong><small>${serviceTypeLabel(x.service_type)} · ${cadenceLabel(x.cadence)}</small></span><button type="button" data-template-use="${x.id}">Use</button><button type="button" data-template-delete="${x.id}">Delete</button></article>`).join(''):'<p class="portal-muted">No templates yet.</p>'; el.querySelectorAll('[data-template-use]').forEach(b=>b.onclick=()=>useWorkTemplate(b.dataset.templateUse));el.querySelectorAll('[data-template-delete]').forEach(b=>b.onclick=()=>deleteWorkTemplate(b.dataset.templateDelete));
+}
+async function saveWorkTemplate(e){
+  e.preventDefault(); const payload={name:v11El('templateName').value.trim(),service_type:v11El('templateServiceType').value,cadence:v11El('templateCadence').value,client_label:v11El('templateClientLabel').value.trim()||'Next due date',remind_14_days:true,remind_7_days:true,auto_create_work:true}; if(!payload.name)return; const {error}=await sb.from('work_templates').insert(payload); if(error)return showAdminToast('Couldn’t save template',error.message,true);e.currentTarget.reset();v11El('templateClientLabel').value='Next due date';e.currentTarget.classList.add('hidden');showAdminToast('Template saved',payload.name);await loadWorkTemplates();
+}
+function useWorkTemplate(id){
+  const t=workTemplateCache.find(x=>x.id===id); if(!t)return;if(!currentClientId)return showAdminToast('Select a client first','Open a client, then apply this template.',true);scheduleServiceType.value=t.service_type;scheduleTitle.value=t.name;scheduleClientLabel.value=t.client_label;scheduleCadence.value=t.cadence;scheduleAutoCreateWork.checked=t.auto_create_work!==false;scheduleRemind14.checked=t.remind_14_days!==false;scheduleRemind7.checked=t.remind_7_days!==false;if(!scheduleDueDate.value)scheduleDueDate.value=formatDateInput(new Date());revealPanel(scheduleForm,'#scheduleDueDate');showAdminToast('Template applied',`Choose the first due date for ${t.name}.`);
+}
+async function deleteWorkTemplate(id){if(!confirm('Delete this recurring work template?'))return;const {error}=await sb.from('work_templates').delete().eq('id',id);if(error)return showAdminToast('Couldn’t delete template',error.message,true);await loadWorkTemplates();}
+
+// V11 timeline also includes document requests, onboarding changes (via audit), and private practice notes.
+async function loadClientAuditLog(clientId){
+  if(!window.clientAuditLog)return; const [auditRes,notesRes,docsRes,repliesRes,requestsRes,privateRes]=await Promise.all([
+    sb.from('practice_audit_log').select('id,actor_name,action_type,summary,created_at').eq('client_id',clientId).order('created_at',{ascending:false}).limit(80),
+    sb.from('client_notes').select('id,note,service_name,created_at').eq('client_id',clientId).order('created_at',{ascending:false}).limit(30),
+    sb.from('document_submissions').select('id,file_name,file_count,service_name,client_note,sent_at').eq('client_id',clientId).order('sent_at',{ascending:false}).limit(30),
+    sb.from('client_email_replies').select('id,subject,body_text,received_at').eq('client_id',clientId).order('received_at',{ascending:false}).limit(30),
+    sb.from('client_document_requests').select('id,title,status,requested_at,received_at').eq('client_id',clientId).order('requested_at',{ascending:false}).limit(30),
+    sb.from('client_internal_notes').select('id,note,created_at').eq('client_id',clientId).order('created_at',{ascending:false}).limit(30)
+  ]); const events=[];
+  (auditRes.data||[]).forEach(r=>events.push({id:`a-${r.id}`,category:timelineCategoryFromAudit(r.action_type),kind:timelineCategoryFromAudit(r.action_type),title:r.summary,detail:r.actor_name||'Nicole',at:r.created_at}));
+  (notesRes.data||[]).forEach(r=>events.push({id:`n-${r.id}`,category:'client',kind:'note',title:'Client added a note',detail:`${r.service_name?`${r.service_name} · `:''}${r.note||''}`,at:r.created_at}));
+  (docsRes.data||[]).forEach(r=>events.push({id:`d-${r.id}`,category:'client',kind:'document',title:'Client uploaded documents',detail:`${r.file_name||`${r.file_count||1} file(s)`}${r.client_note?` · ${r.client_note}`:''}`,at:r.sent_at}));
+  (repliesRes.data||[]).forEach(r=>events.push({id:`e-${r.id}`,category:'client',kind:'email',title:'Client replied by email',detail:`${r.subject||'Reply'}${r.body_text?` · ${r.body_text.slice(0,180)}`:''}`,at:r.received_at}));
+  (requestsRes.data||[]).forEach(r=>events.push({id:`r-${r.id}`,category:'schedule',kind:'document',title:`Document ${r.status==='received'?'received':'requested'}: ${r.title}`,detail:r.status==='received'?'Client requirement completed':'Waiting for client document',at:r.status==='received'&&r.received_at?r.received_at:r.requested_at}));
+  (privateRes.data||[]).forEach(r=>events.push({id:`p-${r.id}`,category:'admin',kind:'admin',title:'Private practice note',detail:r.note,at:r.created_at}));
+  let rows=events.sort((a,b)=>new Date(b.at)-new Date(a.at));if(timelineFilter!=='all')rows=rows.filter(x=>x.category===timelineFilter);rows=rows.slice(0,100);const err=auditRes.error||notesRes.error||docsRes.error||repliesRes.error; if(err&&!rows.length){clientAuditLog.innerHTML=`<p class="portal-error">Could not load timeline: ${esc(err.message)}</p>`;return;} clientAuditLog.innerHTML=rows.length?rows.map(r=>`<article class="timeline-row ${escAttr(r.kind)}"><div class="timeline-marker">${timelineIcon(r.kind)}</div><div class="timeline-card"><div class="timeline-card-top"><strong>${esc(r.title||'Activity')}</strong><time>${formatStamp(r.at)}</time></div><p>${esc(r.detail||'')}</p></div></article>`).join(''):'<p class="portal-muted">No timeline events in this view yet.</p>';
 }

@@ -35,3 +35,10 @@ Do not commit these values to GitHub.
 
 ## Security
 RLS restricts clients to their own record/messages. Admin access is checked server-side. Client creation happens in an authenticated Edge Function so privileged credentials never enter GitHub/browser code. Documents are sent as email attachments and are not inserted into Supabase Storage/database.
+
+## Practice dashboard upgrade (v10)
+Before uploading the v10 admin files, run `SUPABASE-PRACTICE-UPGRADE.sql` once in the Supabase SQL Editor. It adds the stored client attention flag and reminder-status fields used by the upgraded admin dashboard. The migration is additive and uses `IF NOT EXISTS` where possible.
+
+
+## V11 practice-management upgrade
+Run `SUPABASE-PRACTICE-V11.sql` once in the Supabase SQL Editor before using onboarding checklists, document requests, private notes or recurring work templates. The migration is additive and does not delete existing client data.

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <link rel="icon" href="assets/logo.png">
-  <link rel="stylesheet" href="portal.css">
+  <link rel="stylesheet" href="portal.css?v=25">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <title>Your Dashboard | Nicole Platten Accounting</title>
@@ -14,6 +14,10 @@
 <div class="portal-shell">
   <header class="portal-topbar"><a href="index.html"><img class="portal-logo" src="assets/logo.png" alt="Nicole Platten Accounting"></a><div class="portal-actions"><span id="userEmail" class="portal-muted"></span><button id="logoutBtn" class="portal-btn secondary">Sign out</button></div></header>
   <section class="portal-card pad portal-welcome"><div><span class="portal-kicker">Your account</span><h1 id="welcomeName">Welcome</h1><p class="portal-muted">Track each piece of accounting work separately, including recurring monthly services.</p></div><span id="activeCount" class="status-pill">Loading</span></section>
+  <section id="clientActionsCard" class="portal-card pad client-actions-card">
+    <div class="client-actions-heading"><div><span class="portal-kicker">What you need to do</span><h2 id="clientActionsTitle">You’re all caught up</h2><p id="clientActionsSub" class="portal-muted">Anything Nicole needs from you will appear here.</p></div><span id="clientActionsCount" class="client-action-count">0</span></div>
+    <div id="clientActionsList" class="client-actions-list"><p class="portal-muted">Loading your actions…</p></div>
+  </section>
   <main class="portal-grid">
     <div class="portal-main">
       <section><div class="section-heading"><span class="portal-kicker">Active work</span><h2>What Nicole is working on</h2></div><div id="activeWork" class="work-cards"><p class="portal-muted">Loading your work…</p></div></section>
@@ -47,11 +51,11 @@
         </div>
       </section>
 
-      <section class="portal-card pad"><span class="portal-kicker">Documents</span><h2>Send documents</h2><p class="portal-muted">Your files are emailed directly to Nicole and are not stored in your portal. You can send up to 5 files at once.</p><form id="documentForm" class="portal-form upload-box"><label>Which work is this for?</label><select id="documentWork"></select><label for="documentFile">Choose files</label><input id="documentFile" type="file" multiple required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.heic,.webp"><small class="portal-muted">PDF, Word, Excel, CSV or image files. Maximum 8 MB per file and 20 MB total.</small><textarea id="documentNote" maxlength="2000" placeholder="Optional note for Nicole"></textarea><div id="documentMessage" hidden></div><button class="portal-btn" type="submit">Email documents to Nicole</button></form><div class="document-history"><h3>Recently sent</h3><div id="documentHistory"><p class="portal-muted">No documents sent yet.</p></div></div></section>
+      <section class="portal-card pad"><span class="portal-kicker">Documents</span><h2>Send documents</h2><p class="portal-muted">Your files are emailed directly to Nicole and are not stored in your portal. You can send up to 5 files at once.</p><form id="documentForm" class="portal-form upload-box"><label for="documentRequest">Are you sending something Nicole requested?</label><select id="documentRequest"><option value="">No — general document upload</option></select><label>Which work is this for?</label><select id="documentWork"></select><label for="documentFile">Choose files</label><input id="documentFile" type="file" multiple required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.heic,.webp"><small class="portal-muted">PDF, Word, Excel, CSV or image files. Maximum 8 MB per file and 20 MB total.</small><textarea id="documentNote" maxlength="2000" placeholder="Optional note for Nicole"></textarea><div id="documentMessage" hidden></div><button class="portal-btn" type="submit">Email documents to Nicole</button></form><div class="document-history"><h3>Recently sent</h3><div id="documentHistory"><p class="portal-muted">No documents sent yet.</p></div></div></section>
     </aside>
   </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="portal-config.js"></script>
-<script src="portal.js"></script>
+<script src="portal.js?v=25"></script>
 </body></html>
